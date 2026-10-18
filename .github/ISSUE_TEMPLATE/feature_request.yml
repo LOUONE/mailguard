@@ -1,0 +1,53 @@
+name: Feature request
+description: Propose a new capability or improvement.
+title: "[feat]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What are you trying to achieve that's not possible or painful today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: A rough sketch of the change — API, flag, model, pipeline step, etc.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you thought about and why you prefer the one above.
+    validations:
+      required: false
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - parsing
+        - features
+        - models
+        - serving
+        - agent
+        - monitoring
+        - adversarial
+        - infra
+        - docs
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: How do we know this is done? Measurable checks.
+      placeholder: |
+        - [ ]
+        - [ ]
+    validations:
+      required: false
