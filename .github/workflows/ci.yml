@@ -28,19 +28,13 @@ jobs:
         run: uv python install
 
       - name: Sync dependencies
-        run: uv sync --all-extras --dev
+        run: make sync
 
-      - name: Ruff lint
-        run: uv run ruff check .
+      - name: Lint (ruff + mypy)
+        run: make lint
 
-      - name: Ruff format check
-        run: uv run ruff format --check .
-
-      - name: Mypy
-        run: uv run mypy
-
-      - name: Pytest
-        run: uv run pytest --cov=mailguard --cov-report=xml --cov-report=term-missing
+      - name: Tests + coverage
+        run: make coverage
 
       - name: Upload coverage artifact
         if: always()
