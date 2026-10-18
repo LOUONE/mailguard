@@ -1,0 +1,35 @@
+name: Task / chore
+description: A concrete piece of work tied to a phase milestone.
+title: "[task]: "
+labels: ["task"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What's the broader goal and why does this task matter?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: What this task covers
+      description: Deliverables, in-scope and out-of-scope items.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: |
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+  - type: input
+    id: milestone
+    attributes:
+      label: Target milestone
+      placeholder: "Phase 0, Phase 1, ..."
+    validations:
+      required: false
