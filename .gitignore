@@ -1,3 +1,6 @@
+# mailguard: corpora and local artefacts are downloaded, never committed (see docs/data.md)
+/data/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
