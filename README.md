@@ -55,6 +55,17 @@ src/mailguard/
 └── adversarial/    attack suite + robustness eval
 ```
 
+## Data
+
+Trained and evaluated on two public corpora: ~6,000 ham and spam messages from the
+[SpamAssassin public corpus](https://spamassassin.apache.org/old/publiccorpus/) and ~8,000 phishing
+messages (2004-2025) from Jose Nazario's [phishing corpus](https://monkey.org/~jose/phishing/)
+(CC BY 4.0). No message is redistributed in this repo.
+
+[docs/data.md](docs/data.md) covers licences, class balance, personal data, and the leakage risks
+measured before any modelling (source artefacts in headers, a 2002-only ham set, SPF/DKIM headers
+that exist only in recent phishing).
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
