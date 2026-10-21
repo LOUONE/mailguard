@@ -10,6 +10,7 @@ def test_package_imports() -> None:
 
 def test_subpackages_import() -> None:
     for sub in (
+        "data",
         "parsing",
         "features",
         "models",
