@@ -12,7 +12,7 @@ inside them, and the biases that come with them. Raw data is never committed: it
 | SpamAssassin public corpus | same | same | `20030228_spam`, `20050311_spam_2` | 1,896 | `spam` | 2002-2003 |
 | Nazario phishing corpus | [monkey.org/~jose/phishing](https://monkey.org/~jose/phishing/) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | `phishing0.mbox` to `phishing3.mbox` | 4,572 | `phishing` | 2004-2007 |
 | Nazario phishing corpus | same | same | `phishing-2015` to `phishing-2025` | 3,466 | `phishing` | 2015-2025 |
-| **Total** | | | 16 files, ~140 MB | **14,084** | | |
+| **Total** | | | 20 files, ~147 MB | **14,084** | | |
 
 Class balance of the combined set: 29.5% ham, 13.5% spam, 57.1% phishing.
 
