@@ -1,8 +1,8 @@
 # Data
 
 This document lists the corpora mailguard is trained and evaluated on, their licences, what is
-inside them, and the biases that come with them. Raw data is never committed: it lives in
-`data/`, which is gitignored.
+inside them, and the biases that come with them. Raw data is never committed: it is downloaded
+into `data/` (gitignored) by `scripts/download_data.py`, which pins every file by SHA-256.
 
 ## Selected corpora
 
@@ -77,3 +77,15 @@ learn instead of learning what phishing looks like.
 | **Duplicates** | Phishing campaigns reuse the same body across files and years, and the SpamAssassin readme mentions removed duplicates. | Exact and near-duplicate removal before splitting, with duplicates kept in the same split. Rates reported in `notebooks/01_eda.ipynb`. |
 | **Broken `Date` headers** | Some parsed years are 102, 1970, 2028, 2030 or 2038, and 55 messages in `phishing-2023` have no parsable date. | `Date` is treated as untrusted input. Time-based analysis uses the corpus file period, not the header. |
 | **Malformed messages** | At least one message in `phishing3.mbox` makes the stdlib `email` generator raise `UnicodeEncodeError` when re-serialised. | The parser is property-tested with `hypothesis` to never raise on arbitrary bytes (issue #12). |
+
+## Reproducing
+
+```bash
+make data   # or: uv run python scripts/download_data.py [--corpus nazario] [--force]
+```
+
+Files land in `data/raw/<corpus>/<original filename>`. The manifest of URLs, labels and checksums
+lives in [`src/mailguard/data/sources.py`](../src/mailguard/data/sources.py). Re-running is a no-op
+when every file is present with the right checksum. A file whose checksum no longer matches upstream
+fails loudly instead of being accepted silently: if a corpus is updated upstream, the new checksum
+is reviewed and committed like any other change.

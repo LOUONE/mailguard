@@ -1,9 +1,10 @@
-.PHONY: help setup sync lint format test test-unit test-integration coverage pre-commit clean all
+.PHONY: help setup sync data lint format test test-unit test-integration coverage pre-commit clean all
 
 help:
 	@echo "mailguard — available targets:"
 	@echo "  setup           Create venv, install deps, install pre-commit hook"
 	@echo "  sync            Sync dependencies from uv.lock"
+	@echo "  data            Download corpora into data/raw/ and verify checksums"
 	@echo "  lint            Ruff check + format check + mypy"
 	@echo "  format          Ruff auto-fix + ruff format"
 	@echo "  test            Run full test suite with coverage"
@@ -20,6 +21,9 @@ setup:
 
 sync:
 	uv sync --all-extras --dev
+
+data:
+	uv run python scripts/download_data.py
 
 lint:
 	uv run ruff check .

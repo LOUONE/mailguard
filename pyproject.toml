@@ -30,7 +30,7 @@ dev = [
 [tool.ruff]
 line-length = 100
 target-version = "py314"
-src = ["src", "tests"]
+src = ["src", "tests", "scripts"]
 
 [tool.ruff.lint]
 select = [
@@ -53,7 +53,7 @@ indent-style = "space"
 [tool.mypy]
 python_version = "3.14"
 strict = true
-files = ["src", "tests"]
+files = ["src", "tests", "scripts"]
 show_error_codes = true
 warn_unused_ignores = true
 warn_redundant_casts = true

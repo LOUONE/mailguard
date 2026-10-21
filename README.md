@@ -38,6 +38,7 @@ cd mailguard
 make setup   # creates the venv, installs deps, installs pre-commit hook
 make test    # runs the test suite with coverage
 make lint    # ruff + mypy strict
+make data    # downloads the corpora (~147 MB) into data/raw/, checksum-verified
 ```
 
 See the `Makefile` for the full list of targets (`make help`).
