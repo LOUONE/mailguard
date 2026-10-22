@@ -277,6 +277,7 @@ name = "mailguard"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "pydantic" },
     { name = "pydantic-settings" },
 ]
 
@@ -290,7 +291,10 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pydantic-settings", specifier = ">=2.16.0" }]
+requires-dist = [
+    { name = "pydantic", specifier = ">=2.14.0" },
+    { name = "pydantic-settings", specifier = ">=2.16.0" },
+]
 
 [package.metadata.requires-dev]
 dev = [
