@@ -11,7 +11,7 @@ help:
 	@echo "  test            Run full test suite with coverage"
 	@echo "  test-unit       Run tests marked 'unit' only"
 	@echo "  test-integration  Run tests marked 'integration' only"
-	@echo "  coverage        Run tests and emit coverage.xml"
+	@echo "  coverage        Run tests, emit coverage.xml, fail under 90% coverage"
 	@echo "  pre-commit      Run all pre-commit hooks against every file"
 	@echo "  clean           Remove caches and build artifacts"
 	@echo "  all             lint + test"
@@ -48,7 +48,7 @@ test-integration:
 	uv run pytest -m integration
 
 coverage:
-	uv run pytest --cov=mailguard --cov-report=xml --cov-report=term-missing
+	uv run pytest --cov=mailguard --cov-report=xml --cov-report=term-missing --cov-fail-under=90
 
 pre-commit:
 	uv run pre-commit run --all-files
