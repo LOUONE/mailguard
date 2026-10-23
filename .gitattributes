@@ -7,6 +7,10 @@ Makefile text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
 *.toml text eol=lf
+*.ipynb text eol=lf
+
+# Notebooks explore, src/ produces: keep them out of GitHub's language statistics.
+*.ipynb linguist-documentation
 
 *.png binary
 *.jpg binary
