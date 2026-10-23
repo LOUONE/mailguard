@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import pytest
 
+from mailguard.parsing import html as html_module
 from mailguard.parsing import parse_email
 from mailguard.parsing import parser as parser_module
-from mailguard.parsing import urls as urls_module
+from mailguard.parsing.html import read_html
 from mailguard.parsing.urls import urls_in_html, urls_in_text
 
 # --- MIME structure -------------------------------------------------------------
@@ -214,6 +215,15 @@ def test_non_web_hrefs_are_ignored() -> None:
     assert urls_in_html(html) == []
 
 
+def test_visible_text_skips_scripts_and_styles() -> None:
+    html = (
+        "<head><title>T</title><style>p{}</style></head>"
+        "<p>Hello&nbsp;<b>you</b></p><script>x()</script>"
+    )
+
+    assert read_html(html).text == "Hello you"  # &nbsp; is normalised like any space
+
+
 def test_form_action_is_extracted() -> None:
     html = '<form action="https://collect.example/steal"><input name="pwd"></form>'
 
@@ -224,6 +234,6 @@ def test_html_parser_crash_keeps_partial_result(monkeypatch: pytest.MonkeyPatch)
     def explode(self: object, data: str) -> None:
         raise AssertionError("simulated html.parser failure")
 
-    monkeypatch.setattr(urls_module._LinkCollector, "feed", explode)
+    monkeypatch.setattr(html_module._Collector, "feed", explode)
 
     assert urls_in_html("<a href='https://x.example'>") == []

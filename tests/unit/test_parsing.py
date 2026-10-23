@@ -218,3 +218,11 @@ def test_model_validators() -> None:
 def test_model_rejects_invalid_data(kwargs: dict[str, object]) -> None:
     with pytest.raises(ValidationError):
         Email(**kwargs)
+
+
+def test_body_text_prefers_plain_text() -> None:
+    assert parse_email(MULTIPART_ALTERNATIVE).body_text.startswith("Read online")
+
+
+def test_body_text_falls_back_to_visible_html() -> None:
+    assert parse_email(HTML_ONLY).body_text == "Chère cliente, cliquez ici"
