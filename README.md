@@ -6,7 +6,7 @@ Real-time phishing detection with an LLM investigation agent, built for privacy.
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.14+](https://img.shields.io/badge/python-3.14+-blue.svg)](pyproject.toml)
 
-> **Status: work in progress.** Phase 0 (scaffolding + CI) is complete. Phase 1 (data pipeline + classical baseline) is next. Expected final version: `v1.0.0`.
+> **Status: work in progress.** Phase 0 (scaffolding + CI) is complete. Phase 1 is in progress: the data pipeline, parser and [exploratory analysis](notebooks/01_eda.ipynb) are done, the classical baseline is next. Expected final version: `v1.0.0`.
 
 ## What this project aims to prove
 
@@ -39,6 +39,7 @@ make setup   # creates the venv, installs deps, installs pre-commit hook
 make test    # runs the test suite with coverage
 make lint    # ruff + mypy strict
 make data    # downloads the corpora (~147 MB) into data/raw/, checksum-verified
+make eda     # re-runs the exploratory notebook on the downloaded data
 ```
 
 See the `Makefile` for the full list of targets (`make help`).
@@ -47,6 +48,7 @@ See the `Makefile` for the full list of targets (`make help`).
 
 ```
 src/mailguard/
+├── data/           corpus manifest, checksummed download, streaming loader, dedup
 ├── parsing/        raw email -> validated Email model
 ├── features/       header, URL, text features
 ├── models/         training, evaluation, registry
@@ -65,7 +67,8 @@ messages (2004-2025) from Jose Nazario's [phishing corpus](https://monkey.org/~j
 
 [docs/data.md](docs/data.md) covers licences, class balance, personal data, and the leakage risks
 measured before any modelling (source artefacts in headers, a 2002-only ham set, SPF/DKIM headers
-that exist only in recent phishing).
+that exist only in recent phishing). [notebooks/01_eda.ipynb](notebooks/01_eda.ipynb) adds class
+balance, dates, structure and duplicate rates, with a TL;DR of what each finding changes.
 
 ## License
 
