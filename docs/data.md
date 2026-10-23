@@ -47,7 +47,7 @@ Labels come from the corpus a message belongs to, not from per-message annotatio
 - `phishing`: hand-classified phishing from Nazario's own inbox.
 
 The three labels are kept as-is in the parsed dataset. How `spam` enters the binary
-phishing-vs-rest target is a modelling decision recorded as an ADR in week 3.
+phishing-vs-rest target is a modelling decision, recorded as an ADR before the first baseline.
 
 Expected label noise: Nazario notes his classification is manual and may contain errors, and a few
 2002-era SpamAssassin spam messages are phishing in all but name.

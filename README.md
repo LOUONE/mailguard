@@ -18,13 +18,16 @@ Real-time phishing detection with an LLM investigation agent, built for privacy.
 
 ## Roadmap
 
-| Phase | Weeks | Deliverable | Release |
+Each phase is a [GitHub milestone](https://github.com/LOUONE/mailguard/milestones) with one issue
+per task, ordered by dependency, and ends with a tagged release.
+
+| Phase | Deliverable | Release | Status |
 |---|---|---|---|
-| 0 — Foundations | 1 | Repo scaffolded, CI green, `main` protected | `v0.0.1` |
-| 1 — Data + classical model | 2-4 | Parsed corpora, LightGBM baseline, rigorous eval, SHAP, MLflow | `v0.1.0` |
-| 2 — Production | 5-8 | FastAPI service, Docker, Prometheus/Grafana, drift reports, auto-retraining | `v0.2.0` |
-| 3 — Agent | 9-11 | LLM agent (Ollama/vLLM), typed tools, prompt-injection defence | `v0.3.0` |
-| 4 — Adversarial | 12 | Attack suite + hardening, before/after metrics | `v1.0.0` |
+| 0 — Foundations | Repo scaffolded, CI green, `main` protected | `v0.0.1` | Released 2026-10-18 |
+| 1 — Data + classical model | Parsed corpora, grouped splits, features, LightGBM baseline, rigorous eval, SHAP, MLflow | `v0.1.0` | In progress, target 2026-11-15 |
+| 2 — Production | FastAPI service, Docker, Prometheus/Grafana, drift reports, gated auto-retraining | `v0.2.0` | Target 2026-12-13 |
+| 3 — Agent | LLM agent (Ollama, OpenAI-compatible fallback), typed tools, prompt-injection defence | `v0.3.0` | Target 2027-01-10 |
+| 4 — Adversarial | Attack suite + hardening, before/after metrics | `v1.0.0` | Target 2027-01-24 |
 
 Current board: [mailguard roadmap](https://github.com/users/LOUONE/projects/1).
 
