@@ -6,15 +6,19 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from mailguard.parsing.html import read_html
+
 
 class _Frozen(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
 
 def _normalise_address(value: object) -> object:
+    """Lowercase and unwrap an address; anything without a domain becomes None."""
     if isinstance(value, str):
         value = value.strip().strip("<>").strip().lower()
-        return value or None
+        local, _, domain = value.rpartition("@")
+        return value if local and domain else None
     return value
 
 
@@ -76,6 +80,13 @@ class Email(_Frozen):
         if isinstance(value, str):
             return value.strip() or None
         return value
+
+    @property
+    def body_text(self) -> str:
+        """What the reader sees: the plain-text body, or the visible text of the HTML body."""
+        if self.text_body.strip():
+            return self.text_body
+        return read_html(self.html_body).text
 
     def header_values(self, name: str) -> list[str]:
         """All values of a header, case-insensitively, in message order."""

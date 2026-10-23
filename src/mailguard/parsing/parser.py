@@ -43,6 +43,10 @@ def _parse(raw: bytes) -> Email:
         if part.is_multipart():
             continue
         content_type = part.get_content_type()
+        if content_type.startswith("multipart/"):
+            # A multipart without a usable boundary arrives as one opaque part:
+            # keep its content as text instead of filing it as an attachment.
+            content_type = "text/plain"
         payload = _payload_bytes(part)
         filename = _filename(part)
         is_body = content_type in _BODY_TYPES and filename is None
