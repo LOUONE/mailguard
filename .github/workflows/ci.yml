@@ -35,6 +35,8 @@ jobs:
 
       - name: Tests + coverage
         run: make coverage
+        env:
+          HYPOTHESIS_PROFILE: ci
 
       - name: Upload coverage artifact
         if: always()

@@ -1,7 +1,7 @@
 [project]
 name = "mailguard"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.0.1"
+description = "Real-time phishing detection with an LLM investigation agent, built for privacy."
 readme = "README.md"
 authors = [
     { name = "louon", email = "louone.lf@gmail.com" }
@@ -11,9 +11,6 @@ dependencies = [
     "pydantic>=2.14.0",
     "pydantic-settings>=2.16.0",
 ]
-
-[project.scripts]
-mailguard = "mailguard:main"
 
 [build-system]
 requires = ["uv_build>=0.13.1,<0.14.0"]
