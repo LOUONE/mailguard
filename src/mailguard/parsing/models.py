@@ -12,9 +12,11 @@ class _Frozen(BaseModel):
 
 
 def _normalise_address(value: object) -> object:
+    """Lowercase and unwrap an address; anything without a domain becomes None."""
     if isinstance(value, str):
         value = value.strip().strip("<>").strip().lower()
-        return value or None
+        local, _, domain = value.rpartition("@")
+        return value if local and domain else None
     return value
 
 
