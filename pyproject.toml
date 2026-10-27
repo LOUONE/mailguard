@@ -8,10 +8,12 @@ authors = [
 ]
 requires-python = ">=3.14"
 dependencies = [
+    "numpy>=2.5.4",
     "pandas>=3.1.0",
     "pyarrow>=26.0.0",
     "pydantic>=2.14.0",
     "pydantic-settings>=2.16.0",
+    "scikit-learn>=1.9.1",
 ]
 
 [build-system]
@@ -66,6 +68,11 @@ show_error_codes = true
 warn_unused_ignores = true
 warn_redundant_casts = true
 plugins = ["pydantic.mypy"]
+
+# scikit-learn ships no type information: its objects are Any for mypy.
+[[tool.mypy.overrides]]
+module = ["sklearn", "sklearn.*"]
+ignore_missing_imports = true
 
 [tool.pydantic-mypy]
 init_forbid_extra = true
