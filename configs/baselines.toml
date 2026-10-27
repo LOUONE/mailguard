@@ -1,0 +1,30 @@
+# Hyperparameters of the two Phase 1 baselines. Read by `make train` (src/mailguard/models/config.py).
+# Changing a value here is a reviewed change: every MLflow run records the full config.
+
+seed = 20261027
+
+# Baseline 1: how far does text alone go?
+[logreg]
+C = 4.0
+max_iter = 2000
+
+[logreg.text]
+word_max_features = 50000
+char_max_features = 100000
+min_df = 3
+
+# Baseline 2: what do header, attachment, URL and lexicon features add?
+[lightgbm]
+n_estimators = 500
+learning_rate = 0.05
+num_leaves = 31
+min_child_samples = 20
+colsample_bytree = 0.3
+reg_lambda = 1.0
+n_jobs = 4  # fixed: LightGBM is only deterministic for a given thread count
+
+# Smaller vocabularies: trees split on single columns, so most TF-IDF terms are never used.
+[lightgbm.text]
+word_max_features = 20000
+char_max_features = 30000
+min_df = 3
