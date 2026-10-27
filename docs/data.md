@@ -46,8 +46,9 @@ Labels come from the corpus a message belongs to, not from per-message annotatio
 - `spam`: unsolicited bulk mail from SpamAssassin. Not phishing, but not legitimate either.
 - `phishing`: hand-classified phishing from Nazario's own inbox.
 
-The three labels are kept as-is in the parsed dataset. How `spam` enters the binary
-phishing-vs-rest target is a modelling decision, recorded as an ADR before the first baseline.
+The three labels are kept as-is in the parsed dataset. The binary target is phishing against ham
+and spam ([ADR 0001](adr/0001-binary-target.md)): `target = 1` for `phishing`, `0` otherwise. The
+headline false-positive rate is measured on ham; spam flagged as phishing is reported separately.
 
 Expected label noise: Nazario notes his classification is manual and may contain errors, and a few
 2002-era SpamAssassin spam messages are phishing in all but name.
