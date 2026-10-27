@@ -8,12 +8,15 @@ authors = [
 ]
 requires-python = ">=3.14"
 dependencies = [
+    "lightgbm>=4.7.0",
+    "mlflow>=3.15",
     "numpy>=2.5.4",
     "pandas>=3.1.0",
-    "pyarrow>=26.0.0",
+    "pyarrow>=21",
     "pydantic>=2.14.0",
     "pydantic-settings>=2.16.0",
     "scikit-learn>=1.9.1",
+    "skops>=0.16",
 ]
 
 [build-system]
@@ -70,9 +73,9 @@ warn_unused_ignores = true
 warn_redundant_casts = true
 plugins = ["pydantic.mypy"]
 
-# scikit-learn ships no type information: its objects are Any for mypy.
+# scikit-learn and skops ship no type information: their objects are Any for mypy.
 [[tool.mypy.overrides]]
-module = ["sklearn", "sklearn.*"]
+module = ["sklearn", "sklearn.*", "skops", "skops.*"]
 ignore_missing_imports = true
 
 [tool.pydantic-mypy]
