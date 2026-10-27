@@ -126,6 +126,7 @@ def test_attachment_metadata_only() -> None:
             content_type="application/pdf",
             size=13,
             sha256=hashlib.sha256(b"%PDF-1.4 fake").hexdigest(),
+            detected_type="pdf",  # from the first bytes; the payload itself is not kept
         ),
     )
 

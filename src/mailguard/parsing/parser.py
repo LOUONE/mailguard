@@ -10,6 +10,7 @@ from email.message import Message
 from email.parser import BytesParser
 from email.utils import getaddresses, parsedate_to_datetime
 
+from mailguard.parsing.filetypes import sniff
 from mailguard.parsing.models import Attachment, Email, Header
 from mailguard.parsing.urls import dedupe, urls_in_html, urls_in_text
 
@@ -57,6 +58,7 @@ def _parse(raw: bytes) -> Email:
                     content_type=content_type,
                     size=len(payload),
                     sha256=hashlib.sha256(payload).hexdigest(),
+                    detected_type=sniff(payload),
                 )
             )
         elif content_type == "text/plain":
