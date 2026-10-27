@@ -73,6 +73,12 @@ measured before any modelling (source artefacts in headers, a 2002-only ham set,
 that exist only in recent phishing). [notebooks/01_eda.ipynb](notebooks/01_eda.ipynb) adds class
 balance, dates, structure and duplicate rates, with a TL;DR of what each finding changes.
 
+## Design decisions
+
+Structural choices are recorded as short [architecture decision records](docs/adr/README.md):
+the binary target ([0001](docs/adr/0001-binary-target.md)) and the parser design
+([0002](docs/adr/0002-parser-design.md)) so far.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

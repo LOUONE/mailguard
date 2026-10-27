@@ -1,0 +1,26 @@
+# Architecture decision records
+
+An ADR records one structural decision: the context that forced it, the options that were on the
+table, what was chosen and what it costs. They are short on purpose. The code says *what* the
+system does; ADRs say *why it does not do something else*.
+
+## Index
+
+| # | Decision | Status | Date |
+|---|---|---|---|
+| [0001](0001-binary-target.md) | Binary target: phishing against ham and spam | Accepted | 2026-10-27 |
+| [0002](0002-parser-design.md) | Parser design: lenient, never raises, metadata-only attachments | Accepted (retroactive) | 2026-10-27 |
+
+## Writing one
+
+1. Copy [`template.md`](template.md) to `NNNN-short-title.md`, with the next free number.
+2. Keep it under a page. Write the options as they looked *before* the decision, including the
+   ones that lost, with their real advantages.
+3. Put numbers in the context whenever they exist (EDA, benchmarks). A decision that cannot point
+   to evidence says so.
+4. Open it in the same PR as the code it governs, or before that PR if the code depends on it.
+5. ADRs are not edited once accepted. A new decision gets a new ADR that marks the old one
+   `Superseded by NNNN`.
+
+Statuses: `Proposed`, `Accepted`, `Superseded by NNNN`, `Rejected`. A retroactive ADR documents a
+decision already in the code, so that it can be reviewed like the others.
