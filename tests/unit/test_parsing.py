@@ -8,6 +8,7 @@ import pytest
 from pydantic import ValidationError
 
 from mailguard.parsing import Attachment, Email, parse_email
+from mailguard.parsing.html import Anchor, read_html
 
 # All fixtures are synthetic: no message from the training corpora is committed.
 
@@ -226,3 +227,19 @@ def test_body_text_prefers_plain_text() -> None:
 
 def test_body_text_falls_back_to_visible_html() -> None:
     assert parse_email(HTML_ONLY).body_text == "Chère cliente, cliquez ici"
+
+
+def test_html_reader_returns_anchor_text_with_its_target() -> None:
+    html = (
+        '<p>Hi <a href="http://evil.example/x">www.<b>bank</b>.com</a>'
+        '<a href="y">open <a href="z">next</a><a>no target</a><a href="k">tail'
+    )
+
+    anchors = read_html(html).anchors
+
+    assert anchors == (
+        Anchor("http://evil.example/x", "www.bank.com"),
+        Anchor("y", "open"),  # an unclosed <a> ends at the next one
+        Anchor("z", "next"),
+        Anchor("k", "tail"),  # ... or at the end of the document
+    )
