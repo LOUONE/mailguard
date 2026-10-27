@@ -36,6 +36,9 @@ class Attachment(_Frozen):
     content_type: str
     size: int = Field(ge=0, description="Size in bytes after transfer decoding.")
     sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    detected_type: str | None = Field(
+        default=None, description="Family sniffed from the first bytes (pdf, zip, exe, ...)."
+    )
 
 
 class Email(_Frozen):

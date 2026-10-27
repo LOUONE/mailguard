@@ -33,3 +33,28 @@ URL_KEYWORDS: Final = (
     "account", "banking", "confirm", "login", "password", "secure", "signin", "update",
     "verify", "webscr",
 )  # fmt: skip
+
+# Brands most impersonated in phishing display names ("PayPal Security" <x@evil.example>), as
+# lowercase tokens compared with the sender's registrable domain. Hand-picked from the brands that
+# APWG phishing trend reports and vendor brand-phishing rankings name year after year.
+BRANDS: Final = frozenset(
+    {
+        "adobe", "amazon", "americanexpress", "apple", "bankofamerica", "barclays", "chase",
+        "citibank", "dhl", "docusign", "dropbox", "ebay", "facebook", "fedex", "google", "hsbc",
+        "instagram", "irs", "linkedin", "microsoft", "netflix", "office365", "outlook", "paypal",
+        "santander", "usps", "wellsfargo", "whatsapp", "yahoo",
+    }
+)  # fmt: skip
+
+# Attachment extensions that run code or render a page when opened.
+RISKY_EXTENSIONS: Final = frozenset(
+    {
+        "bat", "cmd", "com", "cpl", "exe", "hta", "htm", "html", "img", "iso", "jar", "js", "jse",
+        "lnk", "msi", "pif", "ps1", "scr", "shtml", "vbe", "vbs", "wsf", "docm", "xlsm", "pptm",
+    }
+)  # fmt: skip
+ARCHIVE_EXTENSIONS: Final = frozenset({"7z", "gz", "rar", "tgz", "zip"})
+
+# Domains that the corpus maintainers substituted into headers: they identify the corpus, not the
+# sender (docs/data.md). Addresses under them are treated as unknown.
+ARTEFACT_DOMAINS: Final = ("spamassassin.taint.org", "taint.org", "monkey.org")
