@@ -41,7 +41,7 @@ def body_text(email: Email) -> str:
 
 
 # Words that name the corpora or their recipient rather than anything the sender chose. The
-# phishing corpus is one person's inbox: "Dear jose" appears in 26% of it and in 0.4% of ham.
+# phishing corpus is one person's inbox: "jose" appears in 25% of it and in 0.3% of ham.
 ARTEFACT_WORDS: Final = ("jose", "nazario", "monkey", "spamassassin", "taint")
 
 _ADDRESS_RE = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")

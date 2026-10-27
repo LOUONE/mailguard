@@ -18,6 +18,7 @@ import argparse
 import hashlib
 import json
 import logging
+import math
 import random
 import re
 from collections import Counter, defaultdict
@@ -93,6 +94,11 @@ def temporal_sides(frame: pd.DataFrame) -> tuple[pd.Series[bool], pd.Series[bool
 # --- split assignment --------------------------------------------------------------------
 
 
+def least_full(filled: Mapping[Split, int], targets: Mapping[Split, float]) -> Split:
+    """The split with the lowest filled / target ratio; ties go to the first in `SPLITS`."""
+    return min(SPLITS, key=lambda s: filled[s] / targets[s] if targets[s] else math.inf)
+
+
 def assign_groups(
     groups: Mapping[str, tuple[str, int]],
     fractions: Mapping[Split, float] = FRACTIONS,
@@ -101,9 +107,13 @@ def assign_groups(
     """Assign each group (cluster) to a split, stratified, keeping every group whole.
 
     `groups` maps a group id to `(stratum, size)`. Within each stratum, groups are shuffled with
-    `seed` and then placed largest first, each into the split furthest below its target size.
-    Placing large groups first is what keeps the proportions tight: a 71-message cluster placed
-    last could not be balanced any more.
+    `seed` and then placed largest first, each into the split that is least full relative to its
+    target size. Placing large groups first keeps the proportions tight: a 71-message cluster
+    placed last could not be balanced any more.
+
+    The relative fill matters. Choosing the split with the largest absolute shortfall instead
+    sends every large group to train, whose target is the biggest, until train is 55% full: on
+    this corpus that put all 1,254 multi-message clusters in train and none in validation or test.
     """
     if abs(sum(fractions.values()) - 1.0) > 1e-9:
         raise ValueError(f"fractions must sum to 1, got {dict(fractions)}")
@@ -120,8 +130,9 @@ def assign_groups(
         members.sort(key=lambda m: m[1], reverse=True)  # stable: equal sizes keep shuffled order
         total = sum(size for _, size in members)
         filled = dict.fromkeys(SPLITS, 0)
+        targets = {s: fractions[s] * total for s in SPLITS}
         for group, size in members:
-            chosen = max(SPLITS, key=lambda s: fractions[s] * total - filled[s])
+            chosen = least_full(filled, targets)
             assignment[group] = chosen
             filled[chosen] += size
     return assignment

@@ -38,6 +38,14 @@ def test_label_shares_within_one_point_of_overall(dataset: pd.DataFrame) -> None
         assert (share - overall).abs().max() < 0.01, split
 
 
+def test_duplicates_are_spread_across_splits(dataset: pd.DataFrame) -> None:
+    duplicated = dataset.groupby("cluster")["cluster"].transform("size") > 1
+    overall = duplicated.mean()
+    for split in SPLITS:
+        share = duplicated[dataset["split"] == split].mean()
+        assert abs(share - overall) < 0.03, (split, share, overall)
+
+
 def test_split_sizes_match_fractions(dataset: pd.DataFrame) -> None:
     sizes = dataset["split"].value_counts(normalize=True)
     for split in SPLITS:

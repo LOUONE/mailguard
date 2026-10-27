@@ -113,6 +113,18 @@ def test_large_balanced_strata_stay_within_one_point() -> None:
         assert abs(share - FRACTIONS[split]) < 0.01
 
 
+def test_large_groups_are_spread_across_splits() -> None:
+    # Regression: choosing the largest absolute shortfall sent every large group to train.
+    sizes = [20] * 30 + [1] * 1400
+    groups = {f"g{i}": ("phishing", n) for i, n in enumerate(sizes)}
+    assignment = assign_groups(groups)
+    overall = 600 / 2000  # share of messages that sit in a 20-message group
+
+    for split in SPLITS:
+        in_split = [n for g, (_, n) in groups.items() if assignment[g] == split]
+        assert abs(sum(n for n in in_split if n > 1) / sum(in_split) - overall) < 0.05, split
+
+
 def test_fractions_must_sum_to_one() -> None:
     with pytest.raises(ValueError, match="sum to 1"):
         assign_groups({"g": ("ham", 1)}, {"train": 0.8, "val": 0.1, "test": 0.05})
