@@ -51,10 +51,15 @@ def split_data(frame: pd.DataFrame, split: Split, column: str = "split") -> Spli
     )
 
 
-def train_baseline(name: ModelName, frame: pd.DataFrame, config: BaselineConfig) -> Pipeline:
-    """Fit one baseline on the training rows of `frame`, and on nothing else."""
-    train = split_data(frame, "train")
-    logger.info("%s: fitting on %d training messages", name, len(train.emails))
+def train_baseline(
+    name: ModelName, frame: pd.DataFrame, config: BaselineConfig, column: str = "split"
+) -> Pipeline:
+    """Fit one baseline on the training rows of `frame`, and on nothing else.
+
+    `column` picks the assignment: `split` (main) or `temporal_split` (the temporal check).
+    """
+    train = split_data(frame, "train", column)
+    logger.info("%s: fitting on %d training messages (%s)", name, len(train.emails), column)
     return build_pipeline(name, config).fit(train.emails, train.target)
 
 

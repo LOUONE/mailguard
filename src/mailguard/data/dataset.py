@@ -268,7 +268,9 @@ def write_dataset(frame: pd.DataFrame, manifest: Mapping[str, Any], out_dir: Pat
 
     manifest_path = out_dir / MANIFEST_FILE
     partial = manifest_path.with_name(manifest_path.name + ".part")
-    partial.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    # LF on every OS: the manifest's SHA-256 is recorded with each training run.
+    text = json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+    partial.write_text(text, encoding="utf-8", newline="\n")
     partial.replace(manifest_path)
     return table
 

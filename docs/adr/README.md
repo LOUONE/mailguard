@@ -10,6 +10,8 @@ system does; ADRs say *why it does not do something else*.
 |---|---|---|---|
 | [0001](0001-binary-target.md) | Binary target: phishing against ham and spam | Accepted | 2026-10-27 |
 | [0002](0002-parser-design.md) | Parser design: lenient, never raises, metadata-only attachments | Accepted (retroactive) | 2026-10-27 |
+| [0003](0003-model-serialisation.md) | Save models with skops and an explicit list of trusted types | Accepted | 2026-10-27 |
+| [0004](0004-grouped-splits.md) | Split by duplicate cluster before any feature, with a separate temporal check | Accepted | 2026-10-27 |
 
 ## Writing one
 

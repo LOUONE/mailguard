@@ -6,7 +6,30 @@ Real-time phishing detection with an LLM investigation agent, built for privacy.
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.14+](https://img.shields.io/badge/python-3.14+-blue.svg)](pyproject.toml)
 
-> **Status: work in progress.** Phase 0 (scaffolding + CI) is complete. Phase 1 is in progress: the data pipeline, parser and [exploratory analysis](notebooks/01_eda.ipynb) are done, the classical baseline is next. Expected final version: `v1.0.0`.
+> **Status: work in progress.** Phase 0 (scaffolding + CI) is complete. Phase 1 is in progress: data pipeline, grouped splits, leakage-audited features, two tracked baselines and a test-set [evaluation report](reports/evaluation.md) are done; calibration, SHAP and the model card are next. Expected final version: `v1.0.0`.
+
+## First results
+
+Test split, 2,113 messages in 1,670 duplicate clusters, never used for any choice. Thresholds are
+fixed on validation ham; brackets are 95% intervals from a bootstrap over duplicate clusters.
+Full report: [reports/evaluation.md](reports/evaluation.md).
+
+| Baseline | PR-AUC | Recall at 1% ham FPR | Ham FPR measured on test | Recall on 2020-2025 phishing, trained up to 2019 |
+|---|---|---|---|---|
+| Logistic regression, text only | 0.9978 [0.9960, 0.9991] | 97.9% [96.7, 98.9] | 1.1% | 96.5% [95.6, 97.4] |
+| LightGBM, all feature groups | 0.9993 [0.9985, 0.9998] | **98.8% [97.8, 99.5]** | 0.8% | 95.3% [94.1, 96.3] |
+
+How to read it:
+
+- Header, URL and attachment features add 0.8 points of recall at 1% FPR (paired interval
+  [0.2, 1.7]).
+- **0.1% FPR cannot be promised on this data.** With 622 ham in validation, the strictest
+  threshold allows zero false positives, and it still flags 0.6-0.8% of test ham (4-5 messages).
+- **New campaigns cost recall.** Trained only on phishing up to 2019, LightGBM loses 3.5 points
+  on 2020-2025 phishing and falls behind the text-only model. Its URL features encode the era,
+  as the [leakage audit](docs/features.md#leakage-audit) predicted.
+- Scores are near the ceiling because all ham dates from 2002 and phishing from 2004 onwards.
+  Treat these as an upper bound for a real inbox ([docs/data.md](docs/data.md)).
 
 ## What this project aims to prove
 
@@ -44,6 +67,7 @@ make lint    # ruff + mypy strict
 make data    # downloads the corpora (~147 MB) into data/raw/, checksum-verified
 make dataset # parses them into data/processed/ with grouped train/val/test splits
 make train   # trains both baselines (~3 min) and registers them in a local MLflow
+make evaluate  # test-split report with intervals into reports/ (~3 min)
 make eda     # re-runs the exploratory notebook on the downloaded data
 ```
 
@@ -78,8 +102,10 @@ balance, dates, structure and duplicate rates, with a TL;DR of what each finding
 ## Design decisions
 
 Structural choices are recorded as short [architecture decision records](docs/adr/README.md):
-the binary target ([0001](docs/adr/0001-binary-target.md)) and the parser design
-([0002](docs/adr/0002-parser-design.md)) so far.
+the binary target ([0001](docs/adr/0001-binary-target.md)), the parser design
+([0002](docs/adr/0002-parser-design.md)), model serialisation without pickle
+([0003](docs/adr/0003-model-serialisation.md)) and the grouped splits
+([0004](docs/adr/0004-grouped-splits.md)) so far.
 
 ## License
 

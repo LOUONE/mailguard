@@ -1,4 +1,4 @@
-.PHONY: help setup sync data dataset audit train mlflow-ui eda lint format test test-unit test-integration coverage pre-commit clean all
+.PHONY: help setup sync data dataset audit train evaluate mlflow-ui eda lint format test test-unit test-integration coverage pre-commit clean all
 
 help:
 	@echo "mailguard — available targets:"
@@ -8,6 +8,7 @@ help:
 	@echo "  dataset         Parse corpora into data/processed/ with grouped splits (needs make data)"
 	@echo "  audit           Era-leakage audit of each feature group (needs make dataset)"
 	@echo "  train           Train both baselines, log and register them in MLflow (needs make dataset)"
+	@echo "  evaluate        Test-split report with cluster-bootstrap intervals into reports/ (needs make train)"
 	@echo "  mlflow-ui       Browse local MLflow runs at http://127.0.0.1:5000"
 	@echo "  eda          Re-execute notebooks/01_eda.ipynb in place (needs make data)"
 	@echo "  lint            Ruff check + format check + mypy"
@@ -38,6 +39,9 @@ audit:
 
 train:
 	uv run python scripts/train.py
+
+evaluate:
+	uv run python scripts/evaluate.py
 
 mlflow-ui:
 	uv run mlflow ui --backend-store-uri sqlite:///mlruns/mlflow.db
