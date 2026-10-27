@@ -322,7 +322,8 @@ def render_markdown(report: Mapping[str, Any]) -> str:
 def write_report(report: Mapping[str, Any], out_dir: Path) -> tuple[Path, Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
     json_path, md_path = out_dir / "evaluation.json", out_dir / "evaluation.md"
-    json_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    report_json = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    json_path.write_text(report_json, encoding="utf-8", newline="\n")
     md_path.write_text(render_markdown(report), encoding="utf-8", newline="\n")
     return json_path, md_path
 

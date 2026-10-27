@@ -266,3 +266,12 @@ def test_main_fails_cleanly_without_raw_data(tmp_path: Path) -> None:
 
     assert main(args, sources=[source("phishing-2020", "phishing")]) == 1
     assert not (tmp_path / "out").exists()
+
+
+def test_manifest_bytes_do_not_depend_on_the_os(tmp_path: Path) -> None:
+    sources = write_corpus(tmp_path / "raw")
+    df = build_frame(tmp_path / "raw", sources)
+
+    write_dataset(df, build_manifest(df, sources), tmp_path / "out")
+
+    assert b"\r\n" not in (tmp_path / "out" / "manifest.json").read_bytes()
