@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-import io
-import mailbox
-import tarfile
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -12,42 +9,14 @@ from hypothesis import strategies as st
 
 from mailguard.data.corpus import iter_corpus, iter_messages
 from mailguard.data.dedup import exact_fingerprint, normalise_text, normalised_fingerprint
-from mailguard.data.download import target_path
 from mailguard.data.records import iter_records
-from mailguard.data.sources import Source
+from tests.fakes import source, write_mbox, write_tar
 
 HAM = b"From: a@example.org\nDate: Tue, 14 Oct 2025 11:00:00 +0200\n\nHello Bob, lunch at 12?\n"
 PHISH = (
     b"From: x@example.net\nContent-Type: text/html\n\n"
     b'<p>Your account 4821 is locked. <a href="https://evil.example/a?u=1">Unlock</a></p>\n'
 )
-
-
-def source(filename: str, label: str = "ham") -> Source:
-    corpus = "spamassassin" if filename.endswith(".tar.bz2") else "nazario"
-    return Source(corpus, filename, label, f"https://example.org/{filename}", "0" * 64)  # type: ignore[arg-type]
-
-
-def write_tar(dest: Path, src: Source, members: dict[str, bytes]) -> None:
-    path = target_path(src, dest)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with tarfile.open(path, "w:bz2") as archive:
-        directory = tarfile.TarInfo("easy_ham")
-        directory.type = tarfile.DIRTYPE
-        archive.addfile(directory)
-        for name, data in members.items():
-            info = tarfile.TarInfo(f"easy_ham/{name}")
-            info.size = len(data)
-            archive.addfile(info, io.BytesIO(data))
-
-
-def write_mbox(dest: Path, src: Source, messages: list[bytes]) -> None:
-    path = target_path(src, dest)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    box = mailbox.mbox(path)
-    for raw in messages:
-        box.add(raw)
-    box.close()
 
 
 # --- corpus reader --------------------------------------------------------------
