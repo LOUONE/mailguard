@@ -154,3 +154,56 @@ the era shows through their combination: raw IP hosts fall from 36.5% to 0.5% of
 keywords from 71.1% to 14.3%. These are choices made by the attacker, and ham carries them at
 plausible rates. The consequence is accepted and measured: URL features should help more on old
 phishing than on recent phishing, and the per-era results will show by how much.
+
+## Text features
+
+Code: [`src/mailguard/features/text.py`](../src/mailguard/features/text.py). The body is read
+through `Email.body_text`, plain text or visible HTML text alike, and cut at 20,000 characters
+(0.38% of messages are longer; one is over a million characters).
+
+**TF-IDF** (`TextFeatures`): word 1-2 grams (50,000 terms at most) and character 3-5 grams within
+word boundaries (100,000 at most), `min_df=3`, sublinear term frequency, float32 sparse output.
+Character n-grams hold up better against `v3rify` or `P@yPal` than whole words. This is the only
+extractor with state: its vocabulary and IDF weights are learnt in `fit`, which runs inside the
+training pipeline on the training split only, and `transform` refuses to run before it. The
+vocabulary size is logged at each fit. Fitting the 9,859 training messages takes about 25 seconds.
+
+**Scrubbing before TF-IDF.** A first logistic regression on raw body text ranked these among its
+strongest terms: `jose` (the phishing corpus owner, in 26.2% of phishing and 0.4% of ham), `monkey`
+and `org` (his domain), `2002` and `2025` (years), `spamassassin` and `xent` (the ham maintainers'
+software and mailing lists). They describe who received the message and when, not what the sender
+wrote. Before vectorising, the text is scrubbed:
+
+- addresses become `emailaddress` and URLs `urladdress` (URL features already describe them);
+- digits become `0`, which removes years;
+- the words of the recipients' own addresses are removed (`jane.doe@...` removes `jane` and `doe`);
+- the corpus names `jose`, `nazario`, `monkey`, `spamassassin`, `taint` are removed, with any
+  domain labels that follow them.
+
+After scrubbing, none of these terms is left in the top weights; `org` drops from 8.2% to 0.3% of
+phishing. The strongest phishing terms become `your account`, `verify`, `update your`, `kindly`,
+`mailbox`, `upgrade`; the strongest ham terms are mailing-list vocabulary (`wrote`, `mailing list`,
+`unsubscribe`). The lexicon below is computed on the unscrubbed text, since its cues
+(`within 24 hours`) need the digits.
+
+**Lexicon** (`LexiconFeatures`, stateless), for the body and for the subject:
+
+| Feature | Definition |
+|---|---|
+| `*_urgency_cues` | Distinct pressure cues present: urgent, suspended, expires, within 24 hours, locked, unusual activity, ... (12 patterns) |
+| `*_credential_cues` | Distinct credential cues present: password, sign in, verify, account, card number, billing, ... (12 patterns) |
+| `*_uppercase_ratio` | Uppercase share of letters |
+| `*_exclamation_ratio` | `!` share of non-space characters |
+| `body_empty` | No visible text at all (image or attachment only, 2.1-2.3% of phishing) |
+
+Cues count once per message, so the feature measures how many tactics are used, not how long the
+message is. Mean values on the training split:
+
+| Feature | Ham | Spam | Phishing 2004-2007 | Phishing 2015-2025 |
+|---|---|---|---|---|
+| `body_urgency_cues` | 0.07 | 0.22 | 0.79 | 0.51 |
+| `body_credential_cues` | 0.11 | 0.25 | 2.34 | 1.22 |
+| `subject_credential_cues` | 0.00 | 0.02 | 0.62 | 0.37 |
+| `body_empty` | 0.00 | 0.01 | 0.02 | 0.02 |
+
+The cues are English only. Non-English phishing relies on TF-IDF and the other feature groups.
