@@ -15,6 +15,8 @@ def test_defaults(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
         "MAILGUARD_LOG_LEVEL",
         "MAILGUARD_DATA_DIR",
         "MAILGUARD_APP_NAME",
+        "MAILGUARD_MLFLOW_TRACKING_URI",
+        "MAILGUARD_MLFLOW_ARTIFACT_DIR",
     ):
         monkeypatch.delenv(var, raising=False)
 
@@ -24,6 +26,8 @@ def test_defaults(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     assert settings.environment == "dev"
     assert settings.log_level == "INFO"
     assert settings.data_dir == Path("data")
+    assert settings.mlflow_tracking_uri == "sqlite:///mlruns/mlflow.db"
+    assert settings.mlflow_artifact_dir == Path("mlruns/artifacts")
 
 
 def test_env_overrides(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:

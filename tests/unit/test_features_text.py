@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import logging
+import pickle
+from pathlib import Path
 
 import numpy as np
 import pytest
 import scipy.sparse as sp
+import skops.io as sio
 from sklearn.base import clone
 from sklearn.exceptions import NotFittedError
 
@@ -169,3 +172,24 @@ def test_lexicon_transformer() -> None:
     names = list(LEXICON_FEATURES)
     credential = out[:, names.index("body_credential_cues")]
     assert credential[:3].sum() == 0 and (credential[3:] > 0).all()
+
+
+def test_saved_state_round_trips_without_unfitting_the_original(tmp_path: Path) -> None:
+    features = small().fit(TRAIN)
+    expected = features.transform(TRAIN)
+
+    path = tmp_path / "text.skops"
+    sio.dump(features, path)
+    from_skops = sio.load(path, trusted=["mailguard.features.text.TextFeatures"])
+    from_pickle = pickle.loads(pickle.dumps(features))
+
+    for copy in (features, from_skops, from_pickle):
+        assert np.array_equal(copy.transform(TRAIN).toarray(), expected.toarray())
+        assert list(copy.get_feature_names_out()) == list(features.get_feature_names_out())
+
+
+def test_unfitted_state_round_trips() -> None:
+    copy = pickle.loads(pickle.dumps(small()))
+
+    with pytest.raises(NotFittedError):
+        copy.transform(TRAIN)

@@ -152,6 +152,36 @@ class TextFeatures(TransformerMixin, BaseEstimator):  # type: ignore[misc]  # sk
         tags.input_tags.string = True
         return tags
 
+    # Models are saved with skops, which rebuilds only trusted types instead of running pickle
+    # code. skops stores a dict entry by entry: a 150k-term vocabulary took 150 s and 92 MB. The
+    # fitted state is therefore saved as arrays (terms in column order, IDF weights), which skops
+    # stores natively, and the vectorisers are rebuilt from them on load.
+
+    def __getstate__(self) -> dict[str, Any]:
+        # A copy: object.__getstate__ returns the instance's own __dict__, and saving a model must
+        # not unfit it.
+        state: dict[str, Any] = dict(super().__getstate__())
+        vectorizers = state.pop("vectorizers_", None)
+        if vectorizers is not None:
+            state["fitted_"] = {
+                name: {
+                    "terms": np.asarray(v.get_feature_names_out(), dtype=np.str_),
+                    "idf": np.asarray(v.idf_, dtype=np.float64),
+                }
+                for name, v in vectorizers.items()
+            }
+        return state
+
+    def __setstate__(self, state: dict[str, Any]) -> None:
+        fitted = state.pop("fitted_", None)
+        super().__setstate__(state)
+        if fitted is not None:
+            self.vectorizers_ = self._vectorizers()
+            for name, vectorizer in self.vectorizers_.items():
+                terms = fitted[name]["terms"].tolist()
+                vectorizer.vocabulary_ = {term: i for i, term in enumerate(terms)}
+                vectorizer.idf_ = fitted[name]["idf"]
+
 
 # --- lexicon -------------------------------------------------------------------------------
 

@@ -1,5 +1,9 @@
 # mailguard: corpora and local artefacts are downloaded, never committed (see docs/data.md)
 /data/
+# MLflow runs and models: fitted vocabularies hold n-grams of corpus text
+/mlruns/
+/mlartifacts/
+mlflow.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
