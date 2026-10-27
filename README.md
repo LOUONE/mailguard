@@ -42,6 +42,7 @@ make setup   # creates the venv, installs deps, installs pre-commit hook
 make test    # runs the test suite with coverage
 make lint    # ruff + mypy strict
 make data    # downloads the corpora (~147 MB) into data/raw/, checksum-verified
+make dataset # parses them into data/processed/ with grouped train/val/test splits
 make eda     # re-runs the exploratory notebook on the downloaded data
 ```
 
