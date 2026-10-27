@@ -79,6 +79,46 @@ learn instead of learning what phishing looks like.
 | **Broken `Date` headers** | Some parsed years are 102, 1970, 2028, 2030 or 2038, and 55 messages in `phishing-2023` have no parsable date. | `Date` is treated as untrusted input. Time-based analysis uses the corpus file period, not the header. |
 | **Malformed messages** | At least one message in `phishing3.mbox` makes the stdlib `email` generator raise `UnicodeEncodeError` when re-serialised. | The parser is property-tested with `hypothesis` to never raise on arbitrary bytes (issue #12). |
 
+## Modelling dataset and splits
+
+`make dataset` parses every message once into `data/processed/dataset.parquet` (gitignored: it
+holds raw message bytes) and writes `data/processed/manifest.json` next to it (counts and hashes
+only). The code is in [`src/mailguard/data/dataset.py`](../src/mailguard/data/dataset.py).
+
+Each row carries the record fields, the three-way `label`, the binary `target`
+([ADR 0001](adr/0001-binary-target.md)), the file `period` and `year`, a duplicate `cluster` and
+two split assignments. The raw bytes are kept rather than the extracted text, so features are
+computed from `parse_email(raw)` exactly as the API will compute them.
+
+**Main split** (`split`): 70 / 15 / 15, stratified by label and phishing period, grouped by
+duplicate cluster (normalised body fingerprint; each empty body is its own cluster). Clusters are
+shuffled with a fixed seed and placed largest first into the split furthest below its target size.
+
+| Split | Ham | Spam | Phishing | Total |
+|---|---|---|---|---|
+| train | 2,904 | 1,328 | 5,627 | 9,859 |
+| val | 623 | 284 | 1,206 | 2,113 |
+| test | 623 | 284 | 1,205 | 2,112 |
+
+Every stratum (ham, spam, 2004-2007 phishing, 2015-2025 phishing) lands within 0.05 points of
+70 / 15 / 15. 11,142 clusters, 1,254 of them with duplicates, the largest with 71 messages.
+
+**Temporal check** (`temporal_split`): phishing from the 2004-2007 files and the 2015-2019 files
+trains, 2020-2025 phishing is the test set. Ham and spam keep their main split, so the threshold is
+still fixed on held-out ham. A cluster holding any phishing up to 2019 goes to the training side:
+6 clusters (22 messages) cross the cut today.
+
+| Temporal split | Ham | Spam | Phishing |
+|---|---|---|---|
+| train | 2,904 | 1,328 | 5,311 |
+| val | 623 | 284 | 927 |
+| test | 623 | 284 | 1,800 |
+
+**Reproducibility.** The manifest stores the seed, the fractions, the SHA-256 of every source file
+and `assignment_sha256`, a hash of every (message, split, temporal split) triple. Two builds from
+the same files give the same hash (current value starts with `09ed126af5f7`). Training runs record
+the manifest hash, so a model can always be traced to the exact split it was trained on.
+
 ## Reproducing
 
 ```bash
