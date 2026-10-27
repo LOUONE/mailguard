@@ -56,16 +56,16 @@ diff, and update the version and checksum here.
 
 | Feature | Ham | Spam | Phishing 2004-2007 | Phishing 2015-2025 |
 |---|---|---|---|---|
-| any URL | 87.5% | 82.1% | 97.8% | 89.9% |
-| IP host | 0.2% | 20.2% | 36.5% | 0.5% |
-| login-flow keyword | 3.6% | 1.0% | 71.1% | 14.3% |
-| anchor text / target mismatch | 1.8% | 0.8% | 52.1% | 13.1% |
-| shortener | 0.1% | 0.0% | 0.0% | 5.6% |
-| suspicious TLD | 0.0% | 0.0% | 0.0% | 1.3% |
-| non-standard port | 0.4% | 3.0% | 7.5% | 0.2% |
+| any URL | 87.0% | 83.4% | 96.9% | 89.4% |
+| IP host | 0.1% | 19.5% | 30.5% | 0.5% |
+| login-flow keyword | 3.8% | 1.3% | 66.5% | 13.7% |
+| anchor text / target mismatch | 1.8% | 1.4% | 51.9% | 12.4% |
+| shortener | 0.2% | 0.0% | 0.1% | 5.9% |
+| suspicious TLD | 0.0% | 0.0% | 0.0% | 1.0% |
+| non-standard port | 0.3% | 2.8% | 7.2% | 0.2% |
 
 The strongest URL signals of 2004-2007 phishing (raw IPs, keywords, mismatched anchors) are four to
-seventy times rarer in recent phishing: attackers moved to real domains, shorteners and hosted
+sixty times rarer in recent phishing: attackers moved to real domains, shorteners and hosted
 pages. Expect URL features to help much more on old phishing than on new, and the temporal check
 to show it.
 
@@ -77,8 +77,8 @@ headers are read: `From`, `Reply-To`, `Return-Path`, `Message-ID` and `Date`. Ev
 `hypothesis` property checks that adding any other header never changes a feature.
 
 The corpus maintainers replaced real domains with `spamassassin.taint.org` and `monkey.org`. On the
-training split, `Return-Path` is under `taint.org` for 24.7% of ham and `From` for 17.0%, and 7.0%
-of phishing display names contain `monkey.org`. Those domains count as **unknown**: an unknown
+training split, `Return-Path` is under `taint.org` for 24.6% of ham and `From` for 17.1%, and
+15.8% of recent phishing display names contain `monkey.org`. Those domains count as **unknown**: an unknown
 domain never matches or differs from another one.
 
 | Feature | Definition |
@@ -114,8 +114,8 @@ The parser now sniffs each attachment's first bytes and stores the file family (
 | `att_double_extension` | A known extension hides in front of a risky or archive one (`invoice.pdf.exe`) |
 | `att_type_mismatch` | The sniffed family differs from the one implied by the name or declared type |
 
-Attachments are rare in these corpora (3.2% of ham, 5.7% and 17.5% of old and recent phishing).
-Risky extensions appear in 5.6% of recent phishing and almost never elsewhere.
+Attachments are rare in these corpora (3.0% of ham, 10.8% and 18.1% of old and recent phishing).
+Risky extensions appear in 6.0% of recent phishing and almost never elsewhere.
 
 ## Leakage audit
 
@@ -136,22 +136,24 @@ A high era AUC has two possible causes, and only one is leakage:
 
 | Group | Era AUC, first run | Era AUC, after removals | Top features (univariate AUC) |
 |---|---|---|---|
-| headers | 0.937 | 0.854 | `hdr_message_id_domain_mismatch` 0.73, `hdr_reply_to_present` 0.67 |
-| attachments | 0.557 | 0.557 | `att_count` 0.56 |
-| urls | 0.956 | 0.956 | `url_keyword_hits` 0.80, `url_count` 0.71, `url_distinct_domains` 0.70 |
-| all groups | 0.990 | 0.980 | |
+| headers | 0.928 | 0.838 | `hdr_message_id_domain_mismatch` 0.72, `hdr_reply_to_present` 0.65 |
+| attachments | 0.530 | 0.530 | `att_count` 0.54 |
+| urls | 0.950 | 0.950 | `url_keyword_hits` 0.78, `url_max_subdomain_depth` 0.71, `url_distinct_domains` 0.70 |
+| all groups | 0.988 | 0.980 | |
+
+In the first run, the strongest single header feature was the `Received` hop count (0.78).
 
 **Removed** (cause 1):
 
 - `hdr_received_hops`: each relay on the recipient's side adds a `Received` line. Ham has a median
-  of 6 hops (mailing lists and the maintainer's own fetching chain), 2004-2007 phishing 3, recent
+  of 6 hops (mailing lists and the maintainer's own fetching chain), 2004-2007 phishing 4, recent
   phishing 2. The count measures the receiving infrastructure of each corpus.
 - `hdr_recipients`: in 2004-2007 phishing, a `To` header exists in 99.9% of messages but holds an
-  address in only 68.8% (ham: 96.2%). The anonymisation removed the others.
+  address in only 71.6% (ham: 95.8%). The anonymisation removed the others.
 
-**Kept** (cause 2): the URL group, above the threshold at 0.956. No single URL feature exceeds 0.80;
-the era shows through their combination: raw IP hosts fall from 36.5% to 0.5% of phishing, login
-keywords from 71.1% to 14.3%. These are choices made by the attacker, and ham carries them at
+**Kept** (cause 2): the URL group, at the threshold with 0.950. No single URL feature exceeds 0.78;
+the era shows through their combination: raw IP hosts fall from 30.5% to 0.5% of phishing, login
+keywords from 66.5% to 13.7%. These are choices made by the attacker, and ham carries them at
 plausible rates. The consequence is accepted and measured: URL features should help more on old
 phishing than on recent phishing, and the per-era results will show by how much.
 
@@ -166,13 +168,25 @@ word boundaries (100,000 at most), `min_df=3`, sublinear term frequency, float32
 Character n-grams hold up better against `v3rify` or `P@yPal` than whole words. This is the only
 extractor with state: its vocabulary and IDF weights are learnt in `fit`, which runs inside the
 training pipeline on the training split only, and `transform` refuses to run before it. The
-vocabulary size is logged at each fit. Fitting the 9,859 training messages takes about 25 seconds.
+vocabulary size is logged at each fit. Fitting the 9,858 training messages takes about 25 seconds.
 
 **Scrubbing before TF-IDF.** A first logistic regression on raw body text ranked these among its
-strongest terms: `jose` (the phishing corpus owner, in 26.2% of phishing and 0.4% of ham), `monkey`
-and `org` (his domain), `2002` and `2025` (years), `spamassassin` and `xent` (the ham maintainers'
-software and mailing lists). They describe who received the message and when, not what the sender
-wrote. Before vectorising, the text is scrubbed:
+strongest terms: `jose` (the phishing corpus owner), `monkey` and `org` (his domain), `2002` and
+`2025` (years), `spamassassin` and `xent` (the ham maintainers' software and mailing lists). They
+describe who received the message and when, not what the sender wrote. Share of training messages
+containing each term:
+
+| Term | Ham, raw | Phishing, raw | Ham, scrubbed | Phishing, scrubbed |
+|---|---|---|---|---|
+| `jose` | 0.3% | 25.0% | 0% | 0% |
+| `monkey` | 0.6% | 20.2% | 0% | 0% |
+| `2002` | 52.9% | 0.1% | 0% | 0% |
+| `2025` | 0.0% | 3.3% | 0% | 0% |
+| `spamassassin` | 13.7% | 0.1% | 0% | 0% |
+| `xent` | 12.4% | 0.0% | 0% | 0% |
+| `org` | 20.9% | 21.5% | 2.0% | 0.3% |
+
+Before vectorising, the text is scrubbed:
 
 - addresses become `emailaddress` and URLs `urladdress` (URL features already describe them);
 - digits become `0`, which removes years;
@@ -180,8 +194,7 @@ wrote. Before vectorising, the text is scrubbed:
 - the corpus names `jose`, `nazario`, `monkey`, `spamassassin`, `taint` are removed, with any
   domain labels that follow them.
 
-After scrubbing, none of these terms is left in the top weights; `org` drops from 8.2% to 0.3% of
-phishing. The strongest phishing terms become `your account`, `verify`, `update your`, `kindly`,
+After scrubbing, none of these terms is left in the top weights. The strongest phishing terms become `your account`, `verify`, `update your`, `kindly`,
 `mailbox`, `upgrade`; the strongest ham terms are mailing-list vocabulary (`wrote`, `mailing list`,
 `unsubscribe`). The lexicon below is computed on the unscrubbed text, since its cues
 (`within 24 hours`) need the digits.
@@ -194,16 +207,16 @@ phishing. The strongest phishing terms become `your account`, `verify`, `update 
 | `*_credential_cues` | Distinct credential cues present: password, sign in, verify, account, card number, billing, ... (12 patterns) |
 | `*_uppercase_ratio` | Uppercase share of letters |
 | `*_exclamation_ratio` | `!` share of non-space characters |
-| `body_empty` | No visible text at all (image or attachment only, 2.1-2.3% of phishing) |
+| `body_empty` | No visible text at all (image or attachment only, 3-4% of training phishing) |
 
 Cues count once per message, so the feature measures how many tactics are used, not how long the
 message is. Mean values on the training split:
 
 | Feature | Ham | Spam | Phishing 2004-2007 | Phishing 2015-2025 |
 |---|---|---|---|---|
-| `body_urgency_cues` | 0.07 | 0.22 | 0.79 | 0.51 |
-| `body_credential_cues` | 0.11 | 0.25 | 2.34 | 1.22 |
-| `subject_credential_cues` | 0.00 | 0.02 | 0.62 | 0.37 |
-| `body_empty` | 0.00 | 0.01 | 0.02 | 0.02 |
+| `body_urgency_cues` | 0.06 | 0.23 | 0.71 | 0.51 |
+| `body_credential_cues` | 0.11 | 0.25 | 2.05 | 1.22 |
+| `subject_credential_cues` | 0.00 | 0.02 | 0.59 | 0.38 |
+| `body_empty` | 0.00 | 0.02 | 0.04 | 0.03 |
 
 The cues are English only. Non-English phishing relies on TF-IDF and the other feature groups.

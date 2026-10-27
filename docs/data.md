@@ -92,16 +92,24 @@ computed from `parse_email(raw)` exactly as the API will compute them.
 
 **Main split** (`split`): 70 / 15 / 15, stratified by label and phishing period, grouped by
 duplicate cluster (normalised body fingerprint; each empty body is its own cluster). Clusters are
-shuffled with a fixed seed and placed largest first into the split furthest below its target size.
+shuffled with a fixed seed and placed largest first into the split that is least full relative to
+its target size.
 
 | Split | Ham | Spam | Phishing | Total |
 |---|---|---|---|---|
-| train | 2,904 | 1,328 | 5,627 | 9,859 |
-| val | 623 | 284 | 1,206 | 2,113 |
-| test | 623 | 284 | 1,205 | 2,112 |
+| train | 2,906 | 1,326 | 5,626 | 9,858 |
+| val | 622 | 285 | 1,206 | 2,113 |
+| test | 622 | 285 | 1,206 | 2,113 |
 
-Every stratum (ham, spam, 2004-2007 phishing, 2015-2025 phishing) lands within 0.05 points of
-70 / 15 / 15. 11,142 clusters, 1,254 of them with duplicates, the largest with 71 messages.
+Every stratum (ham, spam, 2004-2007 phishing, 2015-2025 phishing) lands within 0.06 points of
+70 / 15 / 15. 11,142 clusters, 1,254 of them with duplicates, the largest with 71 messages. Each
+split holds the same share of messages from multi-message clusters (29.8-29.9%).
+
+That last property was missing from the first version, which placed each cluster into the split
+with the largest *absolute* shortfall. Train, with the biggest target, kept that title until it was
+55% full, so all 1,254 multi-message clusters went to train and validation and test held unique
+messages only. Proportions were perfect, which is why the tests did not see it; the evaluation
+report did (#27). A regression test and an integration check now cover it.
 
 **Temporal check** (`temporal_split`): phishing from the 2004-2007 files and the 2015-2019 files
 trains, 2020-2025 phishing is the test set. Ham and spam keep their main split, so the threshold is
@@ -110,13 +118,13 @@ still fixed on held-out ham. A cluster holding any phishing up to 2019 goes to t
 
 | Temporal split | Ham | Spam | Phishing |
 |---|---|---|---|
-| train | 2,904 | 1,328 | 5,311 |
-| val | 623 | 284 | 927 |
-| test | 623 | 284 | 1,800 |
+| train | 2,906 | 1,326 | 5,333 |
+| val | 622 | 285 | 905 |
+| test | 622 | 285 | 1,800 |
 
 **Reproducibility.** The manifest stores the seed, the fractions, the SHA-256 of every source file
 and `assignment_sha256`, a hash of every (message, split, temporal split) triple. Two builds from
-the same files give the same hash (current value starts with `09ed126af5f7`). Training runs record
+the same files give the same hash (current value starts with `bcb685de8cbe`). Training runs record
 the manifest hash, so a model can always be traced to the exact split it was trained on.
 
 ## Reproducing

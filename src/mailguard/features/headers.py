@@ -46,7 +46,7 @@ HEADER_FEATURES: Final = (
 # were collected, not who sent the message.
 #  - Received hop count: mostly the recipient's own relays (median 6 hops for ham, 2 for
 #    recent phishing).
-#  - Recipient count: anonymisation emptied the To addresses of 31% of 2004-2007 phishing.
+#  - Recipient count: anonymisation emptied the To addresses of 28% of 2004-2007 phishing.
 REMOVED_FEATURES: Final = ("hdr_received_hops", "hdr_recipients")
 
 ATTACHMENT_FEATURES: Final = (
