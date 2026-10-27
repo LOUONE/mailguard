@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     environment: Environment = "dev"
     log_level: LogLevel = "INFO"
     data_dir: Path = Field(default_factory=lambda: Path("data"))
+    # Local experiment tracking (gitignored). Phase 2 points this at the compose MLflow server.
+    mlflow_tracking_uri: str = "sqlite:///mlruns/mlflow.db"
+    mlflow_artifact_dir: Path = Field(default_factory=lambda: Path("mlruns/artifacts"))
 
 
 def get_settings() -> Settings:

@@ -43,6 +43,7 @@ make test    # runs the test suite with coverage
 make lint    # ruff + mypy strict
 make data    # downloads the corpora (~147 MB) into data/raw/, checksum-verified
 make dataset # parses them into data/processed/ with grouped train/val/test splits
+make train   # trains both baselines (~3 min) and registers them in a local MLflow
 make eda     # re-runs the exploratory notebook on the downloaded data
 ```
 
