@@ -1,10 +1,11 @@
-.PHONY: help setup sync data eda lint format test test-unit test-integration coverage pre-commit clean all
+.PHONY: help setup sync data dataset eda lint format test test-unit test-integration coverage pre-commit clean all
 
 help:
 	@echo "mailguard — available targets:"
 	@echo "  setup           Create venv, install deps, install pre-commit hook"
 	@echo "  sync            Sync dependencies from uv.lock"
 	@echo "  data            Download corpora into data/raw/ and verify checksums"
+	@echo "  dataset         Parse corpora into data/processed/ with grouped splits (needs make data)"
 	@echo "  eda             Re-execute notebooks/01_eda.ipynb in place (needs make data)"
 	@echo "  lint            Ruff check + format check + mypy"
 	@echo "  format          Ruff auto-fix + ruff format"
@@ -25,6 +26,9 @@ sync:
 
 data:
 	uv run python scripts/download_data.py
+
+dataset:
+	uv run python scripts/build_dataset.py
 
 eda:
 	uv run --group notebooks jupyter nbconvert --to notebook --execute --inplace notebooks/01_eda.ipynb
