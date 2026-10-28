@@ -1089,120 +1089,8 @@
     "test_ham": 622,
     "validation_ham": 622
   },
-  "slices": {
-    "100 words or more": {
-      "ham": 394,
-      "lightgbm": {
-        "ham_fpr": {
-          "estimate": 0.0,
-          "high": 0.0,
-          "low": 0.0
-        },
-        "recall": {
-          "estimate": 0.9846796657381616,
-          "high": 0.9958864397460889,
-          "low": 0.9706999831891963
-        }
-      },
-      "logreg": {
-        "ham_fpr": {
-          "estimate": 0.0,
-          "high": 0.0,
-          "low": 0.0
-        },
-        "recall": {
-          "estimate": 0.9763231197771588,
-          "high": 0.9895064221620533,
-          "low": 0.9605585403802207
-        }
-      },
-      "phishing": 718
-    },
-    "20 to 99 words": {
-      "ham": 201,
-      "lightgbm": {
-        "ham_fpr": {
-          "estimate": 0.01990049751243781,
-          "high": 0.06452484742807323,
-          "low": 0.0
-        },
-        "recall": {
-          "estimate": 0.9900249376558603,
-          "high": 1.0,
-          "low": 0.9753738000169909
-        }
-      },
-      "logreg": {
-        "ham_fpr": {
-          "estimate": 0.029850746268656716,
-          "high": 0.0773202995956029,
-          "low": 0.0
-        },
-        "recall": {
-          "estimate": 0.9900249376558603,
-          "high": 1.0,
-          "low": 0.975300925925926
-        }
-      },
-      "phishing": 401
-    },
-    "20+ words, little English": {
-      "ham": 8,
-      "lightgbm": {
-        "ham_fpr": {
-          "estimate": 0.0,
-          "high": 0.0,
-          "low": 0.0
-        },
-        "recall": {
-          "estimate": 1.0,
-          "high": 1.0,
-          "low": 1.0
-        }
-      },
-      "logreg": {
-        "ham_fpr": {
-          "estimate": 0.125,
-          "high": 0.4,
-          "low": 0.0
-        },
-        "recall": {
-          "estimate": 0.9615384615384616,
-          "high": 1.0,
-          "low": 0.9152387350144688
-        }
-      },
-      "phishing": 78
-    },
-    "20+ words, mostly English": {
-      "ham": 587,
-      "lightgbm": {
-        "ham_fpr": {
-          "estimate": 0.0068143100511073255,
-          "high": 0.021590610723100347,
-          "low": 0.0
-        },
-        "recall": {
-          "estimate": 0.9855907780979827,
-          "high": 0.9945801901661938,
-          "low": 0.9741718045174673
-        }
-      },
-      "logreg": {
-        "ham_fpr": {
-          "estimate": 0.008517887563884156,
-          "high": 0.026026411696347625,
-          "low": 0.0
-        },
-        "recall": {
-          "estimate": 0.9827089337175793,
-          "high": 0.9918715578284815,
-          "low": 0.9714008506959637
-        }
-      },
-      "phishing": 1041
-    },
-    "under 20 words": {
+  "slices": [
+    {
       "ham": 27,
       "lightgbm": {
         "ham_fpr": {
@@ -1228,9 +1116,126 @@
           "low": 0.8709435483870968
         }
       },
-      "phishing": 87
+      "phishing": 87,
+      "slice": "under 20 words"
+    },
+    {
+      "ham": 201,
+      "lightgbm": {
+        "ham_fpr": {
+          "estimate": 0.01990049751243781,
+          "high": 0.06452484742807323,
+          "low": 0.0
+        },
+        "recall": {
+          "estimate": 0.9900249376558603,
+          "high": 1.0,
+          "low": 0.9753738000169909
+        }
+      },
+      "logreg": {
+        "ham_fpr": {
+          "estimate": 0.029850746268656716,
+          "high": 0.0773202995956029,
+          "low": 0.0
+        },
+        "recall": {
+          "estimate": 0.9900249376558603,
+          "high": 1.0,
+          "low": 0.975300925925926
+        }
+      },
+      "phishing": 401,
+      "slice": "20 to 99 words"
+    },
+    {
+      "ham": 394,
+      "lightgbm": {
+        "ham_fpr": {
+          "estimate": 0.0,
+          "high": 0.0,
+          "low": 0.0
+        },
+        "recall": {
+          "estimate": 0.9846796657381616,
+          "high": 0.9958864397460889,
+          "low": 0.9706999831891963
+        }
+      },
+      "logreg": {
+        "ham_fpr": {
+          "estimate": 0.0,
+          "high": 0.0,
+          "low": 0.0
+        },
+        "recall": {
+          "estimate": 0.9763231197771588,
+          "high": 0.9895064221620533,
+          "low": 0.9605585403802207
+        }
+      },
+      "phishing": 718,
+      "slice": "100 words or more"
+    },
+    {
+      "ham": 587,
+      "lightgbm": {
+        "ham_fpr": {
+          "estimate": 0.0068143100511073255,
+          "high": 0.021590610723100347,
+          "low": 0.0
+        },
+        "recall": {
+          "estimate": 0.9855907780979827,
+          "high": 0.9945801901661938,
+          "low": 0.9741718045174673
+        }
+      },
+      "logreg": {
+        "ham_fpr": {
+          "estimate": 0.008517887563884156,
+          "high": 0.026026411696347625,
+          "low": 0.0
+        },
+        "recall": {
+          "estimate": 0.9827089337175793,
+          "high": 0.9918715578284815,
+          "low": 0.9714008506959637
+        }
+      },
+      "phishing": 1041,
+      "slice": "20+ words, mostly English"
+    },
+    {
+      "ham": 8,
+      "lightgbm": {
+        "ham_fpr": {
+          "estimate": 0.0,
+          "high": 0.0,
+          "low": 0.0
+        },
+        "recall": {
+          "estimate": 1.0,
+          "high": 1.0,
+          "low": 1.0
+        }
+      },
+      "logreg": {
+        "ham_fpr": {
+          "estimate": 0.125,
+          "high": 0.4,
+          "low": 0.0
+        },
+        "recall": {
+          "estimate": 0.9615384615384616,
+          "high": 1.0,
+          "low": 0.9152387350144688
+        }
+      },
+      "phishing": 78,
+      "slice": "20+ words, little English"
     }
-  },
+  ],
   "temporal": {
     "lightgbm": {
       "threshold": 0.5997453014023048,
