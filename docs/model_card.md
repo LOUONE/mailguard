@@ -52,9 +52,14 @@ Thresholds are fixed on validation ham, then applied to test as they are.
 | Recall at the 1% ham-FPR threshold | **98.8% [97.8, 99.5]** |
 | Ham FPR measured on test at that threshold | 0.8% [0.0, 2.4] (5 messages) |
 | Spam flagged at that threshold | 3.9% [1.5, 6.6] |
-| Recall at the 0.1% threshold | 96.4% [95.0, 97.6] |
-| Ham FPR measured on test at that threshold | 0.6% [0.0, 2.0] (4 messages): **0.1% is not achieved** |
+| Recall at the strict threshold (0.1% target: no validation ham flagged) | 96.4% [95.0, 97.6] |
+| Ham FPR measured on test at that threshold | 0.6% [0.0, 2.0] (4 messages) |
 | PR-AUC (depends on the 57% prior; for comparison only) | 0.9993 [0.9985, 0.9998] |
+
+**What 622 test ham can measure.** One ham message is 0.16% of the FPR, so every FPR above is a
+count of a handful of messages. A 0.1% FPR can be neither shown nor ruled out: proving it would
+take about 3,000 test ham with none flagged (rule of three). The strict threshold is therefore a
+stricter setting with a measured 0.6% FPR, not a 0.1% operating point.
 
 **By phishing era**, at the 1% threshold: 98.4% [96.8, 99.5] on 2004-2007 phishing and
 99.2% [98.1, 100.0] on 2015-2025 phishing.
@@ -74,12 +79,17 @@ goes from 1.0% [0.5, 1.8] to **0.7% [0.5, 1.6]**, Brier score from 0.0124 to 0.0
 reliability diagram is in the report.
 
 Probabilities hold at the corpus base rate of 57% phishing. In a mailbox where 1% of mail is
-phishing:
+phishing, out of 1,000 messages (10 phishing, 990 ham), the 1% operating point would:
 
-- the 1% operating point would have a **precision of 55.4% [29.6, 100.0]**: about one alert in
-  two would be a false alarm (11.0% at 0.1% phishing, 86.6% at 5%);
-- a corpus probability of 0.9 means **0.064**, and 0.99 means 0.429
+- catch **9.9** of the 10 phishing messages;
+- flag **8.0 [0.0, 23.6]** legitimate messages, so a precision of 55.4% [29.6, 100.0]. The
+  interval is wide because it rests on five flagged test ham: between no false alarm and more
+  than two per phishing message caught. At 0.1% phishing, precision falls to 11.0%;
+- turn a corpus probability of 0.9 into **0.064**, and 0.99 into 0.429
   (`mailguard.models.calibration.adjust_prior`, Bayes' rule on the odds).
+
+Spam is left out of these counts: it would add false alarms of the cheaper kind (3.9% of spam is
+flagged), in a proportion that depends on the spam filter in front of the model.
 
 The serving layer must apply the base rate of its own mailbox before showing a probability.
 
@@ -98,8 +108,16 @@ From the [error taxonomy](error_analysis.md) (validation and test, 1% threshold)
   The ham errors are notifications with very long tracking URLs, a commercial email about account
   details and a bounce.
 - **False negatives (30).** 11 are not phishing at all (spam and newsletters stored in the phishing
-  corpus) and 5 are advance-fee fraud without a credential request. The 14 real misses all carry
-  little English text: other languages, junk-text padding, lures in an attachment or image.
+  corpus) and 5 are advance-fee fraud without a credential request. In the 14 real misses the
+  lure is diluted or hidden: junk or encyclopedia padding, other languages, an attachment or an
+  image.
+- **Slices.** Short and non-English phishing is not the weak spot: every test phishing message
+  under 20 words or with little English is caught. Recall is lowest on long, padded messages
+  (98.5% at 100 words or more), and every flagged test ham is under 100 words.
+- **Label noise.** In a random sample of 100 test phishing messages, 1 to 3 are not phishing,
+  and all 100 were flagged: the noise sits among detections as well as misses. Corrected on both
+  sides, recall would be about 99.1% instead of 98.8%, inside the interval, so the measured
+  figure stands.
 
 ## Limitations
 
@@ -109,7 +127,7 @@ leaves the model:
 | Risk | Effect on this model |
 |---|---|
 | **No modern ham.** All ham is from 2002. | The largest one. Every false-positive figure is measured on 2002 mailing-list and personal mail; modern newsletters, transactional mail and SaaS notifications are untested. Treat the FPR as optimistic. |
-| **URL length as an era marker** (found by the leakage check) | `url_max_length` is the strongest feature: short URLs in 2002 ham, long ones in phishing. Modern ham with long tracking URLs is exactly what the ham false positives look like. To be monitored in production (#38). |
+| **URL length as an era marker** (found by the leakage check) | `url_max_length` is the strongest feature: short URLs in 2002 ham, long ones in phishing. Modern ham with long tracking URLs is exactly what the ham false positives look like. The ablation in the report confirms it: without it, recall on the test split is unchanged, and recall on unseen 2020-2025 campaigns rises from 95.3% to 97.6% (with a slightly looser threshold), at the cost of 2.1 points more spam flagged. Removal is a candidate model change; until then it is monitored in production (#38). |
 | **Era gap** between ham (2002) and phishing (2004-2025) | No date or HTML features; text read the same way for plain text and HTML; digits scrubbed; era leakage audited. URL features still encode the era (audit AUC 0.950), measured by the temporal check. |
 | **Source artefacts in headers** | Five allowlisted headers; corpus domains treated as unknown; two collection artefacts removed after an audit (`Received` hops, recipient count). None in the top 20 features. |
 | **Authentication headers** exist only in recent phishing | SPF / DKIM / DMARC are parsed but not used by the model; the agent uses them on live mail. The model therefore ignores a strong real-world signal. |
@@ -118,9 +136,9 @@ leaves the model:
 | **Broken `Date` headers** | Only the presence of a date is a feature, never its value. |
 | **Malformed messages** | The parser never raises (property-tested); defects are counted as a feature. |
 | **Image- or attachment-only phishing** (3.2% of phishing) | Almost invisible to the model: no text, and attachment content is never read. Left to the agent. |
-| **Label noise** | Nazario's corpus is one inbox and holds spam and newsletters; 11 of 30 sampled misses were not phishing. Recall is a lower bound. |
-| **English only** | Lexicon cues are English; non-English phishing relies on TF-IDF alone and is a known miss. |
-| **Small ham test set** (622) | 0.1% FPR is not measurable (it would be under one message) and the 1% FPR interval is wide. |
+| **Label noise** | Nazario's corpus is one inbox and holds spam and newsletters: 1% to 3% of the phishing label in a random sample, but 4 of the 15 test misses. It barely moves recall (about +0.3 points once corrected on both sides). |
+| **English only** | Lexicon cues are English; non-English phishing relies on TF-IDF and the structured features. All 78 test phishing messages with little English were caught, but 3 non-English misses appear in the error taxonomy. |
+| **Small ham test set** (622) | One ham message is 0.16% of the FPR: 0.1% FPR can be neither shown nor ruled out (that takes about 3,000 ham), and the 1% FPR interval is wide. |
 
 ## Privacy
 

@@ -24,15 +24,21 @@ How to read it:
 
 - Header, URL and attachment features add 0.8 points of recall at 1% FPR (paired interval
   [0.2, 1.7]).
-- **0.1% FPR cannot be promised on this data.** With 622 ham in validation, the strictest
-  threshold allows zero false positives, and it still flags 0.6-0.8% of test ham (4-5 messages).
-- **New campaigns cost recall.** Trained only on phishing up to 2019, LightGBM loses 3.5 points
-  on 2020-2025 phishing and falls behind the text-only model. Its URL features encode the era,
-  as the [leakage audit](docs/features.md#leakage-audit) predicted.
-- **In a real mailbox, about one alert in two would be a false alarm.** The corpus is 57%
-  phishing; at 1% phishing, the 1% operating point gives LightGBM a precision of 55% [30, 100].
-  Probabilities are calibrated (ECE 0.7% on test) and converted to a real base rate with
-  Bayes' rule, so a "90%" in the corpus means 6% in such an inbox.
+- **0.1% FPR can be neither shown nor ruled out on this data.** One test ham is 0.16% of the
+  FPR; proving 0.1% would take about 3,000 ham with none flagged. The strictest threshold
+  (no validation ham flagged) still flags 0.6-0.8% of test ham (4-5 messages).
+- **New campaigns cost recall, and the strongest feature is to blame.** Trained only on phishing
+  up to 2019, LightGBM loses 3.5 points on 2020-2025 phishing. Retrained without
+  `url_max_length`, an era marker found by the [leakage check](docs/error_analysis.md#last-leakage-check),
+  it keeps the same test recall and loses only 1.2 points on new campaigns, at the cost of more
+  spam flagged.
+- **In a real mailbox, false alarms would be about as frequent as caught phishing.** Out of
+  1,000 messages with 1% phishing, LightGBM would catch 9.9 of 10 phishing messages and flag
+  8 legitimate ones [0, 24]: the interval rests on five flagged test ham. Probabilities are
+  calibrated (ECE 0.7% on test) and converted to a real base rate with Bayes' rule, so a "90%"
+  in the corpus means 6% in such an inbox.
+- **Label noise does not change these figures.** 1-3% of the phishing label is wrong in a
+  random sample; corrected on both sides, recall moves by about 0.3 points.
 - Scores are near the ceiling because all ham dates from 2002 and phishing from 2004 onwards.
   Treat these as an upper bound for a real inbox ([docs/data.md](docs/data.md)).
 
