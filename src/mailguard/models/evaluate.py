@@ -30,9 +30,17 @@ from sklearn.pipeline import Pipeline
 
 from mailguard.config import Settings, get_settings
 from mailguard.data.dataset import load_dataset, load_manifest
+from mailguard.models.calibration import (
+    CalibratedPipeline,
+    adjust_prior,
+    expected_calibration_error,
+    precision_at_prior,
+    reliability_table,
+)
 from mailguard.models.config import DEFAULT_CONFIG, BaselineConfig, load_config
 from mailguard.models.metrics import FPR_TARGETS, threshold_at_fpr
 from mailguard.models.pipelines import MODEL_NAMES, ModelName
+from mailguard.models.plots import reliability_svg
 from mailguard.models.stats import (
     ClusterBootstrap,
     mcnemar,
@@ -40,13 +48,19 @@ from mailguard.models.stats import (
     weighted_rate,
 )
 from mailguard.models.train import EXPERIMENT, REGISTERED_PREFIX, train_baseline
-from mailguard.parsing import parse_email
+from mailguard.parsing import Email, parse_email
 
 logger = logging.getLogger(__name__)
 
 N_BOOT: Final = 1000
 BOOT_SEED: Final = 20261027
 REPORT_DIR: Final = Path("reports")
+RELIABILITY_SVG: Final = "reliability.svg"
+# Phishing base rates of a real mailbox, for precision and probability conversions. The corpus
+# itself is 57% phishing; a filtered inbox sees well under 1%.
+PRODUCTION_PRIORS: Final = (0.001, 0.005, 0.01, 0.05)
+
+type Model = Pipeline | CalibratedPipeline
 
 
 @dataclass(frozen=True, slots=True)
@@ -74,10 +88,14 @@ class Rows:
         return self.is_label("phishing") & (years > after)
 
 
-def predict(pipeline: Pipeline, rows: Rows) -> NDArray[np.float64]:
-    """Scores in the row order of `rows`, so they line up with its labels and clusters."""
-    emails = [parse_email(raw) for raw in rows.frame["raw"]]
-    scores: NDArray[np.float64] = pipeline.predict_proba(emails)[:, 1]
+def parse_rows(rows: Rows) -> list[Email]:
+    """Emails in the row order of `rows`, so scores line up with its labels and clusters."""
+    return [parse_email(raw) for raw in rows.frame["raw"]]
+
+
+def predict(model: Model, rows: Rows | list[Email]) -> NDArray[np.float64]:
+    emails = parse_rows(rows) if isinstance(rows, Rows) else rows
+    scores: NDArray[np.float64] = model.predict_proba(emails)[:, 1]
     return scores
 
 
@@ -196,15 +214,76 @@ def temporal_report(
     }
 
 
+def calibration_report(
+    rows: Rows, model: CalibratedPipeline, emails: list[Email], boot: ClusterBootstrap
+) -> dict[str, Any]:
+    """ECE and Brier score of the raw and calibrated scores on test, with reliability bins."""
+    target = rows.target
+    raw, calibrated = model.raw_scores(emails), predict(model, emails)
+
+    def brier(scores: NDArray[np.float64]) -> dict[str, float]:
+        return boot.interval(
+            lambda w: float(np.average((scores - target) ** 2, weights=w))
+        ).as_dict()
+
+    def ece(scores: NDArray[np.float64]) -> dict[str, float]:
+        return boot.interval(lambda w: expected_calibration_error(target, scores, w)).as_dict()
+
+    return {
+        "method": model.calibrator.method,
+        "fitted_on_prior": model.calibrator.prior_,
+        "ece_raw": ece(raw),
+        "ece_calibrated": ece(calibrated),
+        "brier_raw": brier(raw),
+        "brier_calibrated": brier(calibrated),
+        "reliability_raw": reliability_table(target, raw),
+        "reliability_calibrated": reliability_table(target, calibrated),
+    }
+
+
+def base_rate_report(
+    rows: Rows,
+    scores: NDArray[np.float64],
+    threshold: float,
+    fitted_on_prior: float,
+    boot: ClusterBootstrap,
+) -> dict[str, Any]:
+    """What the 1% operating point and the probabilities mean in a mailbox with little phishing.
+
+    Precision is computed from recall and ham FPR on test, which do not depend on the base rate,
+    and carries their bootstrap uncertainty.
+    """
+    flagged = scores > threshold
+    phishing, ham = rows.is_label("phishing"), rows.is_label("ham")
+
+    def precision(prior: float) -> dict[str, float]:
+        return boot.interval(
+            lambda w: precision_at_prior(
+                weighted_rate(flagged, phishing, w), weighted_rate(flagged, ham, w), prior
+            )
+        ).as_dict()
+
+    return {
+        "precision_at_1pct_threshold": {str(p): precision(p) for p in PRODUCTION_PRIORS},
+        "probability_at_prior": {
+            str(prior): {
+                str(p): float(adjust_prior(p, fitted_on_prior, prior)) for p in (0.5, 0.9, 0.99)
+            }
+            for prior in PRODUCTION_PRIORS
+        },
+    }
+
+
 def evaluate(
     frame: pd.DataFrame,
-    pipelines: Mapping[ModelName, Pipeline],
+    pipelines: Mapping[ModelName, Model],
     temporal_pipelines: Mapping[ModelName, Pipeline],
     n_boot: int = N_BOOT,
 ) -> dict[str, Any]:
     val, test = Rows.of(frame, "split", "val"), Rows.of(frame, "split", "test")
-    val_scores = {n: predict(p, val) for n, p in pipelines.items()}
-    test_scores = {n: predict(p, test) for n, p in pipelines.items()}
+    val_emails, test_emails = parse_rows(val), parse_rows(test)
+    val_scores = {n: predict(p, val_emails) for n, p in pipelines.items()}
+    test_scores = {n: predict(p, test_emails) for n, p in pipelines.items()}
     thresholds = {n: val_thresholds(val, s) for n, s in val_scores.items()}
     boot = ClusterBootstrap(test.frame["cluster"].tolist(), n_boot, BOOT_SEED)
 
@@ -220,6 +299,14 @@ def evaluate(
     }
     if set(pipelines) == set(MODEL_NAMES):
         report["comparison"] = comparison(test, test_scores, thresholds, boot)
+    calibrated = {n: m for n, m in pipelines.items() if isinstance(m, CalibratedPipeline)}
+    report["calibration"] = {
+        n: calibration_report(test, m, test_emails, boot) for n, m in calibrated.items()
+    }
+    report["base_rate"] = {
+        n: base_rate_report(test, test_scores[n], thresholds[n]["1pct"], m.calibrator.prior_, boot)
+        for n, m in calibrated.items()
+    }
     report["temporal"] = {
         n: temporal_report(
             frame, test, test_scores[n], thresholds[n]["1pct"], temporal_pipelines[n], n_boot
@@ -238,6 +325,78 @@ def _pct(i: Mapping[str, float]) -> str:
 
 def _num(i: Mapping[str, float], digits: int = 4) -> str:
     return f"{i['estimate']:.{digits}f} [{i['low']:.{digits}f}, {i['high']:.{digits}f}]"
+
+
+def _calibration_markdown(report: Mapping[str, Any]) -> list[str]:
+    calibration, base_rate = report.get("calibration", {}), report.get("base_rate", {})
+    if not calibration:
+        return []
+    lines = [
+        "## Calibration",
+        "",
+        "Calibrators are fitted on validation (method chosen by cross-validation grouped by "
+        "cluster, on validation only) and measured here on test. ECE: mean gap between predicted "
+        "and observed phishing rate over 10 equal-width bins.",
+        "",
+        "| Model | Method | ECE raw | ECE calibrated | Brier raw | Brier calibrated |",
+        "|---|---|---|---|---|---|",
+    ]
+    for name, c in calibration.items():
+        lines.append(
+            f"| {name} | {c['method']} | {_pct(c['ece_raw'])} | {_pct(c['ece_calibrated'])} | "
+            f"{_num(c['brier_raw'])} | {_num(c['brier_calibrated'])} |"
+        )
+    lines += [
+        "",
+        f"![Reliability diagram]({RELIABILITY_SVG})",
+        "",
+        "Almost every score is below 0.1 or above 0.9. The bins in between hold a handful of "
+        "messages each, so their zigzag is noise; the counts are in the table below.",
+        "",
+        "| Model | Bin | Messages | Mean probability | Observed phishing rate |",
+        "|---|---|---|---|---|",
+    ]
+    for name, c in calibration.items():
+        lines += [
+            f"| {name} | {r['low']:.1f}-{r['high']:.1f} | {r['messages']} | "
+            f"{r['mean_score']:.3f} | {r['phishing_rate']:.3f} |"
+            for r in c["reliability_calibrated"]
+        ]
+    priors = [str(p) for p in PRODUCTION_PRIORS]
+    lines += [
+        "",
+        "## What the numbers mean in a real mailbox",
+        "",
+        "The corpus is 57% phishing. Recall and FPR do not depend on that; precision and "
+        "probabilities do. Precision of the 1% operating point if phishing were this share of "
+        "mail:",
+        "",
+        "| Model | " + " | ".join(f"{100 * float(p):g}% phishing" for p in priors) + " |",
+        "|---|" + "---|" * len(priors),
+    ]
+    for name, b in base_rate.items():
+        cells = [_pct(b["precision_at_1pct_threshold"][p]) for p in priors]
+        lines.append(f"| {name} | " + " | ".join(cells) + " |")
+    lines += [
+        "",
+        "The test set holds 622 ham and the 1% threshold flags about 5 of them, so the ham FPR "
+        "and every precision built on it are uncertain; an upper bound of 100% comes from "
+        "replicates that drew no flagged ham at all.",
+        "",
+        "A calibrated probability converted to those base rates (Bayes' rule on the odds, "
+        "`mailguard.models.calibration.adjust_prior`):",
+        "",
+        "| Model | Corpus probability | "
+        + " | ".join(f"{100 * float(p):g}%" for p in priors)
+        + " |",
+        "|---|---|" + "---|" * len(priors),
+    ]
+    for name, b in base_rate.items():
+        for prob in ("0.5", "0.9", "0.99"):
+            cells = [f"{b['probability_at_prior'][p][prob]:.3f}" for p in priors]
+            lines.append(f"| {name} | {prob} | " + " | ".join(cells) + " |")
+    lines.append("")
+    return lines
 
 
 def render_markdown(report: Mapping[str, Any]) -> str:
@@ -296,6 +455,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
             "paired cluster-bootstrap interval of the difference is the number to trust.",
             "",
         ]
+    lines += _calibration_markdown(report)
     if report.get("temporal"):
         lines += [
             "## Temporal check: phishing from 2020-2025",
@@ -319,13 +479,24 @@ def render_markdown(report: Mapping[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def write_report(report: Mapping[str, Any], out_dir: Path) -> tuple[Path, Path]:
+def write_report(report: Mapping[str, Any], out_dir: Path) -> list[Path]:
+    """Write the JSON, the Markdown and, when there is calibration data, the reliability SVG."""
     out_dir.mkdir(parents=True, exist_ok=True)
     json_path, md_path = out_dir / "evaluation.json", out_dir / "evaluation.md"
     report_json = json.dumps(report, indent=2, sort_keys=True) + "\n"
     json_path.write_text(report_json, encoding="utf-8", newline="\n")
     md_path.write_text(render_markdown(report), encoding="utf-8", newline="\n")
-    return json_path, md_path
+    paths = [json_path, md_path]
+    if report.get("calibration"):
+        svg_path = out_dir / RELIABILITY_SVG
+        # Fixed order, so each model keeps its colour whatever order the report is read back in.
+        calibration = report["calibration"]
+        curves: dict[str, Any] = {
+            n: calibration[n]["reliability_calibrated"] for n in MODEL_NAMES if n in calibration
+        }
+        svg_path.write_text(reliability_svg(curves), encoding="utf-8", newline="\n")
+        paths.append(svg_path)
+    return paths
 
 
 # --- models from the registry --------------------------------------------------------------

@@ -28,6 +28,10 @@ How to read it:
 - **New campaigns cost recall.** Trained only on phishing up to 2019, LightGBM loses 3.5 points
   on 2020-2025 phishing and falls behind the text-only model. Its URL features encode the era,
   as the [leakage audit](docs/features.md#leakage-audit) predicted.
+- **In a real mailbox, about one alert in two would be a false alarm.** The corpus is 57%
+  phishing; at 1% phishing, the 1% operating point gives LightGBM a precision of 55% [30, 100].
+  Probabilities are calibrated (ECE 0.7% on test) and converted to a real base rate with
+  Bayes' rule, so a "90%" in the corpus means 6% in such an inbox.
 - Scores are near the ceiling because all ham dates from 2002 and phishing from 2004 onwards.
   Treat these as an upper bound for a real inbox ([docs/data.md](docs/data.md)).
 
