@@ -6,13 +6,14 @@ Real-time phishing detection with an LLM investigation agent, built for privacy.
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.14+](https://img.shields.io/badge/python-3.14+-blue.svg)](pyproject.toml)
 
-> **Status: work in progress.** Phase 0 (scaffolding + CI) is complete. Phase 1 is in progress: data pipeline, grouped splits, leakage-audited features, two tracked baselines and a test-set [evaluation report](reports/evaluation.md) are done; calibration, SHAP and the model card are next. Expected final version: `v1.0.0`.
+> **Status: work in progress.** Phase 1 is complete: data pipeline, grouped splits, leakage-audited features, two tracked and calibrated baselines, a test-set [evaluation report](reports/evaluation.md) and a [model card](docs/model_card.md). Phase 2 (serving in production) is next. Expected final version: `v1.0.0`.
 
-## First results
+## Results
 
 Test split, 2,113 messages in 1,670 duplicate clusters, never used for any choice. Thresholds are
 fixed on validation ham; brackets are 95% intervals from a bootstrap over duplicate clusters.
-Full report: [reports/evaluation.md](reports/evaluation.md).
+Full report: [reports/evaluation.md](reports/evaluation.md). What the model is for, where it fails
+and why LightGBM was chosen: [model card](docs/model_card.md), [ADR 0005](docs/adr/0005-model-choice.md).
 
 | Baseline | PR-AUC | Recall at 1% ham FPR | Ham FPR measured on test | Recall on 2020-2025 phishing, trained up to 2019 |
 |---|---|---|---|---|
@@ -108,8 +109,9 @@ balance, dates, structure and duplicate rates, with a TL;DR of what each finding
 Structural choices are recorded as short [architecture decision records](docs/adr/README.md):
 the binary target ([0001](docs/adr/0001-binary-target.md)), the parser design
 ([0002](docs/adr/0002-parser-design.md)), model serialisation without pickle
-([0003](docs/adr/0003-model-serialisation.md)) and the grouped splits
-([0004](docs/adr/0004-grouped-splits.md)) so far.
+([0003](docs/adr/0003-model-serialisation.md)), the grouped splits
+([0004](docs/adr/0004-grouped-splits.md)) and the model choice
+([0005](docs/adr/0005-model-choice.md)) so far.
 
 ## License
 
