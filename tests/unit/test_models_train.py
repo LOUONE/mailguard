@@ -21,7 +21,7 @@ from mailguard.models.config import (
     flatten,
     load_config,
 )
-from mailguard.models.pipelines import MODEL_NAMES, TRUSTED_TYPES
+from mailguard.models.pipelines import MODEL_NAMES, TRUSTED_TYPES, lightgbm_pipeline
 from mailguard.models.train import (
     calibrate,
     feature_summary,
@@ -154,6 +154,22 @@ def test_calibrate_wraps_the_pipeline_without_changing_its_ranking(name: str) ->
     order = np.argsort(raw, kind="stable")
     assert np.all(np.diff(calibrated[order]) >= -1e-12)  # monotone in the raw score
     assert {"ece_raw", "cv_log_loss_sigmoid", "cv_log_loss_isotonic"} <= set(report)
+
+
+def test_excluded_features_leave_the_lightgbm_pipeline() -> None:
+    lightgbm = TINY.lightgbm.model_copy(update={"exclude_features": ("url_max_length",)})
+    config = TINY.model_copy(update={"lightgbm": lightgbm})
+
+    names = feature_summary(train_baseline("lightgbm", tiny_frame(), config))["urls"]["names"]
+
+    assert "url_max_length" not in names and "url_count" in names
+
+
+def test_excluding_an_unknown_feature_fails_loudly() -> None:
+    lightgbm = TINY.lightgbm.model_copy(update={"exclude_features": ("url_length",)})
+
+    with pytest.raises(ValueError, match="url_length"):
+        lightgbm_pipeline(TINY.model_copy(update={"lightgbm": lightgbm}))
 
 
 def test_feature_summary_hides_tfidf_terms() -> None:

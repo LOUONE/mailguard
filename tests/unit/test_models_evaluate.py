@@ -13,6 +13,7 @@ from mailguard.data.dataset import write_dataset
 from mailguard.models.config import BaselineConfig, LightGBMConfig, LogRegConfig, TextConfig
 from mailguard.models.evaluate import (
     Rows,
+    ablated_config,
     evaluate,
     load_registered,
     main,
@@ -64,12 +65,20 @@ def calibrated_models(frame: pd.DataFrame) -> dict:  # type: ignore[type-arg]
     return {n: calibrate(train_baseline(n, frame, TINY), val)[0] for n in ("logreg", "lightgbm")}
 
 
-@pytest.fixture(scope="module")
-def report() -> dict:  # type: ignore[type-arg]
-    frame = tiny_frame()
+def build_report(frame: pd.DataFrame) -> dict:  # type: ignore[type-arg]
     pipelines = calibrated_models(frame)
     temporal = {n: train_baseline(n, frame, TINY, "temporal_split") for n in ("logreg", "lightgbm")}
-    return evaluate(frame, pipelines, temporal, n_boot=50)  # type: ignore[arg-type]
+    without = ablated_config(TINY)
+    ablated = (
+        train_baseline("lightgbm", frame, without),
+        train_baseline("lightgbm", frame, without, "temporal_split"),
+    )
+    return evaluate(frame, pipelines, temporal, 50, ablated)  # type: ignore[arg-type]
+
+
+@pytest.fixture(scope="module")
+def report() -> dict:  # type: ignore[type-arg]
+    return build_report(tiny_frame())
 
 
 def test_rows_masks() -> None:
@@ -107,12 +116,57 @@ def test_report_has_every_metric_with_an_interval(report: dict) -> None:  # type
         assert 0 <= explanation["example"]["probability"] <= 1
 
 
-def test_report_is_deterministic(report: dict) -> None:  # type: ignore[type-arg]
-    frame = tiny_frame()
-    pipelines = calibrated_models(frame)
-    temporal = {n: train_baseline(n, frame, TINY, "temporal_split") for n in ("logreg", "lightgbm")}
+def test_alerts_per_thousand_messages_add_up(report: dict) -> None:  # type: ignore[type-arg]
+    base_rate = report["base_rate"]["lightgbm"]
+    point = report["models"]["lightgbm"]["operating_points"]["1pct"]
 
-    again = evaluate(frame, pipelines, temporal, n_boot=50)  # type: ignore[arg-type]
+    counts = base_rate["per_1000_messages"]["0.01"]
+
+    assert counts["phishing_caught"]["estimate"] == pytest.approx(10 * point["recall"]["estimate"])
+    assert counts["ham_flagged"]["estimate"] == pytest.approx(990 * point["ham_fpr"]["estimate"])
+
+
+def test_resolution_of_the_ham_sets(report: dict) -> None:  # type: ignore[type-arg]
+    resolution = report["resolution"]
+
+    assert resolution["validation_ham"] == 10 and resolution["test_ham"] == 10
+    assert resolution["one_test_ham"] == pytest.approx(0.1)
+    assert resolution["targets"]["1pct"] == {"validation_ham_allowed": 0, "test_ham_needed": 300}
+    assert resolution["targets"]["01pct"]["test_ham_needed"] == 3000
+
+
+def test_headings_say_when_a_threshold_lets_no_ham_through(report: dict) -> None:  # type: ignore[type-arg]
+    bigger = json.loads(json.dumps(report))
+    bigger["resolution"]["targets"]["1pct"]["validation_ham_allowed"] = 6
+
+    markdown = render_markdown(bigger)
+
+    assert "## Operating point: 1% ham FPR on validation\n" in markdown
+    assert "0.1% ham FPR on validation, i.e. no validation ham flagged" in markdown
+
+
+def test_slices_count_their_messages(report: dict) -> None:  # type: ignore[type-arg]
+    slices = {s["slice"]: s for s in report["slices"]}
+
+    assert sum(s["phishing"] for s in report["slices"][:3]) == 10  # length bins partition
+    short = slices["under 20 words"]
+    assert short["phishing"] == 10 and short["ham"] == 10  # every tiny message is short
+    assert set(short["lightgbm"]["recall"]) == {"estimate", "low", "high"}
+    assert slices["20+ words, little English"]["lightgbm"]["recall"] is None  # empty slice
+
+
+def test_ablation_is_paired_against_the_registered_model(report: dict) -> None:  # type: ignore[type-arg]
+    ablation = report["ablation"]
+
+    assert ablation["feature"] == "url_max_length"
+    with_feature = report["models"]["lightgbm"]["operating_points"]["1pct"]["recall"]["estimate"]
+    without = ablation["model"]["operating_points"]["1pct"]["recall"]["estimate"]
+    assert ablation["difference"]["recall"]["estimate"] == pytest.approx(without - with_feature)
+    assert ablation["temporal"]["trained_up_to_2019"]["phishing_messages"] > 0
+
+
+def test_report_is_deterministic(report: dict) -> None:  # type: ignore[type-arg]
+    again = build_report(tiny_frame())
 
     assert json.dumps(again, sort_keys=True) == json.dumps(report, sort_keys=True)
 
@@ -123,12 +177,15 @@ def test_markdown_and_json_hold_metrics_only(report: dict, tmp_path: Path) -> No
 
     assert svg_path.name in markdown and svg_path.read_text(encoding="utf-8").startswith("<svg")
     sections = ("1% ham FPR", "0.1% ham FPR", "PR-AUC", "McNemar", "Temporal check",
-                "Calibration", "real mailbox", "What drives the scores")  # fmt: skip
+                "Calibration", "real mailbox", "What drives the scores", "can measure",
+                "no validation ham flagged", "Ablation", "Slices", "n/a")  # fmt: skip
     for section in sections:
         assert section in markdown
     for text in (markdown, json_path.read_text(encoding="utf-8")):
         assert SECRET not in text and "example.org" not in text and "evil.example" not in text
     assert render_markdown(report) == markdown
+    read_back = json.loads(json_path.read_text(encoding="utf-8"))  # keys sorted on disk
+    assert render_markdown(read_back) == markdown
 
 
 def test_single_model_report_skips_the_comparison() -> None:
@@ -139,8 +196,10 @@ def test_single_model_report_skips_the_comparison() -> None:
 
     assert "comparison" not in report and report["temporal"] == {}
     assert report["calibration"] == {} and report["base_rate"] == {}
+    assert "ablation" not in report
     assert "Temporal check" not in render_markdown(report)
     assert "Calibration" not in render_markdown(report)
+    assert "Ablation" not in render_markdown(report)
 
 
 # --- registry ------------------------------------------------------------------------------

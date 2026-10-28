@@ -46,12 +46,44 @@ committed.
 | "You received a postcard" malware lure | 2 | Yes |
 
 - **11 of the 30 misses are not phishing.** The phishing corpus is one person's inbox and also
-  holds the spam, newsletters and mail he received. The measured recall is therefore a lower
-  bound on the real one, and some of the "errors" are the model being right.
-- **14 are real misses, and they share a pattern: the phishing signal is diluted or absent from
-  the text the model reads.** Other languages (the lexicon is English only), padding with unrelated
-  text, and lures that hide in an attachment or image. These are the attacks Phase 4 will build
-  deliberately (#50), and the cases the Phase 3 agent should take over.
+  holds the spam, newsletters and mail he received. Some of the "errors" are the model being
+  right, but the same noise also sits among the messages the model flags, where it counts as
+  caught phishing. Reading misses alone cannot say which way recall moves: the
+  [label audit](#label-audit-a-random-sample-of-phishing) below measures both sides.
+- **14 are real misses, and the phishing signal is diluted or absent from the text the model
+  reads**: other languages (the lexicon is English only), padding with unrelated text, and lures
+  that hide in an attachment or image. These are the attacks Phase 4 will build deliberately
+  (#50), and the cases the Phase 3 agent should take over.
+- **"Little text" is not the weak spot, padding is.** The first reading of these misses suggested
+  that short or non-English messages were the problem. The slices added to the report do not
+  support it: on test, LightGBM catches every phishing message under 20 words (87) and every one
+  with little English (78), helped by subject, attachment and header features. Its recall is
+  lowest on messages of 100 words or more (98.5% [97.1, 99.6]), where junk or encyclopedia text
+  buries a short lure. The slices also show where false alarms come from: no test ham of 100
+  words or more is flagged; every flagged ham is shorter.
+
+## Label audit: a random sample of phishing
+
+Errors are a biased sample: the model rejects spam, so spam stored in the phishing corpus piles up
+among the misses. To measure the noise of the phishing label itself, 100 test messages labelled
+phishing were drawn at random (`scripts/review_errors.py --kind sample --splits test`, seed fixed
+in the script) and read like the errors.
+
+| Reading | Count | Flagged at 1% |
+|---|---|---|
+| Phishing (credential, payment, callback, malware lures; padded or not) | 97 | 97 |
+| Not phishing: an advertisement for an auction-selling kit | 1 | 1 |
+| Cannot tell: a newsletter template under a delivery subject; a body in an encoding that does not decode | 2 | 2 |
+
+- **The phishing label is 1% to 3% wrong** (1 clear case, 3 counting the uncertain ones; the
+  exact 95% interval of 1 in 100 is 0.03% to 5.5%). All 100 sampled messages were flagged.
+- **On test, the 15 misses split into 6 real misses, 5 advance-fee frauds (one sent four times)
+  and 4 messages that are not phishing** (casino, pharmacy and reseller spam, a newsletter).
+- **Recall corrected on both sides moves from 98.8% to about 99.1%.** Removing the 4 noisy misses
+  and 1% to 3% of the 1,191 flagged messages gives 99.06% to 99.08%; also counting advance-fee
+  fraud as out of scope gives about 99.5%. The difference stays inside the bootstrap interval
+  of the measured recall, so the measured figure is the one to quote, and label noise does not
+  change any conclusion.
 
 ## Last leakage check
 
@@ -73,10 +105,20 @@ The 20 features with the largest mean absolute contribution on test (TreeSHAP, i
 - **`url_max_length` is the strongest feature and a probable era confound.** 2002 ham has short
   URLs (median 48 characters on the training split); phishing of both eras has long ones (about
   70). Modern legitimate mail is full of long tracking URLs, so in a real inbox this feature would
-  push ham towards phishing, exactly what the false positives above show. It cannot be measured
-  without modern ham, so it is kept, listed as the first limitation in the model card, and watched
-  by the drift report in Phase 2 (#38). A model without it is the first experiment once modern ham
-  is available.
+  push ham towards phishing, exactly what the false positives above show. Its effect on modern
+  ham cannot be measured without modern ham; what it does to the model can, and the report now
+  includes an ablation:
+  - **On the test split, the model does not need it.** Retrained without it, LightGBM keeps the
+    same recall (98.8%, paired difference +0.1 points [0.0, 0.3]) and PR-AUC, flags one more test
+    ham (6 instead of 5) and 2.1 points more spam [0.7, 3.8].
+  - **On new campaigns, it hurts.** Trained on phishing up to 2019, the model without it catches
+    97.6% [96.8, 98.4] of 2020-2025 phishing instead of 95.3% [94.1, 96.3], and moves above the
+    text-only challenger (96.5%). Part of the gain comes from a looser threshold on that split (ham FPR 1.1% instead
+    of 0.6%, three more messages), so the size of the gain is uncertain; its direction is not.
+  - This is what an era marker looks like: a feature that helps tell 2002 ham from later phishing
+    and nothing else. Removing it from the served model is a model change and gets its own
+    decision record; until then it stays listed as the first limitation in the model card and is
+    watched by the drift report in Phase 2 (#38).
 - **Mailing-list vocabulary reflects the composition of the ham corpus**, which is mostly mailing
   lists. It is real ham behaviour, not an artefact, but it means the model knows one kind of
   legitimate mail far better than the others (personal mail, transactional mail).
