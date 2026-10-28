@@ -146,9 +146,9 @@ def test_headings_say_when_a_threshold_lets_no_ham_through(report: dict) -> None
 
 
 def test_slices_count_their_messages(report: dict) -> None:  # type: ignore[type-arg]
-    slices = report["slices"]
+    slices = {s["slice"]: s for s in report["slices"]}
 
-    assert sum(s["phishing"] for s in list(slices.values())[:3]) == 10  # length bins partition
+    assert sum(s["phishing"] for s in report["slices"][:3]) == 10  # length bins partition
     short = slices["under 20 words"]
     assert short["phishing"] == 10 and short["ham"] == 10  # every tiny message is short
     assert set(short["lightgbm"]["recall"]) == {"estimate", "low", "high"}
@@ -184,6 +184,8 @@ def test_markdown_and_json_hold_metrics_only(report: dict, tmp_path: Path) -> No
     for text in (markdown, json_path.read_text(encoding="utf-8")):
         assert SECRET not in text and "example.org" not in text and "evil.example" not in text
     assert render_markdown(report) == markdown
+    read_back = json.loads(json_path.read_text(encoding="utf-8"))  # keys sorted on disk
+    assert render_markdown(read_back) == markdown
 
 
 def test_single_model_report_skips_the_comparison() -> None:

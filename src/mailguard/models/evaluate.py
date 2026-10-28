@@ -357,10 +357,14 @@ def slice_report(
     scores: Mapping[ModelName, NDArray[np.float64]],
     thresholds: Mapping[ModelName, Mapping[str, float]],
     boot: ClusterBootstrap,
-) -> dict[str, Any]:
-    """Recall and ham FPR at the 1% operating point, in each slice of `mailguard.models.slices`."""
+) -> list[dict[str, Any]]:
+    """Recall and ham FPR at the 1% operating point, in each slice of `mailguard.models.slices`.
+
+    A list rather than a mapping: the JSON report is written with sorted keys, and slices must
+    keep their order.
+    """
     phishing, ham = rows.is_label("phishing"), rows.is_label("ham")
-    out: dict[str, Any] = {}
+    out: list[dict[str, Any]] = []
     for name, mask in slice_masks(emails).items():
         positives, negatives = mask & phishing, mask & ham
         models: dict[str, Any] = {}
@@ -370,7 +374,9 @@ def slice_report(
                 "recall": rate(boot, flagged, positives) if positives.any() else None,
                 "ham_fpr": rate(boot, flagged, negatives) if negatives.any() else None,
             }
-        out[name] = {"phishing": int(positives.sum()), "ham": int(negatives.sum()), **models}
+        out.append(
+            {"slice": name, "phishing": int(positives.sum()), "ham": int(negatives.sum()), **models}
+        )
     return out
 
 
@@ -484,6 +490,11 @@ def _num(i: Mapping[str, float], digits: int = 4) -> str:
     return f"{i['estimate']:.{digits}f} [{i['low']:.{digits}f}, {i['high']:.{digits}f}]"
 
 
+def _models(by_model: Mapping[str, Any]) -> list[tuple[str, Any]]:
+    """Entries in `MODEL_NAMES` order, so a report read back from sorted JSON renders the same."""
+    return [(name, by_model[name]) for name in MODEL_NAMES if name in by_model]
+
+
 def _count(i: Mapping[str, float]) -> str:
     return _num(i, 1)
 
@@ -540,7 +551,8 @@ def _slices_markdown(report: Mapping[str, Any]) -> list[str]:
         + " |",
         "|---|---|" + "---|" * len(models) + "---|" + "---|" * len(models),
     ]
-    for name, s in slices.items():
+    for s in slices:
+        name = s["slice"]
         recalls = [_pct_or_na(s[n]["recall"]) for n in models]
         fprs = [_pct_or_na(s[n]["ham_fpr"]) for n in models]
         lines.append(
@@ -603,10 +615,10 @@ def _explanation_markdown(report: Mapping[str, Any]) -> list[str]:
         "| Model | " + " | ".join(groups) + " |",
         "|---|" + "---|" * len(groups),
     ]
-    for name, e in explanations.items():
+    for name, e in _models(explanations):
         cells = [f"{100 * e['group_share'].get(g, 0.0):.1f}%" for g in groups]
         lines.append(f"| {name} | " + " | ".join(cells) + " |")
-    for name, e in explanations.items():
+    for name, e in _models(explanations):
         lines += ["", f"Top {len(e['top_features'])} features, {name}:", ""]
         lines += ["| # | Feature | Mean abs. contribution |", "|---|---|---|"]
         lines += [
@@ -621,7 +633,7 @@ def _explanation_markdown(report: Mapping[str, Any]) -> list[str]:
         "| Model | Probability | Top reasons (log-odds) |",
         "|---|---|---|",
     ]
-    for name, e in explanations.items():
+    for name, e in _models(explanations):
         reasons = ", ".join(
             f"`{r['feature']}` {r['contribution']:+.2f}" for r in e["example"]["reasons"]
         )
@@ -644,7 +656,7 @@ def _calibration_markdown(report: Mapping[str, Any]) -> list[str]:
         "| Model | Method | ECE raw | ECE calibrated | Brier raw | Brier calibrated |",
         "|---|---|---|---|---|---|",
     ]
-    for name, c in calibration.items():
+    for name, c in _models(calibration):
         lines.append(
             f"| {name} | {c['method']} | {_pct(c['ece_raw'])} | {_pct(c['ece_calibrated'])} | "
             f"{_num(c['brier_raw'])} | {_num(c['brier_calibrated'])} |"
@@ -659,7 +671,7 @@ def _calibration_markdown(report: Mapping[str, Any]) -> list[str]:
         "| Model | Bin | Messages | Mean probability | Observed phishing rate |",
         "|---|---|---|---|---|",
     ]
-    for name, c in calibration.items():
+    for name, c in _models(calibration):
         lines += [
             f"| {name} | {r['low']:.1f}-{r['high']:.1f} | {r['messages']} | "
             f"{r['mean_score']:.3f} | {r['phishing_rate']:.3f} |"
@@ -678,7 +690,7 @@ def _calibration_markdown(report: Mapping[str, Any]) -> list[str]:
         "| Precision |",
         "|---|---|---|---|---|---|",
     ]
-    for name, b in base_rate.items():
+    for name, b in _models(base_rate):
         for p in priors:
             counts = b["per_1000_messages"][p]
             lines.append(
@@ -701,7 +713,7 @@ def _calibration_markdown(report: Mapping[str, Any]) -> list[str]:
         + " |",
         "|---|---|" + "---|" * len(priors),
     ]
-    for name, b in base_rate.items():
+    for name, b in _models(base_rate):
         for prob in ("0.5", "0.9", "0.99"):
             cells = [f"{b['probability_at_prior'][p][prob]:.3f}" for p in priors]
             lines.append(f"| {name} | {prob} | " + " | ".join(cells) + " |")
@@ -731,7 +743,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
             "| Model | Recall | Recall 2004-2007 | Recall 2015-2025 | Ham FPR | Spam FPR |",
             "|---|---|---|---|---|---|",
         ]
-        for name, m in report["models"].items():
+        for name, m in _models(report["models"]):
             p = m["operating_points"][point]
             lines.append(
                 f"| {name} | {_pct(p['recall'])} | {_pct(p['recall_2004_2007'])} | "
@@ -740,7 +752,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
             )
         lines.append("")
     lines += ["## Ranking", "", "| Model | PR-AUC |", "|---|---|"]
-    lines += [f"| {n} | {_num(m['pr_auc'])} |" for n, m in report["models"].items()]
+    lines += [f"| {n} | {_num(m['pr_auc'])} |" for n, m in _models(report["models"])]
     lines.append("")
     if "comparison" in report:
         c = report["comparison"]
@@ -775,7 +787,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
             "| Model | Trained up to 2019 | Trained on the main split |",
             "|---|---|---|",
         ]
-        for name, t in report["temporal"].items():
+        for name, t in _models(report["temporal"]):
             past, main = t["trained_up_to_2019"], t["trained_on_main_split"]
             lines.append(
                 f"| {name} | {_pct(past['recall_2020_2025'])} on {past['phishing_messages']} msg, "
