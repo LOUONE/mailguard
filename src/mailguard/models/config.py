@@ -36,6 +36,8 @@ class LightGBMConfig(_Strict):
     colsample_bytree: float = Field(default=0.3, gt=0, le=1)
     reg_lambda: float = Field(default=1.0, ge=0)
     n_jobs: int = Field(default=4, ge=1)
+    # Header, attachment, URL or lexicon features left out of the model (ablations).
+    exclude_features: tuple[str, ...] = ()
     text: TextConfig = TextConfig(word_max_features=20_000, char_max_features=30_000)
 
 

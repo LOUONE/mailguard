@@ -12,6 +12,7 @@ from lightgbm import LGBMClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import FeatureUnion, Pipeline
 
+from mailguard.features.base import EmailFeatures
 from mailguard.features.headers import AttachmentFeatures, HeaderFeatures
 from mailguard.features.text import LexiconFeatures, TextFeatures
 from mailguard.features.urls import UrlFeatures
@@ -60,6 +61,23 @@ def logreg_pipeline(config: BaselineConfig) -> Pipeline:
     )
 
 
+def _structured(exclude: tuple[str, ...]) -> list[tuple[str, EmailFeatures]]:
+    """The header, attachment, URL and lexicon groups, without the `exclude`d features."""
+    groups: dict[str, type[EmailFeatures]] = {
+        "headers": HeaderFeatures,
+        "attachments": AttachmentFeatures,
+        "urls": UrlFeatures,
+        "lexicon": LexiconFeatures,
+    }
+    unknown = set(exclude) - {name for group in groups.values() for name in group.names}
+    if unknown:
+        raise ValueError(f"cannot exclude unknown features {sorted(unknown)}")
+    return [
+        (name, group(exclude=tuple(f for f in exclude if f in group.names)))
+        for name, group in groups.items()
+    ]
+
+
 def lightgbm_pipeline(config: BaselineConfig) -> Pipeline:
     """Baseline 2: gradient-boosted trees on every feature group."""
     params = config.lightgbm
@@ -67,15 +85,7 @@ def lightgbm_pipeline(config: BaselineConfig) -> Pipeline:
         [
             (
                 "features",
-                FeatureUnion(
-                    [
-                        ("headers", HeaderFeatures()),
-                        ("attachments", AttachmentFeatures()),
-                        ("urls", UrlFeatures()),
-                        ("lexicon", LexiconFeatures()),
-                        ("text", _text(params.text)),
-                    ]
-                ),
+                FeatureUnion([*_structured(params.exclude_features), ("text", _text(params.text))]),
             ),
             (
                 "classifier",
