@@ -8,22 +8,22 @@ Test split: 2,113 messages (622 ham, 285 spam, 1206 phishing) in 1,670 duplicate
 
 | Model | Recall | Recall 2004-2007 | Recall 2015-2025 | Ham FPR | Spam FPR |
 |---|---|---|---|---|---|
-| lightgbm | 98.8% [97.8, 99.5] | 98.4% [96.8, 99.5] | 99.2% [98.1, 100.0] | 0.8% [0.0, 2.4] (5 msg) | 3.9% [1.5, 6.6] |
 | logreg | 97.9% [96.7, 98.9] | 97.5% [95.7, 98.9] | 98.5% [97.1, 99.6] | 1.1% [0.2, 2.8] (7 msg) | 3.5% [1.5, 5.8] |
+| lightgbm | 98.8% [97.8, 99.5] | 98.4% [96.8, 99.5] | 99.2% [98.1, 100.0] | 0.8% [0.0, 2.4] (5 msg) | 3.9% [1.5, 6.6] |
 
 ## Operating point: 0.1% ham FPR on validation
 
 | Model | Recall | Recall 2004-2007 | Recall 2015-2025 | Ham FPR | Spam FPR |
 |---|---|---|---|---|---|
-| lightgbm | 96.4% [95.0, 97.6] | 96.4% [94.4, 98.0] | 96.3% [94.4, 98.0] | 0.6% [0.0, 2.0] (4 msg) | 0.4% [0.0, 1.2] |
 | logreg | 94.5% [92.8, 96.0] | 93.1% [90.4, 95.4] | 96.3% [94.3, 98.0] | 0.8% [0.0, 2.4] (5 msg) | 2.5% [0.7, 4.7] |
+| lightgbm | 96.4% [95.0, 97.6] | 96.4% [94.4, 98.0] | 96.3% [94.4, 98.0] | 0.6% [0.0, 2.0] (4 msg) | 0.4% [0.0, 1.2] |
 
 ## Ranking
 
 | Model | PR-AUC |
 |---|---|
-| lightgbm | 0.9993 [0.9985, 0.9998] |
 | logreg | 0.9978 [0.9960, 0.9991] |
+| lightgbm | 0.9993 [0.9985, 0.9998] |
 
 ## LightGBM minus logistic regression (paired)
 
@@ -42,8 +42,8 @@ Calibrators are fitted on validation (method chosen by cross-validation grouped 
 
 | Model | Method | ECE raw | ECE calibrated | Brier raw | Brier calibrated |
 |---|---|---|---|---|---|
-| lightgbm | sigmoid | 1.0% [0.5, 1.8] | 0.7% [0.5, 1.6] | 0.0124 [0.0064, 0.0196] | 0.0120 [0.0063, 0.0188] |
 | logreg | sigmoid | 1.6% [1.4, 2.5] | 1.0% [0.6, 1.9] | 0.0178 [0.0123, 0.0241] | 0.0172 [0.0109, 0.0246] |
+| lightgbm | sigmoid | 1.0% [0.5, 1.8] | 0.7% [0.5, 1.6] | 0.0124 [0.0064, 0.0196] | 0.0120 [0.0063, 0.0188] |
 
 ![Reliability diagram](reliability.svg)
 
@@ -51,16 +51,6 @@ Almost every score is below 0.1 or above 0.9. The bins in between hold a handful
 
 | Model | Bin | Messages | Mean probability | Observed phishing rate |
 |---|---|---|---|---|
-| lightgbm | 0.0-0.1 | 873 | 0.005 | 0.008 |
-| lightgbm | 0.1-0.2 | 16 | 0.138 | 0.188 |
-| lightgbm | 0.2-0.3 | 8 | 0.258 | 0.375 |
-| lightgbm | 0.3-0.4 | 6 | 0.343 | 0.167 |
-| lightgbm | 0.4-0.5 | 3 | 0.427 | 0.333 |
-| lightgbm | 0.5-0.6 | 1 | 0.547 | 1.000 |
-| lightgbm | 0.6-0.7 | 4 | 0.668 | 0.750 |
-| lightgbm | 0.7-0.8 | 7 | 0.752 | 0.286 |
-| lightgbm | 0.8-0.9 | 11 | 0.849 | 0.636 |
-| lightgbm | 0.9-1.0 | 1184 | 0.997 | 0.995 |
 | logreg | 0.0-0.1 | 868 | 0.007 | 0.013 |
 | logreg | 0.1-0.2 | 21 | 0.145 | 0.286 |
 | logreg | 0.2-0.3 | 13 | 0.252 | 0.231 |
@@ -71,6 +61,16 @@ Almost every score is below 0.1 or above 0.9. The bins in between hold a handful
 | logreg | 0.7-0.8 | 5 | 0.748 | 1.000 |
 | logreg | 0.8-0.9 | 23 | 0.861 | 0.957 |
 | logreg | 0.9-1.0 | 1152 | 0.994 | 0.990 |
+| lightgbm | 0.0-0.1 | 873 | 0.005 | 0.008 |
+| lightgbm | 0.1-0.2 | 16 | 0.138 | 0.188 |
+| lightgbm | 0.2-0.3 | 8 | 0.258 | 0.375 |
+| lightgbm | 0.3-0.4 | 6 | 0.343 | 0.167 |
+| lightgbm | 0.4-0.5 | 3 | 0.427 | 0.333 |
+| lightgbm | 0.5-0.6 | 1 | 0.547 | 1.000 |
+| lightgbm | 0.6-0.7 | 4 | 0.668 | 0.750 |
+| lightgbm | 0.7-0.8 | 7 | 0.752 | 0.286 |
+| lightgbm | 0.8-0.9 | 11 | 0.849 | 0.636 |
+| lightgbm | 0.9-1.0 | 1184 | 0.997 | 0.995 |
 
 ## What the numbers mean in a real mailbox
 
@@ -78,8 +78,8 @@ The corpus is 57% phishing. Recall and FPR do not depend on that; precision and 
 
 | Model | 0.1% phishing | 0.5% phishing | 1% phishing | 5% phishing |
 |---|---|---|---|---|
-| lightgbm | 11.0% [4.0, 100.0] | 38.2% [17.3, 100.0] | 55.4% [29.6, 100.0] | 86.6% [68.6, 100.0] |
 | logreg | 8.0% [3.4, 38.7] | 30.4% [15.0, 76.0] | 46.8% [26.2, 86.4] | 82.1% [64.9, 97.1] |
+| lightgbm | 11.0% [4.0, 100.0] | 38.2% [17.3, 100.0] | 55.4% [29.6, 100.0] | 86.6% [68.6, 100.0] |
 
 The test set holds 622 ham and the 1% threshold flags about 5 of them, so the ham FPR and every precision built on it are uncertain; an upper bound of 100% comes from replicates that drew no flagged ham at all.
 
@@ -87,18 +87,84 @@ A calibrated probability converted to those base rates (Bayes' rule on the odds,
 
 | Model | Corpus probability | 0.1% | 0.5% | 1% | 5% |
 |---|---|---|---|---|---|
-| lightgbm | 0.5 | 0.001 | 0.004 | 0.008 | 0.038 |
-| lightgbm | 0.9 | 0.007 | 0.033 | 0.064 | 0.263 |
-| lightgbm | 0.99 | 0.069 | 0.272 | 0.429 | 0.797 |
 | logreg | 0.5 | 0.001 | 0.004 | 0.008 | 0.038 |
 | logreg | 0.9 | 0.007 | 0.033 | 0.064 | 0.263 |
 | logreg | 0.99 | 0.069 | 0.272 | 0.429 | 0.797 |
+| lightgbm | 0.5 | 0.001 | 0.004 | 0.008 | 0.038 |
+| lightgbm | 0.9 | 0.007 | 0.033 | 0.064 | 0.263 |
+| lightgbm | 0.99 | 0.069 | 0.272 | 0.429 | 0.797 |
+
+## What drives the scores
+
+Mean absolute contribution to the log-odds on test: exact TreeSHAP values for LightGBM, coefficient times value for the logistic regression (`mailguard.models.explain`). Share of the total by feature group:
+
+| Model | attachments | headers | lexicon | text | urls |
+|---|---|---|---|---|---|
+| logreg | 0.0% | 0.0% | 0.0% | 100.0% | 0.0% |
+| lightgbm | 1.1% | 2.9% | 9.8% | 75.1% | 11.0% |
+
+Top 20 features, logreg:
+
+| # | Feature | Mean abs. contribution |
+|---|---|---|
+| 1 | `text__word:the` | 0.077 |
+| 2 | `text__word:account` | 0.063 |
+| 3 | `text__word:your` | 0.057 |
+| 4 | `text__word:urladdress` | 0.051 |
+| 5 | `text__word:is` | 0.042 |
+| 6 | `text__word:to` | 0.034 |
+| 7 | `text__word:of` | 0.034 |
+| 8 | `text__word:and` | 0.032 |
+| 9 | `text__word:your account` | 0.032 |
+| 10 | `text__word:list` | 0.029 |
+| 11 | `text__char: > ` | 0.028 |
+| 12 | `text__word:you` | 0.025 |
+| 13 | `text__char:___` | 0.025 |
+| 14 | `text__char:____` | 0.025 |
+| 15 | `text__char:_____` | 0.025 |
+| 16 | `text__word:on` | 0.024 |
+| 17 | `text__word:that` | 0.023 |
+| 18 | `text__char:the` | 0.022 |
+| 19 | `text__word:emailaddress` | 0.022 |
+| 20 | `text__word:ebay` | 0.021 |
+
+Top 20 features, lightgbm:
+
+| # | Feature | Mean abs. contribution |
+|---|---|---|
+| 1 | `urls__url_max_length` | 0.949 |
+| 2 | `lexicon__subject_credential_cues` | 0.814 |
+| 3 | `lexicon__body_credential_cues` | 0.618 |
+| 4 | `text__word:list` | 0.439 |
+| 5 | `text__char:ank ` | 0.369 |
+| 6 | `urls__url_max_host_entropy` | 0.359 |
+| 7 | `urls__url_keyword_hits` | 0.331 |
+| 8 | `text__word:your account` | 0.305 |
+| 9 | `text__char: de` | 0.275 |
+| 10 | `headers__hdr_return_path_mismatch` | 0.272 |
+| 11 | `text__char:ccou` | 0.240 |
+| 12 | `text__char:accou` | 0.217 |
+| 13 | `urls__url_anchor_mismatches` | 0.214 |
+| 14 | `attachments__att_count` | 0.204 |
+| 15 | `text__char: © ` | 0.204 |
+| 16 | `text__char:ccoun` | 0.198 |
+| 17 | `text__char:your` | 0.156 |
+| 18 | `lexicon__subject_urgency_cues` | 0.148 |
+| 19 | `text__char: > ` | 0.148 |
+| 20 | `text__char:ank` | 0.146 |
+
+Local explanation of a synthetic phishing email (`SYNTHETIC_EXAMPLE` in `mailguard.models.evaluate`), as the API will return it:
+
+| Model | Probability | Top reasons (log-odds) |
+|---|---|---|
+| logreg | 1.000 | `text__word:account` +0.27, `text__word:your account` +0.22, `text__word:your` +0.21, `text__word:customer` +0.20, `text__word:dear` +0.20 |
+| lightgbm | 1.000 | `lexicon__subject_credential_cues` +1.43, `lexicon__subject_urgency_cues` +1.01, `lexicon__body_credential_cues` +0.88, `urls__url_keyword_hits` +0.52, `urls__url_max_length` -0.50 |
 
 ## Temporal check: phishing from 2020-2025
 
 | Model | Trained up to 2019 | Trained on the main split |
 |---|---|---|
-| lightgbm | 95.3% [94.1, 96.3] on 1800 msg, ham FPR 0.6% [0.0, 2.0] | 98.8% [97.3, 100.0] on 259 msg |
 | logreg | 96.5% [95.6, 97.4] on 1800 msg, ham FPR 1.3% [0.2, 3.0] | 97.7% [95.6, 99.3] on 259 msg |
+| lightgbm | 95.3% [94.1, 96.3] on 1800 msg, ham FPR 0.6% [0.0, 2.0] | 98.8% [97.3, 100.0] on 259 msg |
 
 Both at a 1% ham FPR threshold fixed on validation. The gap is what a model loses on campaigns from years it has never seen.
