@@ -32,6 +32,8 @@ TRUSTED_TYPES: Final = (
     "mailguard.features.text.LexiconFeatures",
     "mailguard.features.text.TextFeatures",
     "mailguard.features.urls.UrlFeatures",
+    "mailguard.models.calibration.CalibratedPipeline",
+    "mailguard.models.calibration.ScoreCalibrator",
 )
 
 

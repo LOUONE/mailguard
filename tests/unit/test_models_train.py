@@ -23,6 +23,7 @@ from mailguard.models.config import (
 )
 from mailguard.models.pipelines import MODEL_NAMES, TRUSTED_TYPES
 from mailguard.models.train import (
+    calibrate,
     feature_summary,
     git_state,
     main,
@@ -56,7 +57,7 @@ def tiny_frame() -> pd.DataFrame:
         if split == "test":
             raw = raw.replace("Lunch", "Zebra").replace("Verify", "Zebra")
         rows.append({"id": f"m{i:02}", "label": label, "target": i % 2, "split": split,
-                     "temporal_split": split, "raw": raw.encode()})  # fmt: skip
+                     "temporal_split": split, "cluster": f"c{i}", "raw": raw.encode()})  # fmt: skip
     return pd.DataFrame(rows)
 
 
@@ -137,6 +138,22 @@ def test_saved_pipelines_load_with_trusted_types_only(name: str) -> None:
 
     assert np.array_equal(scores(pipeline, val), scores(loaded, val))
     assert scores(pipeline, val).shape == (12,)  # saving did not unfit the original
+
+
+@pytest.mark.parametrize("name", MODEL_NAMES)
+def test_calibrate_wraps_the_pipeline_without_changing_its_ranking(name: str) -> None:
+    frame = tiny_frame()
+    pipeline = train_baseline(name, frame, TINY)  # type: ignore[arg-type]
+    val = split_data(frame, "val")
+
+    model, report = calibrate(pipeline, val)
+
+    raw = scores(pipeline, val)
+    assert np.array_equal(model.raw_scores(val.emails), raw)
+    calibrated = scores(model, val)
+    order = np.argsort(raw, kind="stable")
+    assert np.all(np.diff(calibrated[order]) >= -1e-12)  # monotone in the raw score
+    assert {"ece_raw", "cv_log_loss_sigmoid", "cv_log_loss_isotonic"} <= set(report)
 
 
 def test_feature_summary_hides_tfidf_terms() -> None:

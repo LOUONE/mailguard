@@ -1,8 +1,9 @@
 """Train the baselines on the training split and track every run in MLflow.
 
 `train_baseline` takes the whole dataset and selects the training rows itself, so no caller can
-fit a vectoriser on validation or test data by mistake. Each run records its full config, its
-validation metrics, the git commit and the dataset hashes, and registers the fitted pipeline.
+fit a vectoriser on validation or test data by mistake. The fitted pipeline is then calibrated on
+validation (`calibrate`). Each run records its full config, its validation metrics, the git commit
+and the dataset hashes, and registers the calibrated model.
 """
 
 from __future__ import annotations
@@ -24,6 +25,12 @@ from sklearn.pipeline import Pipeline
 
 from mailguard.config import Settings, get_settings
 from mailguard.data.dataset import Split, load_dataset, load_manifest, manifest_hash
+from mailguard.models.calibration import (
+    CalibratedPipeline,
+    ScoreCalibrator,
+    choose_method,
+    expected_calibration_error,
+)
 from mailguard.models.config import DEFAULT_CONFIG, BaselineConfig, flatten, load_config
 from mailguard.models.metrics import validation_metrics
 from mailguard.models.pipelines import MODEL_NAMES, TRUSTED_TYPES, ModelName, build_pipeline
@@ -40,6 +47,7 @@ class SplitData:
     emails: list[Email]
     target: NDArray[np.int64]
     labels: NDArray[np.str_]
+    clusters: list[str]
 
 
 def split_data(frame: pd.DataFrame, split: Split, column: str = "split") -> SplitData:
@@ -48,6 +56,7 @@ def split_data(frame: pd.DataFrame, split: Split, column: str = "split") -> Spli
         emails=[parse_email(raw) for raw in rows["raw"]],
         target=rows["target"].to_numpy(dtype=np.int64),
         labels=rows["label"].to_numpy(dtype=np.str_),
+        clusters=rows["cluster"].astype(str).tolist(),
     )
 
 
@@ -63,9 +72,23 @@ def train_baseline(
     return build_pipeline(name, config).fit(train.emails, train.target)
 
 
-def scores(pipeline: Pipeline, data: SplitData) -> NDArray[np.float64]:
-    proba: NDArray[np.float64] = pipeline.predict_proba(data.emails)[:, 1]
+def scores(model: Pipeline | CalibratedPipeline, data: SplitData) -> NDArray[np.float64]:
+    proba: NDArray[np.float64] = model.predict_proba(data.emails)[:, 1]
     return proba
+
+
+def calibrate(pipeline: Pipeline, val: SplitData) -> tuple[CalibratedPipeline, dict[str, float]]:
+    """Fit a score calibrator on validation, the method chosen by grouped CV on validation."""
+    raw = scores(pipeline, val)
+    method, losses = choose_method(raw, val.target, val.clusters)
+    model = CalibratedPipeline(pipeline, ScoreCalibrator(method).fit(raw, val.target)).fit([])
+    report = {
+        "calibration_isotonic": float(method == "isotonic"),
+        "ece_raw": expected_calibration_error(val.target, raw),
+        **{f"cv_log_loss_{m}": loss for m, loss in losses.items()},
+    }
+    logger.info("calibration: %s (cross-validated log loss %s)", method, losses)
+    return model, report
 
 
 def git_state(cwd: Path | None = None) -> dict[str, str]:
@@ -113,7 +136,7 @@ def model_params(name: ModelName, config: BaselineConfig) -> dict[str, Any]:
 
 def track_run(
     name: ModelName,
-    pipeline: Pipeline,
+    model: Pipeline | CalibratedPipeline,
     config: BaselineConfig,
     metrics: dict[str, float],
     processed_dir: Path,
@@ -147,9 +170,10 @@ def track_run(
         )
         mlflow.log_params(model_params(name, config))
         mlflow.log_metrics({f"val_{k}": v for k, v in metrics.items()})
+        pipeline = model.pipeline if isinstance(model, CalibratedPipeline) else model
         mlflow.log_dict(feature_summary(pipeline), "features.json")
         mlflow.sklearn.log_model(
-            pipeline,
+            model,
             name="model",
             registered_model_name=REGISTERED_PREFIX + name,
             serialization_format="skops",
@@ -193,7 +217,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             metrics["recall_at_1pct_fpr"],
             metrics["recall_at_01pct_fpr"],
         )
+        model, calibration = calibrate(pipeline, val)
+        metrics |= calibration
         if not args.no_tracking:
-            run_id = track_run(name, pipeline, config, metrics, processed, settings)
+            run_id = track_run(name, model, config, metrics, processed, settings)
             logger.info("%s: MLflow run %s", name, run_id)
     return 0

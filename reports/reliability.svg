@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 420" width="480" height="420" role="img" aria-label="Reliability on test">
+<title>Reliability on test</title>
+<style>
+  .surface { fill: #fcfcfb; }
+  .grid { stroke: #e4e3df; stroke-width: 1; }
+  .axis { stroke: #52514e; stroke-width: 1; }
+  .ideal { stroke: #8b8a85; stroke-width: 1.5; stroke-dasharray: 4 4; fill: none; }
+  .text { fill: #0b0b0b; font: 13px system-ui, sans-serif; }
+  .muted { fill: #52514e; font: 12px system-ui, sans-serif; }
+  .s1 { stroke: #2a78d6; fill: #2a78d6; }
+  .s2 { stroke: #eb6834; fill: #eb6834; }
+  path.line, line.line {
+    stroke-width: 2; fill: none; stroke-linejoin: round; stroke-linecap: round;
+  }
+  .dot { stroke: #fcfcfb; stroke-width: 2; }
+  @media (prefers-color-scheme: dark) {
+    .surface { fill: #1a1a19; }
+    .grid { stroke: #3a3a37; }
+    .axis { stroke: #c3c2b7; }
+    .ideal { stroke: #8b8a85; }
+    .text { fill: #f0efec; }
+    .muted { fill: #c3c2b7; }
+    .s1 { stroke: #3987e5; fill: #3987e5; }
+    .s2 { stroke: #d95926; fill: #d95926; }
+    .dot { stroke: #1a1a19; }
+  }
+</style>
+<rect class="surface" width="480" height="420"/>
+<text class="text" x="56" y="22" font-weight="600">Reliability on test</text>
+<line class="grid" x1="56.0" y1="368.0" x2="456.0" y2="368.0"/>
+<line class="grid" x1="56.0" y1="368.0" x2="56.0" y2="64.0"/>
+<text class="muted" x="56.0" y="386.0" text-anchor="middle">0.0</text>
+<text class="muted" x="48.0" y="372.0" text-anchor="end">0.0</text>
+<line class="grid" x1="56.0" y1="307.2" x2="456.0" y2="307.2"/>
+<line class="grid" x1="136.0" y1="368.0" x2="136.0" y2="64.0"/>
+<text class="muted" x="136.0" y="386.0" text-anchor="middle">0.2</text>
+<text class="muted" x="48.0" y="311.2" text-anchor="end">0.2</text>
+<line class="grid" x1="56.0" y1="246.4" x2="456.0" y2="246.4"/>
+<line class="grid" x1="216.0" y1="368.0" x2="216.0" y2="64.0"/>
+<text class="muted" x="216.0" y="386.0" text-anchor="middle">0.4</text>
+<text class="muted" x="48.0" y="250.4" text-anchor="end">0.4</text>
+<line class="grid" x1="56.0" y1="185.6" x2="456.0" y2="185.6"/>
+<line class="grid" x1="296.0" y1="368.0" x2="296.0" y2="64.0"/>
+<text class="muted" x="296.0" y="386.0" text-anchor="middle">0.6</text>
+<text class="muted" x="48.0" y="189.6" text-anchor="end">0.6</text>
+<line class="grid" x1="56.0" y1="124.8" x2="456.0" y2="124.8"/>
+<line class="grid" x1="376.0" y1="368.0" x2="376.0" y2="64.0"/>
+<text class="muted" x="376.0" y="386.0" text-anchor="middle">0.8</text>
+<text class="muted" x="48.0" y="128.8" text-anchor="end">0.8</text>
+<line class="grid" x1="56.0" y1="64.0" x2="456.0" y2="64.0"/>
+<line class="grid" x1="456.0" y1="368.0" x2="456.0" y2="64.0"/>
+<text class="muted" x="456.0" y="386.0" text-anchor="middle">1.0</text>
+<text class="muted" x="48.0" y="68.0" text-anchor="end">1.0</text>
+<line class="axis" x1="56.0" y1="368.0" x2="456.0" y2="368.0"/>
+<line class="axis" x1="56.0" y1="368.0" x2="56.0" y2="64.0"/>
+<path class="ideal" d="M56.0 368.0 L456.0 64.0"/>
+<text class="muted" x="256.0" y="408" text-anchor="middle">Mean predicted probability</text>
+<text class="muted" transform="translate(16 216.0) rotate(-90)" text-anchor="middle">Observed phishing rate</text>
+<path class="s1 line" d="M58.7 364.1 L113.8 281.1 L156.8 297.8 L196.3 246.4 L235.3 266.7 L285.5 124.8 L321.5 114.7 L355.3 64.0 L400.6 77.2 L453.4 67.2"/>
+<circle class="s1 dot" cx="58.7" cy="364.1" r="4.5"/>
+<circle class="s1 dot" cx="113.8" cy="281.1" r="4.5"/>
+<circle class="s1 dot" cx="156.8" cy="297.8" r="4.5"/>
+<circle class="s1 dot" cx="196.3" cy="246.4" r="4.5"/>
+<circle class="s1 dot" cx="235.3" cy="266.7" r="4.5"/>
+<circle class="s1 dot" cx="285.5" cy="124.8" r="4.5"/>
+<circle class="s1 dot" cx="321.5" cy="114.7" r="4.5"/>
+<circle class="s1 dot" cx="355.3" cy="64.0" r="4.5"/>
+<circle class="s1 dot" cx="400.6" cy="77.2" r="4.5"/>
+<circle class="s1 dot" cx="453.4" cy="67.2" r="4.5"/>
+<line class="s1 line" x1="56" y1="38" x2="74" y2="38"/>
+<text class="text" x="80" y="42">logreg</text>
+<path class="s2 line" d="M57.9 365.6 L111.0 311.0 L159.0 254.0 L193.2 317.3 L226.9 266.7 L274.6 64.0 L323.1 140.0 L356.6 281.1 L395.7 174.5 L454.6 65.5"/>
+<circle class="s2 dot" cx="57.9" cy="365.6" r="4.5"/>
+<circle class="s2 dot" cx="111.0" cy="311.0" r="4.5"/>
+<circle class="s2 dot" cx="159.0" cy="254.0" r="4.5"/>
+<circle class="s2 dot" cx="193.2" cy="317.3" r="4.5"/>
+<circle class="s2 dot" cx="226.9" cy="266.7" r="4.5"/>
+<circle class="s2 dot" cx="274.6" cy="64.0" r="4.5"/>
+<circle class="s2 dot" cx="323.1" cy="140.0" r="4.5"/>
+<circle class="s2 dot" cx="356.6" cy="281.1" r="4.5"/>
+<circle class="s2 dot" cx="395.7" cy="174.5" r="4.5"/>
+<circle class="s2 dot" cx="454.6" cy="65.5" r="4.5"/>
+<line class="s2 line" x1="176" y1="38" x2="194" y2="38"/>
+<text class="text" x="200" y="42">lightgbm</text>
+<line class="ideal" x1="296" y1="38" x2="314" y2="38"/>
+<text class="muted" x="320" y="42">perfect calibration</text>
+</svg>

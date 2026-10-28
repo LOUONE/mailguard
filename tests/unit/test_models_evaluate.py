@@ -19,7 +19,7 @@ from mailguard.models.evaluate import (
     render_markdown,
     write_report,
 )
-from mailguard.models.train import track_run, train_baseline
+from mailguard.models.train import calibrate, split_data, track_run, train_baseline
 
 TINY_TEXT = TextConfig(word_max_features=60, char_max_features=60, min_df=1)
 TINY = BaselineConfig(
@@ -59,10 +59,15 @@ def tiny_frame() -> pd.DataFrame:
     return frame
 
 
+def calibrated_models(frame: pd.DataFrame) -> dict:  # type: ignore[type-arg]
+    val = split_data(frame, "val")
+    return {n: calibrate(train_baseline(n, frame, TINY), val)[0] for n in ("logreg", "lightgbm")}
+
+
 @pytest.fixture(scope="module")
 def report() -> dict:  # type: ignore[type-arg]
     frame = tiny_frame()
-    pipelines = {n: train_baseline(n, frame, TINY) for n in ("logreg", "lightgbm")}
+    pipelines = calibrated_models(frame)
     temporal = {n: train_baseline(n, frame, TINY, "temporal_split") for n in ("logreg", "lightgbm")}
     return evaluate(frame, pipelines, temporal, n_boot=50)  # type: ignore[arg-type]
 
@@ -88,11 +93,19 @@ def test_report_has_every_metric_with_an_interval(report: dict) -> None:  # type
         assert 0 <= mcnemar["p_value"] <= 1
     temporal = report["temporal"]["lightgbm"]
     assert temporal["trained_up_to_2019"]["phishing_messages"] > 0
+    for name in ("logreg", "lightgbm"):
+        calibration = report["calibration"][name]
+        assert calibration["method"] in ("sigmoid", "isotonic")
+        for key in ("ece_raw", "ece_calibrated", "brier_raw", "brier_calibrated"):
+            assert set(calibration[key]) == {"estimate", "low", "high"}
+        base_rate = report["base_rate"][name]
+        assert set(base_rate["precision_at_1pct_threshold"]) == {"0.001", "0.005", "0.01", "0.05"}
+        assert base_rate["probability_at_prior"]["0.01"]["0.9"] < 0.9
 
 
 def test_report_is_deterministic(report: dict) -> None:  # type: ignore[type-arg]
     frame = tiny_frame()
-    pipelines = {n: train_baseline(n, frame, TINY) for n in ("logreg", "lightgbm")}
+    pipelines = calibrated_models(frame)
     temporal = {n: train_baseline(n, frame, TINY, "temporal_split") for n in ("logreg", "lightgbm")}
 
     again = evaluate(frame, pipelines, temporal, n_boot=50)  # type: ignore[arg-type]
@@ -101,10 +114,13 @@ def test_report_is_deterministic(report: dict) -> None:  # type: ignore[type-arg
 
 
 def test_markdown_and_json_hold_metrics_only(report: dict, tmp_path: Path) -> None:  # type: ignore[type-arg]
-    json_path, md_path = write_report(report, tmp_path)
+    json_path, md_path, svg_path = write_report(report, tmp_path)
     markdown = md_path.read_text(encoding="utf-8")
 
-    for section in ("1% ham FPR", "0.1% ham FPR", "PR-AUC", "McNemar", "Temporal check"):
+    assert svg_path.name in markdown and svg_path.read_text(encoding="utf-8").startswith("<svg")
+    sections = ("1% ham FPR", "0.1% ham FPR", "PR-AUC", "McNemar", "Temporal check",
+                "Calibration", "real mailbox")  # fmt: skip
+    for section in sections:
         assert section in markdown
     for text in (markdown, json_path.read_text(encoding="utf-8")):
         assert SECRET not in text and "example" not in text
@@ -118,7 +134,9 @@ def test_single_model_report_skips_the_comparison() -> None:
     report = evaluate(frame, pipelines, {}, n_boot=20)  # type: ignore[arg-type]
 
     assert "comparison" not in report and report["temporal"] == {}
+    assert report["calibration"] == {} and report["base_rate"] == {}
     assert "Temporal check" not in render_markdown(report)
+    assert "Calibration" not in render_markdown(report)
 
 
 # --- registry ------------------------------------------------------------------------------
