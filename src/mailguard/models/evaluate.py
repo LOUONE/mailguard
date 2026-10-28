@@ -38,6 +38,7 @@ from mailguard.models.calibration import (
     reliability_table,
 )
 from mailguard.models.config import DEFAULT_CONFIG, BaselineConfig, load_config
+from mailguard.models.explain import contributions, explain, global_importance, group_importance
 from mailguard.models.metrics import FPR_TARGETS, threshold_at_fpr
 from mailguard.models.pipelines import MODEL_NAMES, ModelName
 from mailguard.models.plots import reliability_svg
@@ -61,6 +62,20 @@ RELIABILITY_SVG: Final = "reliability.svg"
 PRODUCTION_PRIORS: Final = (0.001, 0.005, 0.01, 0.05)
 
 type Model = Pipeline | CalibratedPipeline
+
+TOP_FEATURES: Final = 20
+# A made-up message (RFC 2606 domains) whose local explanation goes in the report, so a reader
+# sees what the API will return without any corpus content being published.
+SYNTHETIC_EXAMPLE: Final = b"""\
+From: "PayPal Security" <alerts@secure-paypal-verify.example>
+Reply-To: help@other.example
+Subject: Urgent: verify your account within 24 hours
+Content-Type: text/html
+
+<p>Dear customer, unusual activity was detected and your account is suspended.</p>
+<p>Please <a href="http://198.51.100.23/paypal/login.php?session=8f3a9c2e">www.paypal.com</a>
+to confirm your password and billing information.</p>
+"""
 
 
 @dataclass(frozen=True, slots=True)
@@ -274,6 +289,23 @@ def base_rate_report(
     }
 
 
+def explanation_report(model: CalibratedPipeline, emails: list[Email]) -> dict[str, Any]:
+    """Global feature importance on test, by group and per feature, plus the synthetic example."""
+    c = contributions(model.pipeline, emails)
+    example = parse_email(SYNTHETIC_EXAMPLE)
+    return {
+        "group_share": group_importance(c),
+        "top_features": [
+            {"feature": name, "mean_abs_contribution": value}
+            for name, value in global_importance(c)[:TOP_FEATURES]
+        ],
+        "example": {
+            "probability": float(predict(model, [example])[0]),
+            "reasons": explain(model.pipeline, example, top=5),
+        },
+    }
+
+
 def evaluate(
     frame: pd.DataFrame,
     pipelines: Mapping[ModelName, Model],
@@ -307,6 +339,7 @@ def evaluate(
         n: base_rate_report(test, test_scores[n], thresholds[n]["1pct"], m.calibrator.prior_, boot)
         for n, m in calibrated.items()
     }
+    report["explanations"] = {n: explanation_report(m, test_emails) for n, m in calibrated.items()}
     report["temporal"] = {
         n: temporal_report(
             frame, test, test_scores[n], thresholds[n]["1pct"], temporal_pipelines[n], n_boot
@@ -325,6 +358,48 @@ def _pct(i: Mapping[str, float]) -> str:
 
 def _num(i: Mapping[str, float], digits: int = 4) -> str:
     return f"{i['estimate']:.{digits}f} [{i['low']:.{digits}f}, {i['high']:.{digits}f}]"
+
+
+def _explanation_markdown(report: Mapping[str, Any]) -> list[str]:
+    explanations = report.get("explanations", {})
+    if not explanations:
+        return []
+    groups = sorted({g for e in explanations.values() for g in e["group_share"]})
+    lines = [
+        "## What drives the scores",
+        "",
+        "Mean absolute contribution to the log-odds on test: exact TreeSHAP values for LightGBM, "
+        "coefficient times value for the logistic regression (`mailguard.models.explain`). "
+        "Share of the total by feature group:",
+        "",
+        "| Model | " + " | ".join(groups) + " |",
+        "|---|" + "---|" * len(groups),
+    ]
+    for name, e in explanations.items():
+        cells = [f"{100 * e['group_share'].get(g, 0.0):.1f}%" for g in groups]
+        lines.append(f"| {name} | " + " | ".join(cells) + " |")
+    for name, e in explanations.items():
+        lines += ["", f"Top {len(e['top_features'])} features, {name}:", ""]
+        lines += ["| # | Feature | Mean abs. contribution |", "|---|---|---|"]
+        lines += [
+            f"| {i} | `{f['feature']}` | {f['mean_abs_contribution']:.3f} |"
+            for i, f in enumerate(e["top_features"], start=1)
+        ]
+    lines += [
+        "",
+        "Local explanation of a synthetic phishing email (`SYNTHETIC_EXAMPLE` in "
+        "`mailguard.models.evaluate`), as the API will return it:",
+        "",
+        "| Model | Probability | Top reasons (log-odds) |",
+        "|---|---|---|",
+    ]
+    for name, e in explanations.items():
+        reasons = ", ".join(
+            f"`{r['feature']}` {r['contribution']:+.2f}" for r in e["example"]["reasons"]
+        )
+        lines.append(f"| {name} | {e['example']['probability']:.3f} | {reasons} |")
+    lines.append("")
+    return lines
 
 
 def _calibration_markdown(report: Mapping[str, Any]) -> list[str]:
@@ -456,6 +531,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
             "",
         ]
     lines += _calibration_markdown(report)
+    lines += _explanation_markdown(report)
     if report.get("temporal"):
         lines += [
             "## Temporal check: phishing from 2020-2025",

@@ -472,6 +472,256 @@
       "low": 0.0006162242480650671
     }
   },
+  "explanations": {
+    "lightgbm": {
+      "example": {
+        "probability": 0.99991101947202,
+        "reasons": [
+          {
+            "contribution": 1.4251845904933391,
+            "direction": "phishing",
+            "feature": "lexicon__subject_credential_cues",
+            "group": "lexicon"
+          },
+          {
+            "contribution": 1.0129171506729673,
+            "direction": "phishing",
+            "feature": "lexicon__subject_urgency_cues",
+            "group": "lexicon"
+          },
+          {
+            "contribution": 0.879889966973795,
+            "direction": "phishing",
+            "feature": "lexicon__body_credential_cues",
+            "group": "lexicon"
+          },
+          {
+            "contribution": 0.5178833317911178,
+            "direction": "phishing",
+            "feature": "urls__url_keyword_hits",
+            "group": "urls"
+          },
+          {
+            "contribution": -0.4973192290726682,
+            "direction": "legitimate",
+            "feature": "urls__url_max_length",
+            "group": "urls"
+          }
+        ]
+      },
+      "group_share": {
+        "attachments": 0.011122821612137833,
+        "headers": 0.029494099025830143,
+        "lexicon": 0.0981421834501258,
+        "text": 0.751031436932154,
+        "urls": 0.11020945897975219
+      },
+      "top_features": [
+        {
+          "feature": "urls__url_max_length",
+          "mean_abs_contribution": 0.9489375953062542
+        },
+        {
+          "feature": "lexicon__subject_credential_cues",
+          "mean_abs_contribution": 0.8142965953712993
+        },
+        {
+          "feature": "lexicon__body_credential_cues",
+          "mean_abs_contribution": 0.618265601235405
+        },
+        {
+          "feature": "text__word:list",
+          "mean_abs_contribution": 0.4389648747767005
+        },
+        {
+          "feature": "text__char:ank ",
+          "mean_abs_contribution": 0.3693864613621815
+        },
+        {
+          "feature": "urls__url_max_host_entropy",
+          "mean_abs_contribution": 0.3589060144467478
+        },
+        {
+          "feature": "urls__url_keyword_hits",
+          "mean_abs_contribution": 0.3313266211662099
+        },
+        {
+          "feature": "text__word:your account",
+          "mean_abs_contribution": 0.3045593382608377
+        },
+        {
+          "feature": "text__char: de",
+          "mean_abs_contribution": 0.2746832686452783
+        },
+        {
+          "feature": "headers__hdr_return_path_mismatch",
+          "mean_abs_contribution": 0.2716591092971726
+        },
+        {
+          "feature": "text__char:ccou",
+          "mean_abs_contribution": 0.24033625768196265
+        },
+        {
+          "feature": "text__char:accou",
+          "mean_abs_contribution": 0.2170882135451906
+        },
+        {
+          "feature": "urls__url_anchor_mismatches",
+          "mean_abs_contribution": 0.2141950819214724
+        },
+        {
+          "feature": "attachments__att_count",
+          "mean_abs_contribution": 0.2043143950476218
+        },
+        {
+          "feature": "text__char: \u00a9 ",
+          "mean_abs_contribution": 0.20418856524002277
+        },
+        {
+          "feature": "text__char:ccoun",
+          "mean_abs_contribution": 0.19837923374332544
+        },
+        {
+          "feature": "text__char:your",
+          "mean_abs_contribution": 0.15568557014072468
+        },
+        {
+          "feature": "lexicon__subject_urgency_cues",
+          "mean_abs_contribution": 0.14794635271270432
+        },
+        {
+          "feature": "text__char: > ",
+          "mean_abs_contribution": 0.14765627023466651
+        },
+        {
+          "feature": "text__char:ank",
+          "mean_abs_contribution": 0.14629973537426275
+        }
+      ]
+    },
+    "logreg": {
+      "example": {
+        "probability": 0.9999987639581699,
+        "reasons": [
+          {
+            "contribution": 0.27001962065696716,
+            "direction": "phishing",
+            "feature": "text__word:account",
+            "group": "text"
+          },
+          {
+            "contribution": 0.21801738440990448,
+            "direction": "phishing",
+            "feature": "text__word:your account",
+            "group": "text"
+          },
+          {
+            "contribution": 0.21279817819595337,
+            "direction": "phishing",
+            "feature": "text__word:your",
+            "group": "text"
+          },
+          {
+            "contribution": 0.20178821682929993,
+            "direction": "phishing",
+            "feature": "text__word:customer",
+            "group": "text"
+          },
+          {
+            "contribution": 0.20130744576454163,
+            "direction": "phishing",
+            "feature": "text__word:dear",
+            "group": "text"
+          }
+        ]
+      },
+      "group_share": {
+        "text": 1.0
+      },
+      "top_features": [
+        {
+          "feature": "text__word:the",
+          "mean_abs_contribution": 0.07658065855503082
+        },
+        {
+          "feature": "text__word:account",
+          "mean_abs_contribution": 0.06326420605182648
+        },
+        {
+          "feature": "text__word:your",
+          "mean_abs_contribution": 0.05704202502965927
+        },
+        {
+          "feature": "text__word:urladdress",
+          "mean_abs_contribution": 0.05098940432071686
+        },
+        {
+          "feature": "text__word:is",
+          "mean_abs_contribution": 0.04234403744339943
+        },
+        {
+          "feature": "text__word:to",
+          "mean_abs_contribution": 0.03378497436642647
+        },
+        {
+          "feature": "text__word:of",
+          "mean_abs_contribution": 0.033512648195028305
+        },
+        {
+          "feature": "text__word:and",
+          "mean_abs_contribution": 0.032475635409355164
+        },
+        {
+          "feature": "text__word:your account",
+          "mean_abs_contribution": 0.03239763528108597
+        },
+        {
+          "feature": "text__word:list",
+          "mean_abs_contribution": 0.029365157708525658
+        },
+        {
+          "feature": "text__char: > ",
+          "mean_abs_contribution": 0.028114695101976395
+        },
+        {
+          "feature": "text__word:you",
+          "mean_abs_contribution": 0.02525254152715206
+        },
+        {
+          "feature": "text__char:___",
+          "mean_abs_contribution": 0.024979259818792343
+        },
+        {
+          "feature": "text__char:____",
+          "mean_abs_contribution": 0.024849016219377518
+        },
+        {
+          "feature": "text__char:_____",
+          "mean_abs_contribution": 0.024702081456780434
+        },
+        {
+          "feature": "text__word:on",
+          "mean_abs_contribution": 0.024218613281846046
+        },
+        {
+          "feature": "text__word:that",
+          "mean_abs_contribution": 0.023379698395729065
+        },
+        {
+          "feature": "text__char:the",
+          "mean_abs_contribution": 0.02203254960477352
+        },
+        {
+          "feature": "text__word:emailaddress",
+          "mean_abs_contribution": 0.021707914769649506
+        },
+        {
+          "feature": "text__word:ebay",
+          "mean_abs_contribution": 0.020977290347218513
+        }
+      ]
+    }
+  },
   "models": {
     "lightgbm": {
       "operating_points": {

@@ -101,6 +101,10 @@ def test_report_has_every_metric_with_an_interval(report: dict) -> None:  # type
         base_rate = report["base_rate"][name]
         assert set(base_rate["precision_at_1pct_threshold"]) == {"0.001", "0.005", "0.01", "0.05"}
         assert base_rate["probability_at_prior"]["0.01"]["0.9"] < 0.9
+        explanation = report["explanations"][name]
+        assert sum(explanation["group_share"].values()) == pytest.approx(1.0)
+        assert 0 < len(explanation["top_features"]) <= 20
+        assert 0 <= explanation["example"]["probability"] <= 1
 
 
 def test_report_is_deterministic(report: dict) -> None:  # type: ignore[type-arg]
@@ -119,11 +123,11 @@ def test_markdown_and_json_hold_metrics_only(report: dict, tmp_path: Path) -> No
 
     assert svg_path.name in markdown and svg_path.read_text(encoding="utf-8").startswith("<svg")
     sections = ("1% ham FPR", "0.1% ham FPR", "PR-AUC", "McNemar", "Temporal check",
-                "Calibration", "real mailbox")  # fmt: skip
+                "Calibration", "real mailbox", "What drives the scores")  # fmt: skip
     for section in sections:
         assert section in markdown
     for text in (markdown, json_path.read_text(encoding="utf-8")):
-        assert SECRET not in text and "example" not in text
+        assert SECRET not in text and "example.org" not in text and "evil.example" not in text
     assert render_markdown(report) == markdown
 
 
