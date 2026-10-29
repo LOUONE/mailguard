@@ -1,4 +1,4 @@
-.PHONY: help setup sync data dataset audit train evaluate promote serve openapi mlflow-ui eda lint format test test-unit test-integration coverage pre-commit clean all
+.PHONY: help setup sync data dataset audit train evaluate promote serve openapi demo demo-down mlflow-ui eda lint format test test-unit test-integration coverage pre-commit clean all
 
 help:
 	@echo "mailguard — available targets:"
@@ -12,6 +12,8 @@ help:
 	@echo "  promote         Point the production alias at the latest LightGBM (needs make train)"
 	@echo "  serve           Run the scoring API at http://127.0.0.1:8000/docs (needs make promote)"
 	@echo "  openapi         Regenerate docs/api/openapi.json after a schema change"
+	@echo "  demo            Whole stack in Docker: API, MLflow, Prometheus, Grafana, demo traffic"
+	@echo "  demo-down       Stop the stack (volumes kept; add -v to docker compose down to drop them)"
 	@echo "  mlflow-ui       Browse local MLflow runs at http://127.0.0.1:5000"
 	@echo "  eda          Re-execute notebooks/01_eda.ipynb in place (needs make data)"
 	@echo "  lint            Ruff check + format check + mypy"
@@ -54,6 +56,14 @@ serve:
 
 openapi:
 	uv run python scripts/export_openapi.py
+
+demo:
+	docker compose up --build -d
+	@echo "API http://127.0.0.1:8000/docs  MLflow http://127.0.0.1:5000  Grafana http://127.0.0.1:3000"
+	@echo "First start trains the model (about 5 min): docker compose logs -f bootstrap"
+
+demo-down:
+	docker compose down
 
 mlflow-ui:
 	uv run mlflow ui --backend-store-uri sqlite:///mlruns/mlflow.db

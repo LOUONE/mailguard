@@ -1,0 +1,93 @@
+# The whole system on one machine, without Kubernetes or a cloud account:
+#
+#   make demo        # = docker compose up --build -d
+#
+# First start: `bootstrap` downloads the corpora and trains the models (about 5 minutes); later
+# starts reuse the volumes and take seconds. Then:
+#
+#   API and its docs   http://127.0.0.1:8000/docs
+#   MLflow             http://127.0.0.1:5000
+#   Prometheus         http://127.0.0.1:9090
+#   Grafana            http://127.0.0.1:3000   (dashboard "mailguard", no login)
+#
+# Every port is bound to 127.0.0.1: nothing is exposed to the network.
+
+name: mailguard
+
+x-mailguard: &mailguard
+  image: mailguard:local
+  build:
+    context: .
+    dockerfile: docker/Dockerfile.api
+  volumes:
+    - mlruns:/mlruns
+    - data:/data
+
+services:
+  bootstrap:
+    <<: *mailguard
+    command: ["python", "scripts/bootstrap.py"]
+    restart: "no"
+    healthcheck: { disable: true }  # the image's healthcheck is the API's
+
+  mlflow:
+    <<: *mailguard
+    command:
+      - mlflow
+      - server
+      - --backend-store-uri=sqlite:////mlruns/mlflow.db
+      - --default-artifact-root=/mlruns/artifacts
+      - --host=0.0.0.0
+      - --port=5000
+      - --allowed-hosts=mlflow:5000,localhost:5000,127.0.0.1:5000
+    ports: ["127.0.0.1:5000:5000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    depends_on:
+      bootstrap: { condition: service_completed_successfully }
+
+  api:
+    <<: *mailguard
+    # The registry over HTTP, the artifacts from the shared volume, read-only.
+    environment:
+      MAILGUARD_MLFLOW_TRACKING_URI: http://mlflow:5000
+    volumes:
+      - mlruns:/mlruns:ro
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on:
+      mlflow: { condition: service_healthy }
+
+  traffic:
+    <<: *mailguard
+    command: ["python", "scripts/demo_traffic.py", "--url", "http://api:8000", "--rate", "2"]
+    volumes: []
+    healthcheck: { disable: true }
+    depends_on:
+      api: { condition: service_healthy }
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports: ["127.0.0.1:9090:9090"]
+    depends_on: [api]
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/mailguard.json
+    volumes:
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on: [prometheus]
+
+volumes:
+  mlruns:
+  data:
