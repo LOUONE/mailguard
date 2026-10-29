@@ -22,6 +22,8 @@ min_child_samples = 20
 colsample_bytree = 0.3
 reg_lambda = 1.0
 n_jobs = 4  # fixed: LightGBM is only deterministic for a given thread count
+# An era marker, not a phishing signal: short URLs in 2002 ham (ADR 0006).
+exclude_features = ["url_max_length"]
 
 # Smaller vocabularies: trees split on single columns, so most TF-IDF terms are never used.
 [lightgbm.text]
