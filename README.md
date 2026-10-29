@@ -18,25 +18,31 @@ and why LightGBM was chosen: [model card](docs/model_card.md), [ADR 0005](docs/a
 
 | Baseline | PR-AUC | Recall at 1% ham FPR | Ham FPR measured on test | Recall on 2020-2025 phishing, trained up to 2019 |
 |---|---|---|---|---|
-| Logistic regression, text only | 0.9978 [0.9960, 0.9991] | 97.9% [96.7, 98.9] | 1.1% | 96.5% [95.6, 97.4] |
-| LightGBM, all feature groups but `url_max_length` | 0.9992 [0.9986, 0.9997] | **98.8% [97.9, 99.6]** | 1.0% | **97.6% [96.8, 98.4]** |
+| Logistic regression, text only | 0.9974 [0.9953, 0.9988] | 97.9% [96.8, 98.9] | 1.1% | **96.8% [96.0, 97.6]** |
+| LightGBM, all feature groups but `url_max_length` | 0.9990 [0.9982, 0.9997] | **99.0% [98.1, 99.6]** | 1.1% | 96.1% [95.2, 97.0] |
 
 How to read it:
 
-- Header, URL and attachment features add 0.9 points of recall at 1% FPR (paired interval
-  [0.3, 1.8]), and 3.8 points at the strict threshold [2.6, 5.3].
+- Header, URL and attachment features add 1.1 points of recall at 1% FPR (paired interval
+  [0.4, 1.8]), and 4.0 points at the strict threshold [2.7, 5.4].
 - **0.1% FPR can be neither shown nor ruled out on this data.** One test ham is 0.16% of the
   FPR; proving 0.1% would take about 3,000 ham with none flagged. The strictest threshold
   (no validation ham flagged) still flags 0.8% of test ham (5 messages).
+- **New campaigns cost recall, and the text-only model holds up better.** Trained only on
+  phishing up to 2019, LightGBM loses 2.7 points on 2020-2025 phishing, the logistic regression
+  0.9. This comparison is also the least stable one: its threshold rests on the ham of one
+  validation split, and it moved by over a point when 850 spam messages changed split.
 - **The strongest v0.1.0 feature was an era marker, and it was removed.** `url_max_length`
-  separated 2002 ham from later phishing. Without it ([ADR 0006](docs/adr/0006-drop-url-max-length.md)),
-  LightGBM keeps the same test recall and loses 1.2 points instead of 3.5 on campaigns from
-  years it never saw, at the cost of more spam flagged (6.0% instead of 3.9%).
+  separated 2002 ham from later phishing ([ADR 0006](docs/adr/0006-drop-url-max-length.md),
+  with an update on what the evidence turned out to show).
 - **In a real mailbox, false alarms would be about as frequent as caught phishing.** Out of
   1,000 messages with 1% phishing, LightGBM would catch 9.9 of 10 phishing messages and flag
-  9.5 legitimate ones [0, 27]: the interval rests on six flagged test ham. Probabilities are
-  calibrated (ECE 0.9% on test) and converted to a real base rate with Bayes' rule, so a "90%"
+  11 legitimate ones [2, 27]: the interval rests on seven flagged test ham. Probabilities are
+  calibrated (ECE 0.7% on test) and converted to a real base rate with Bayes' rule, so a "90%"
   in the corpus means 6% in such an inbox.
+- **The Python version is part of the data.** A patch release of CPython decoded 4 spam messages
+  differently and moved 850 of them to another split; the exact version is now pinned
+  ([docs/data.md](docs/data.md#reproducibility)).
 - **Label noise does not change these figures.** 1-3% of the phishing label is wrong in a
   random sample; corrected on both sides, recall moves by about 0.3 points.
 - Scores are near the ceiling because all ham dates from 2002 and phishing from 2004 onwards.
@@ -109,7 +115,7 @@ runs as a non-root user and mounts the model store read-only. `make demo-down` s
 **What the dashboard shows is a real finding, not a demo bug.** About 80% of the demo traffic is
 short, made-up personal mail, and the model labels nearly all of it phishing. 75% of the training
 ham comes from mailing lists, and the model has partly learnt that mail which is not from a list
-is suspicious: on the test split, ham without list headers is flagged 2.7% of the time, against
+is suspicious: on the test split, ham without list headers is flagged 3.4% of the time, against
 0.4% for list mail. The predicted phishing rate panel is exactly where an operator would see such
 a shift. Measured and tracked in [#73](https://github.com/LOUONE/mailguard/issues/73).
 

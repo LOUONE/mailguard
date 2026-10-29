@@ -56,30 +56,30 @@
 <path class="ideal" d="M56.0 368.0 L456.0 64.0"/>
 <text class="muted" x="256.0" y="408" text-anchor="middle">Mean predicted probability</text>
 <text class="muted" transform="translate(16 216.0) rotate(-90)" text-anchor="middle">Observed phishing rate</text>
-<path class="s1 line" d="M58.7 364.1 L113.8 281.1 L156.8 297.8 L196.3 246.4 L235.3 266.7 L285.5 124.8 L321.5 114.7 L355.3 64.0 L400.6 77.2 L453.4 67.2"/>
-<circle class="s1 dot" cx="58.7" cy="364.1" r="4.5"/>
-<circle class="s1 dot" cx="113.8" cy="281.1" r="4.5"/>
-<circle class="s1 dot" cx="156.8" cy="297.8" r="4.5"/>
-<circle class="s1 dot" cx="196.3" cy="246.4" r="4.5"/>
-<circle class="s1 dot" cx="235.3" cy="266.7" r="4.5"/>
-<circle class="s1 dot" cx="285.5" cy="124.8" r="4.5"/>
-<circle class="s1 dot" cx="321.5" cy="114.7" r="4.5"/>
-<circle class="s1 dot" cx="355.3" cy="64.0" r="4.5"/>
-<circle class="s1 dot" cx="400.6" cy="77.2" r="4.5"/>
-<circle class="s1 dot" cx="453.4" cy="67.2" r="4.5"/>
+<path class="s1 line" d="M59.1 363.8 L114.6 295.6 L147.9 266.7 L196.1 266.7 L231.4 185.6 L277.1 165.3 L320.6 281.1 L358.3 64.0 L398.8 64.0 L453.0 67.2"/>
+<circle class="s1 dot" cx="59.1" cy="363.8" r="4.5"/>
+<circle class="s1 dot" cx="114.6" cy="295.6" r="4.5"/>
+<circle class="s1 dot" cx="147.9" cy="266.7" r="4.5"/>
+<circle class="s1 dot" cx="196.1" cy="266.7" r="4.5"/>
+<circle class="s1 dot" cx="231.4" cy="185.6" r="4.5"/>
+<circle class="s1 dot" cx="277.1" cy="165.3" r="4.5"/>
+<circle class="s1 dot" cx="320.6" cy="281.1" r="4.5"/>
+<circle class="s1 dot" cx="358.3" cy="64.0" r="4.5"/>
+<circle class="s1 dot" cx="398.8" cy="64.0" r="4.5"/>
+<circle class="s1 dot" cx="453.0" cy="67.2" r="4.5"/>
 <line class="s1 line" x1="56" y1="38" x2="74" y2="38"/>
 <text class="text" x="80" y="42">logreg</text>
-<path class="s2 line" d="M57.9 365.2 L115.3 292.0 L153.9 237.7 L194.8 292.0 L236.4 64.0 L277.5 281.1 L307.7 266.7 L363.2 266.7 L400.9 157.5 L454.9 66.3"/>
-<circle class="s2 dot" cx="57.9" cy="365.2" r="4.5"/>
-<circle class="s2 dot" cx="115.3" cy="292.0" r="4.5"/>
-<circle class="s2 dot" cx="153.9" cy="237.7" r="4.5"/>
-<circle class="s2 dot" cx="194.8" cy="292.0" r="4.5"/>
-<circle class="s2 dot" cx="236.4" cy="64.0" r="4.5"/>
-<circle class="s2 dot" cx="277.5" cy="281.1" r="4.5"/>
-<circle class="s2 dot" cx="307.7" cy="266.7" r="4.5"/>
-<circle class="s2 dot" cx="363.2" cy="266.7" r="4.5"/>
-<circle class="s2 dot" cx="400.9" cy="157.5" r="4.5"/>
-<circle class="s2 dot" cx="454.9" cy="66.3" r="4.5"/>
+<path class="s2 line" d="M58.0 364.9 L112.4 317.3 L158.0 330.0 L188.4 266.7 L232.7 185.6 L274.6 266.7 L317.1 114.7 L359.6 64.0 L393.4 199.1 L454.1 65.3"/>
+<circle class="s2 dot" cx="58.0" cy="364.9" r="4.5"/>
+<circle class="s2 dot" cx="112.4" cy="317.3" r="4.5"/>
+<circle class="s2 dot" cx="158.0" cy="330.0" r="4.5"/>
+<circle class="s2 dot" cx="188.4" cy="266.7" r="4.5"/>
+<circle class="s2 dot" cx="232.7" cy="185.6" r="4.5"/>
+<circle class="s2 dot" cx="274.6" cy="266.7" r="4.5"/>
+<circle class="s2 dot" cx="317.1" cy="114.7" r="4.5"/>
+<circle class="s2 dot" cx="359.6" cy="64.0" r="4.5"/>
+<circle class="s2 dot" cx="393.4" cy="199.1" r="4.5"/>
+<circle class="s2 dot" cx="454.1" cy="65.3" r="4.5"/>
 <line class="s2 line" x1="176" y1="38" x2="194" y2="38"/>
 <text class="text" x="200" y="42">lightgbm</text>
 <line class="ideal" x1="296" y1="38" x2="314" y2="38"/>

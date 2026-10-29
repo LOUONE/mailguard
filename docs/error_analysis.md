@@ -108,17 +108,18 @@ The 20 features with the largest mean absolute contribution on test (TreeSHAP, i
   70). Modern legitimate mail is full of long tracking URLs, so in a real inbox this feature would
   push ham towards phishing, exactly what the false positives above show. Its effect on modern
   ham cannot be measured without modern ham; what it does to the model can, and the report now
-  includes an ablation:
-  - **On the test split, the model does not need it.** Retrained without it, LightGBM keeps the
-    same recall (98.8%, paired difference +0.1 points [0.0, 0.3]) and PR-AUC, flags one more test
-    ham (6 instead of 5) and 2.1 points more spam [0.7, 3.8].
-  - **On new campaigns, it hurts.** Trained on phishing up to 2019, the model without it catches
-    97.6% [96.8, 98.4] of 2020-2025 phishing instead of 95.3% [94.1, 96.3], and moves above the
-    text-only challenger (96.5%). Part of the gain comes from a looser threshold on that split (ham FPR 1.1% instead
-    of 0.6%, three more messages), so the size of the gain is uncertain; its direction is not.
-  - This is what an era marker looks like: a feature that helps tell 2002 ham from later phishing
-    and nothing else. It was removed from the served model in v0.1.1
-    ([ADR 0006](adr/0006-drop-url-max-length.md)); the report keeps measuring both variants.
+  includes an ablation, run on two splits:
+  - **On the test split, the model does not need it.** Without it, recall at 1% FPR is the same
+    or better: +0.1 points [0.0, 0.3] on the first split, +0.5 [0.2, 0.9] on the reproducible one
+    (v0.1.2). It flags about 2 points more spam on both.
+  - **On new campaigns, the evidence did not hold.** On the first split, the model without it
+    caught 97.6% of 2020-2025 phishing instead of 95.3%; on the reproducible split, 96.1% instead
+    of 96.7%, inside the intervals. That check sets its threshold on the ham of one validation
+    split, and 850 spam messages changing split was enough to reverse it. A single split cannot
+    measure an effect of a couple of points.
+  - The feature still encodes the era of the ham corpus by construction. It was removed from the
+    served model in v0.1.1 ([ADR 0006](adr/0006-drop-url-max-length.md), and its update), and the
+    report keeps measuring both variants.
 - **Mailing-list vocabulary reflects the composition of the ham corpus**, which is mostly mailing
   lists. It is real ham behaviour, not an artefact, but it means the model knows one kind of
   legitimate mail far better than the others (personal mail, transactional mail).

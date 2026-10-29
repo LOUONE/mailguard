@@ -124,8 +124,19 @@ still fixed on held-out ham. A cluster holding any phishing up to 2019 goes to t
 
 **Reproducibility.** The manifest stores the seed, the fractions, the SHA-256 of every source file
 and `assignment_sha256`, a hash of every (message, split, temporal split) triple. Two builds from
-the same files give the same hash (current value starts with `bcb685de8cbe`). Training runs record
-the manifest hash, so a model can always be traced to the exact split it was trained on.
+the same files give the same hash (current value starts with `2b74c87d855f`), on Windows and on
+Linux. Training runs record the manifest hash, so a model can always be traced to the exact split
+it was trained on.
+
+**The Python version is part of the data.** The first Docker build gave a different hash from
+the same files: CPython 3.14.10 in the image, 3.14.2 on the development machine. The standard
+library's `email` package decoded 4 spam messages differently between the two patch releases
+(one body came out 180 characters long, the other 404), so 4 dedup fingerprints changed. And
+because each stratum is shuffled as a whole before its clusters are placed, those 4 changed
+fingerprints moved 850 spam messages to another split. The exact version is now pinned in
+`.python-version` (3.14.8), read by uv locally and in CI and checked by the Docker build, and the
+manifest records the version it was built with. 3.14.8 and 3.14.10 give the same hash; 3.14.2
+does not.
 
 ## Reproducing
 
