@@ -19,6 +19,7 @@ import hashlib
 import json
 import logging
 import math
+import platform
 import random
 import re
 from collections import Counter, defaultdict
@@ -241,6 +242,10 @@ def build_manifest(
     crossing = set(frame.loc[past, "cluster"]) & set(frame.loc[future, "cluster"])
     return {
         "rows": len(frame),
+        # The stdlib email parser changes between CPython patch releases, and with it some
+        # dedup fingerprints and the split: the version is pinned in .python-version, and
+        # recorded here so that two manifests can tell why they differ.
+        "python": platform.python_version(),
         "seed": seed,
         "fractions": dict(fractions),
         "temporal_cutoff": TEMPORAL_CUTOFF,
