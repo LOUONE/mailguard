@@ -1,0 +1,61 @@
+# One image for every role of the stack: the API (default command), the MLflow server, the
+# bootstrap that downloads the corpora and trains a model, and the demo traffic generator.
+#
+#   docker build -f docker/Dockerfile.api -t mailguard .
+#
+# Two stages: uv resolves and installs the locked environment in the first; the second copies
+# only the virtual environment and the code, without uv, compilers or caches.
+
+FROM python:3.14-slim AS build
+
+COPY --from=ghcr.io/astral-sh/uv:0.13.1 /uv /bin/uv
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PROJECT_ENVIRONMENT=/app/.venv
+WORKDIR /app
+
+# Dependencies first, in their own layer: code changes do not reinstall them.
+COPY pyproject.toml uv.lock README.md ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-install-project
+COPY src ./src
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-editable
+
+
+FROM python:3.14-slim
+
+# LightGBM's Linux wheel links against the GNU OpenMP runtime.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# A fixed, unprivileged user. /data and /mlruns are created here with its ownership, so that
+# named volumes mounted there start writable by it.
+RUN useradd --system --uid 10001 --user-group --no-create-home mailguard \
+    && mkdir -p /data /mlruns \
+    && chown mailguard:mailguard /data /mlruns
+
+WORKDIR /app
+COPY --from=build /app/.venv /app/.venv
+COPY configs ./configs
+COPY scripts ./scripts
+
+ENV PATH=/app/.venv/bin:$PATH \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    MLFLOW_DISABLE_AGENT_HINT=1 \
+    MAILGUARD_DATA_DIR=/data \
+    MAILGUARD_MLFLOW_TRACKING_URI=sqlite:////mlruns/mlflow.db \
+    MAILGUARD_MLFLOW_ARTIFACT_DIR=/mlruns/artifacts
+
+USER mailguard
+EXPOSE 8000
+
+# Healthy only when a model is loaded: /health answers 503 otherwise.
+HEALTHCHECK --interval=10s --timeout=3s --start-period=60s --retries=3 \
+    CMD ["python", "-c", "import sys, urllib.request; sys.exit(urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).status != 200)"]
+
+CMD ["uvicorn", "--factory", "mailguard.serving.app:create_app", \
+     "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
