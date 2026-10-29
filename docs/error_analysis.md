@@ -7,8 +7,9 @@ committed.
 
 ## Method
 
-- Model: registered `mailguard-lightgbm` (calibrated), at the 1% operating point, i.e. the
-  threshold that flags 1% of validation ham.
+- Model: registered `mailguard-lightgbm` v0.1.0 (calibrated, still with `url_max_length`), at
+  the 1% operating point, i.e. the threshold that flags 1% of validation ham. The label audit
+  and the slices were run later and say which version they measure.
 - Errors: every false positive and false negative on the validation and test splits (test alone
   holds too few for a taxonomy: 5 ham and 11 spam false positives, 15 false negatives).
 - Each message was read and given one category, with the features that pushed it most
@@ -60,7 +61,7 @@ committed.
   with little English (78), helped by subject, attachment and header features. Its recall is
   lowest on messages of 100 words or more (98.5% [97.1, 99.6]), where junk or encyclopedia text
   buries a short lure. The slices also show where false alarms come from: no test ham of 100
-  words or more is flagged; every flagged ham is shorter.
+  words or more was flagged by v0.1.0, and 1 of 394 by v0.1.1; all the others are shorter.
 
 ## Label audit: a random sample of phishing
 
@@ -116,9 +117,8 @@ The 20 features with the largest mean absolute contribution on test (TreeSHAP, i
     text-only challenger (96.5%). Part of the gain comes from a looser threshold on that split (ham FPR 1.1% instead
     of 0.6%, three more messages), so the size of the gain is uncertain; its direction is not.
   - This is what an era marker looks like: a feature that helps tell 2002 ham from later phishing
-    and nothing else. Removing it from the served model is a model change and gets its own
-    decision record; until then it stays listed as the first limitation in the model card and is
-    watched by the drift report in Phase 2 (#38).
+    and nothing else. It was removed from the served model in v0.1.1
+    ([ADR 0006](adr/0006-drop-url-max-length.md)); the report keeps measuring both variants.
 - **Mailing-list vocabulary reflects the composition of the ham corpus**, which is mostly mailing
   lists. It is real ham behaviour, not an artefact, but it means the model knows one kind of
   legitimate mail far better than the others (personal mail, transactional mail).

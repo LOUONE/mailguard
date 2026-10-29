@@ -1,8 +1,14 @@
-# Model card: mailguard-lightgbm v0.1.0
+# Model card: mailguard-lightgbm v0.1.1
 
-The phishing classifier behind mailguard, as of release `v0.1.0`. Every metric on this page comes
+The phishing classifier behind mailguard, as of release `v0.1.1`. Every metric on this page comes
 from [`reports/evaluation.md`](../reports/evaluation.md), which `make evaluate` regenerates
 byte for byte; brackets are 95% intervals from a bootstrap over duplicate clusters.
+
+**Changes since v0.1.0.** `url_max_length`, an era marker, is left out of the model
+([ADR 0006](adr/0006-drop-url-max-length.md)). Same recall at 1% FPR; recall at the strict
+threshold rises from 96.4% to 98.3%, and on unseen 2020-2025 campaigns from 95.3% to 97.6%; spam
+flagged rises from 3.9% to 6.0%. The calibrated operating thresholds are now recorded on the
+registered model version, for the API.
 
 ## Model details
 
@@ -10,9 +16,11 @@ byte for byte; brackets are 95% intervals from a bootstrap over duplicate cluste
   URL and lexicon features plus word and character TF-IDF on the visible body text, a LightGBM
   classifier, and a sigmoid calibration fitted on validation. Registered in MLflow as
   `mailguard-lightgbm`, saved with skops (loading never runs code, [ADR 0003](adr/0003-model-serialisation.md)).
-- **Why this model.** Best recall at both operating points, best calibration, structured
-  explanations; a text-only logistic regression is kept as a challenger because it holds up
-  better on new campaigns ([ADR 0005](adr/0005-model-choice.md)).
+  Its version tags hold the calibrated threshold of each operating point (`threshold_1pct`,
+  `threshold_01pct`).
+- **Why this model.** Best recall at both operating points and on new campaigns, structured
+  explanations; a text-only logistic regression is kept as a challenger
+  ([ADR 0005](adr/0005-model-choice.md)).
 - **Inputs.** One raw RFC 5322 message. Only five headers are read (`From`, `Reply-To`,
   `Return-Path`, `Message-ID`, `Date` presence), plus attachment metadata, URLs and the visible
   body text, cut at 20,000 characters ([features](features.md)).
@@ -49,60 +57,62 @@ Thresholds are fixed on validation ham, then applied to test as they are.
 
 | Metric | Value |
 |---|---|
-| Recall at the 1% ham-FPR threshold | **98.8% [97.8, 99.5]** |
+| Recall at the 1% ham-FPR threshold | **98.8% [97.9, 99.6]** |
+| Ham FPR measured on test at that threshold | 1.0% [0.0, 2.7] (6 messages) |
+| Spam flagged at that threshold | 6.0% [3.3, 9.2] |
+| Recall at the strict threshold (0.1% target: no validation ham flagged) | 98.3% [97.3, 99.2] |
 | Ham FPR measured on test at that threshold | 0.8% [0.0, 2.4] (5 messages) |
-| Spam flagged at that threshold | 3.9% [1.5, 6.6] |
-| Recall at the strict threshold (0.1% target: no validation ham flagged) | 96.4% [95.0, 97.6] |
-| Ham FPR measured on test at that threshold | 0.6% [0.0, 2.0] (4 messages) |
-| PR-AUC (depends on the 57% prior; for comparison only) | 0.9993 [0.9985, 0.9998] |
+| PR-AUC (depends on the 57% prior; for comparison only) | 0.9992 [0.9986, 0.9997] |
 
 **What 622 test ham can measure.** One ham message is 0.16% of the FPR, so every FPR above is a
 count of a handful of messages. A 0.1% FPR can be neither shown nor ruled out: proving it would
 take about 3,000 test ham with none flagged (rule of three). The strict threshold is therefore a
-stricter setting with a measured 0.6% FPR, not a 0.1% operating point.
+stricter setting with a measured 0.8% FPR, not a 0.1% operating point.
 
-**By phishing era**, at the 1% threshold: 98.4% [96.8, 99.5] on 2004-2007 phishing and
+**By phishing era**, at the 1% threshold: 98.5% [97.1, 99.7] on 2004-2007 phishing and
 99.2% [98.1, 100.0] on 2015-2025 phishing.
 
-**Against the text-only challenger**, paired: +0.8 points of recall at 1% FPR [0.2, 1.7],
-McNemar p = 0.061; +1.8 points at the 0.1% threshold [0.4, 3.3], p = 0.00064.
+**Against the text-only challenger**, paired: +0.9 points of recall at 1% FPR [0.3, 1.8],
+McNemar p = 0.46; +3.8 points at the strict threshold [2.6, 5.3], p = 2.4e-9.
 
 **New campaigns.** Retrained on phishing up to 2019 only, the same model catches
-**95.3% [94.1, 96.3]** of 1,800 phishing messages from 2020-2025, against 98.8% [97.3, 100.0]
-when 2020-2025 campaigns are in its training data: it loses 3.5 points on years it has never
-seen (the challenger loses 1.2).
+**97.6% [96.8, 98.4]** of 1,800 phishing messages from 2020-2025, against 98.8% [97.3, 100.0]
+when 2020-2025 campaigns are in its training data: it loses 1.2 points on years it has never
+seen, as the challenger does (96.5%). With `url_max_length` (v0.1.0) it lost 3.5.
 
 ## Calibration and base rate
 
 Sigmoid calibration, chosen over isotonic by cross-validated log loss on validation. On test, ECE
-goes from 1.0% [0.5, 1.8] to **0.7% [0.5, 1.6]**, Brier score from 0.0124 to 0.0120; the
+goes from 1.1% [0.6, 2.0] to **0.9% [0.5, 1.7]**, Brier score from 0.0138 to 0.0136; the
 reliability diagram is in the report.
 
 Probabilities hold at the corpus base rate of 57% phishing. In a mailbox where 1% of mail is
 phishing, out of 1,000 messages (10 phishing, 990 ham), the 1% operating point would:
 
 - catch **9.9** of the 10 phishing messages;
-- flag **8.0 [0.0, 23.6]** legitimate messages, so a precision of 55.4% [29.6, 100.0]. The
-  interval is wide because it rests on five flagged test ham: between no false alarm and more
-  than two per phishing message caught. At 0.1% phishing, precision falls to 11.0%;
+- flag **9.5 [0.0, 26.8]** legitimate messages, so a precision of 50.9% [27.1, 100.0]. The
+  interval is wide because it rests on six flagged test ham: between no false alarm and more
+  than two per phishing message caught. At 0.1% phishing, precision falls to 9.3%;
 - turn a corpus probability of 0.9 into **0.064**, and 0.99 into 0.429
   (`mailguard.models.calibration.adjust_prior`, Bayes' rule on the odds).
 
-Spam is left out of these counts: it would add false alarms of the cheaper kind (3.9% of spam is
+Spam is left out of these counts: it would add false alarms of the cheaper kind (6.0% of spam is
 flagged), in a proportion that depends on the spam filter in front of the model.
 
 The serving layer must apply the base rate of its own mailbox before showing a probability.
 
 ## Explanations
 
-On test, 75.1% of the model's mean absolute contribution comes from text, 11.0% from URLs, 9.8%
-from the lexicon, 2.9% from headers and 1.1% from attachments. The top features and a local
+On test, 76.7% of the model's mean absolute contribution comes from text, 9.7% from the lexicon,
+9.3% from URLs, 3.2% from headers and 1.1% from attachments. The strongest features are now
+credential cues in the subject and body, login words in URLs and host entropy. The top features and a local
 explanation of a synthetic email are in the report; the leakage check of the top 20 is in
 [`docs/error_analysis.md`](error_analysis.md#last-leakage-check).
 
 ## Error analysis
 
-From the [error taxonomy](error_analysis.md) (validation and test, 1% threshold):
+From the [error taxonomy](error_analysis.md) (validation and test, 1% threshold). The taxonomy
+was read on the v0.1.0 model; the slices below are those of v0.1.1.
 
 - **False positives (24: 7 ham, 17 spam).** Mostly spam taken for phishing, the cheaper error.
   The ham errors are notifications with very long tracking URLs, a commercial email about account
@@ -113,7 +123,8 @@ From the [error taxonomy](error_analysis.md) (validation and test, 1% threshold)
   image.
 - **Slices.** Short and non-English phishing is not the weak spot: every test phishing message
   under 20 words or with little English is caught. Recall is lowest on long, padded messages
-  (98.5% at 100 words or more), and every flagged test ham is under 100 words.
+  (98.5% at 100 words or more), and false alarms fall on short ham: 2-4% of ham under 100 words
+  is flagged, against 1 of 394 longer ones.
 - **Label noise.** In a random sample of 100 test phishing messages, 1 to 3 are not phishing,
   and all 100 were flagged: the noise sits among detections as well as misses. Corrected on both
   sides, recall would be about 99.1% instead of 98.8%, inside the interval, so the measured
@@ -127,7 +138,7 @@ leaves the model:
 | Risk | Effect on this model |
 |---|---|
 | **No modern ham.** All ham is from 2002. | The largest one. Every false-positive figure is measured on 2002 mailing-list and personal mail; modern newsletters, transactional mail and SaaS notifications are untested. Treat the FPR as optimistic. |
-| **URL length as an era marker** (found by the leakage check) | `url_max_length` is the strongest feature: short URLs in 2002 ham, long ones in phishing. Modern ham with long tracking URLs is exactly what the ham false positives look like. The ablation in the report confirms it: without it, recall on the test split is unchanged, and recall on unseen 2020-2025 campaigns rises from 95.3% to 97.6% (with a slightly looser threshold), at the cost of 2.1 points more spam flagged. Removal is a candidate model change; until then it is monitored in production (#38). |
+| **URL length as an era marker** (found by the leakage check) | `url_max_length` was the strongest v0.1.0 feature: short URLs in 2002 ham, long ones in phishing. Removed in v0.1.1 ([ADR 0006](adr/0006-drop-url-max-length.md)) after an ablation: same test recall, 97.6% instead of 95.3% on unseen campaigns, 2.1 points more spam flagged. Other URL features may still carry era signal; the drift report watches them (#38). |
 | **Era gap** between ham (2002) and phishing (2004-2025) | No date or HTML features; text read the same way for plain text and HTML; digits scrubbed; era leakage audited. URL features still encode the era (audit AUC 0.950), measured by the temporal check. |
 | **Source artefacts in headers** | Five allowlisted headers; corpus domains treated as unknown; two collection artefacts removed after an audit (`Received` hops, recipient count). None in the top 20 features. |
 | **Authentication headers** exist only in recent phishing | SPF / DKIM / DMARC are parsed but not used by the model; the agent uses them on live mail. The model therefore ignores a strong real-world signal. |
