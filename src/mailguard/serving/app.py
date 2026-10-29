@@ -33,6 +33,7 @@ from starlette.concurrency import run_in_threadpool
 from mailguard import __version__
 from mailguard.config import Settings, get_settings
 from mailguard.monitoring.logs import configure_logging
+from mailguard.monitoring.metrics import CONTENT_TYPE, Metrics
 from mailguard.parsing import parse_email
 from mailguard.serving import errors
 from mailguard.serving.access import RequestLog
@@ -65,6 +66,7 @@ def _errors(*codes: int) -> dict[int | str, dict[str, Any]]:
 def create_app(settings: Settings | None = None, loader: Loader = load_production) -> FastAPI:
     settings = settings or get_settings()
     configure_logging(settings.log_level, json=settings.log_json)
+    metrics = Metrics()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -72,6 +74,7 @@ def create_app(settings: Settings | None = None, loader: Loader = load_productio
         try:
             model = await run_in_threadpool(loader, settings)
             app.state.model = model
+            metrics.model(model.name, model.version, model.operating_point, model.threshold)
             log.info("model_loaded", model=model.name, model_version=model.version)
         except Exception as exc:  # any failure must leave the API up, and not ready
             app.state.load_error = f"{type(exc).__name__}: {exc}"
@@ -88,7 +91,9 @@ def create_app(settings: Settings | None = None, loader: Loader = load_productio
     app.add_middleware(
         RequestLimits, max_body_bytes=settings.max_email_bytes * 4 // 3 + JSON_OVERHEAD
     )
-    app.add_middleware(RequestLog)  # added last, so it is the outermost: it sees everything
+    # Added last, so it is the outermost: it sees every request, even refused ones.
+    app.add_middleware(RequestLog, metrics=metrics)
+    app.state.metrics = metrics
 
     def served(request: Request) -> ServedModel:
         model: ServedModel | None = request.app.state.model
@@ -104,6 +109,11 @@ def create_app(settings: Settings | None = None, loader: Loader = load_productio
             response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
             return Health(status="unavailable", detail=request.app.state.load_error)
         return Health(status="ok", model=model.ref)
+
+    @app.get("/metrics", include_in_schema=False)
+    async def prometheus() -> Response:
+        """Prometheus scrape endpoint (text exposition format)."""
+        return Response(metrics.render(), media_type=CONTENT_TYPE)
 
     @app.post("/v1/predict", responses=_errors(413, 422, 500, 503))
     async def predict(body: PredictRequest, request: Request) -> PredictResponse:
@@ -128,8 +138,10 @@ def create_app(settings: Settings | None = None, loader: Loader = load_productio
                 f"scoring took over {settings.scoring_timeout_s} s",
             ) from None
         label = "phishing" if result.is_phishing else "legitimate"
+        seconds = time.perf_counter() - start
+        metrics.prediction(label, result.score, seconds, len(raw))
         request.state.log |= {
-            "scoring_ms": round(1000 * (time.perf_counter() - start), 2),
+            "scoring_ms": round(1000 * seconds, 2),
             "label": label,
             "score": round(result.score, 4),
             "model_version": model.version,
