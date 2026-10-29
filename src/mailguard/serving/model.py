@@ -6,9 +6,13 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any, Final
 
+import numpy as np
+from numpy.typing import NDArray
+from sklearn.pipeline import Pipeline
+
 from mailguard.config import Settings
 from mailguard.models.calibration import CalibratedPipeline, adjust_prior
-from mailguard.models.explain import explain
+from mailguard.models.explain import contributions_of, feature_names, top_reasons
 from mailguard.models.registry import aliased_version, load_version
 from mailguard.parsing import Email
 from mailguard.serving.schemas import ModelRef
@@ -31,12 +35,17 @@ class ServedModel:
     model: CalibratedPipeline
     thresholds: Mapping[str, float]
     operating_point: str = "1pct"
+    # Computed once at load: rebuilding tens of thousands of n-gram names was 38% of a request.
+    names: NDArray[np.str_] = field(init=False, repr=False)
+    features: Pipeline = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         if self.operating_point not in self.thresholds:
             raise LookupError(
                 f"{self.name} v{self.version} has no threshold for {self.operating_point}"
             )
+        object.__setattr__(self, "names", feature_names(self.model.pipeline))
+        object.__setattr__(self, "features", self.model.pipeline[:-1])
 
     @property
     def threshold(self) -> float:
@@ -52,11 +61,27 @@ class ServedModel:
         )
 
     def predict(self, email: Email, base_rate: float) -> Prediction:
-        """Score one email. The label uses the FPR threshold, which `base_rate` does not move."""
-        score = float(self.model.predict_proba([email])[0, 1])
+        """Score and explain one email in a single pass over the features.
+
+        `predict_proba` then `explain` computed the features twice and called the model twice.
+        Here the features are computed once. For LightGBM the TreeSHAP contributions add up to
+        the model's own margin, so one call gives the score and its reasons; the linear model
+        computes its margin in float32, which the float64 contributions do not reproduce to the
+        last digit, so its score comes from its own (cheap) `predict_proba`. Either way the score
+        is exactly the evaluated model's. The label uses the FPR threshold, which `base_rate`
+        does not move.
+        """
+        features = self.features.transform([email])
+        classifier = self.model.pipeline[-1]
+        c = contributions_of(classifier, features, self.names)
+        raw = (
+            c.probability
+            if hasattr(classifier, "booster_")
+            else classifier.predict_proba(features)[:, 1]
+        )
+        score = float(self.model.calibrator.transform(raw)[0])
         probability = float(adjust_prior(score, self.model.calibrator.prior_, base_rate))
-        reasons = explain(self.model.pipeline, email, top=TOP_REASONS)
-        return Prediction(score, probability, score > self.threshold, reasons)
+        return Prediction(score, probability, score > self.threshold, top_reasons(c, TOP_REASONS))
 
 
 def load_production(settings: Settings) -> ServedModel:

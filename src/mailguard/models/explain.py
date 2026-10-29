@@ -34,19 +34,39 @@ class Contributions:
     bias: NDArray[np.float64]  # one value per email
     names: NDArray[np.str_]
 
+    @property
+    def margin(self) -> NDArray[np.float64]:
+        """The model's raw log-odds, one per email: bias plus every contribution."""
+        return self.bias + np.asarray(self.values.sum(axis=1)).ravel()
 
-def contributions(pipeline: Pipeline, emails: Sequence[Email]) -> Contributions:
-    """Additive log-odds contributions of every feature, for every email."""
-    features = pipeline[:-1].transform(emails)
-    names = np.asarray(pipeline[:-1].get_feature_names_out(), dtype=np.str_)
-    classifier = pipeline[-1]
+    @property
+    def probability(self) -> NDArray[np.float64]:
+        """The pipeline's own probability (both models are logistic in their margin)."""
+        return 1 / (1 + np.exp(-self.margin))
+
+
+def feature_names(pipeline: Pipeline) -> NDArray[np.str_]:
+    """Names of every column the classifier sees. Tens of thousands: compute them once."""
+    return np.asarray(pipeline[:-1].get_feature_names_out(), dtype=np.str_)
+
+
+def contributions_of(classifier: Any, features: Any, names: NDArray[np.str_]) -> Contributions:
+    """Contributions from an already computed feature matrix."""
     if hasattr(classifier, "booster_"):  # LightGBM
         raw = sp.csr_matrix(classifier.booster_.predict(features, pred_contrib=True))
         values, bias = raw[:, :-1], raw[:, -1].toarray().ravel()
     else:  # linear model
-        values = sp.csr_matrix(features).multiply(classifier.coef_[0]).tocsr()
+        # float64 first: the TF-IDF matrix is float32, and summing contributions in float32
+        # drifts from the classifier's own margin in the sixth decimal.
+        values = sp.csr_matrix(features, dtype=np.float64).multiply(classifier.coef_[0]).tocsr()
         bias = np.full(features.shape[0], float(classifier.intercept_[0]))
     return Contributions(sp.csr_matrix(values), bias.astype(np.float64), names)
+
+
+def contributions(pipeline: Pipeline, emails: Sequence[Email]) -> Contributions:
+    """Additive log-odds contributions of every feature, for every email."""
+    features = pipeline[:-1].transform(emails)
+    return contributions_of(pipeline[-1], features, feature_names(pipeline))
 
 
 def group_of(name: str) -> str:
@@ -69,18 +89,27 @@ def group_importance(c: Contributions) -> dict[str, float]:
     return {g: v / grand for g, v in sorted(totals.items())} if grand else {}
 
 
-def explain(pipeline: Pipeline, email: Email, top: int = 5) -> list[dict[str, Any]]:
-    """The `top` features that moved one email's score most, with their direction."""
-    c = contributions(pipeline, [email])
-    row = c.values.toarray().ravel()
-    order = np.argsort(-np.abs(row), kind="stable")[:top]
+def top_reasons(c: Contributions, top: int = 5, row: int = 0) -> list[dict[str, Any]]:
+    """The `top` features that moved one email's score most, with their direction.
+
+    Works on the sparse row directly: an email has a few hundred non-zero contributions out of
+    tens of thousands of columns. Ties go to the lower column, as a stable dense sort would.
+    """
+    sparse = c.values.getrow(row)
+    keep = sparse.data != 0
+    columns, values = sparse.indices[keep], sparse.data[keep]
+    order = np.lexsort((columns, -np.abs(values)))[:top]
     return [
         {
-            "feature": str(c.names[i]),
-            "group": group_of(str(c.names[i])),
-            "contribution": float(row[i]),
-            "direction": "phishing" if row[i] > 0 else "legitimate",
+            "feature": str(c.names[columns[i]]),
+            "group": group_of(str(c.names[columns[i]])),
+            "contribution": float(values[i]),
+            "direction": "phishing" if values[i] > 0 else "legitimate",
         }
         for i in order
-        if row[i] != 0
     ]
+
+
+def explain(pipeline: Pipeline, email: Email, top: int = 5) -> list[dict[str, Any]]:
+    """The `top` features that moved one email's score most, with their direction."""
+    return top_reasons(contributions(pipeline, [email]), top)
