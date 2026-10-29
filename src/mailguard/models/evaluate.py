@@ -386,34 +386,45 @@ def ablation_report(
     test: Rows,
     emails: tuple[list[Email], list[Email]],
     reference: tuple[NDArray[np.float64], float],
-    ablated: tuple[Pipeline, Pipeline],
+    variant: tuple[Pipeline, Pipeline],
+    served_has_feature: bool,
     boot: ClusterBootstrap,
     n_boot: int,
 ) -> dict[str, Any]:
-    """LightGBM retrained without `ABLATED_FEATURE`, paired against the registered LightGBM.
+    """LightGBM with and without `ABLATED_FEATURE`, the served model against its variant.
 
-    `emails` are the validation and test emails, `reference` the registered model's test scores
-    and 1% threshold, `ablated` the pipelines trained without the feature on the main and on the
-    temporal split. Differences are ablated minus reference.
+    `emails` are the validation and test emails, `reference` the served model's test scores and
+    1% threshold, `variant` the same configuration with the feature toggled, trained on the main
+    and on the temporal split. Differences are always without minus with, whichever is served.
     """
-    pipeline, temporal_pipeline = ablated
+    pipeline, temporal_pipeline = variant
     val_scores, test_scores = predict(pipeline, emails[0]), predict(pipeline, emails[1])
     thresholds = val_thresholds(val, val_scores)
-    flag_ref, flag_new = reference[0] > reference[1], test_scores > thresholds["1pct"]
+    served = (reference[0], reference[0] > reference[1])
+    other = (test_scores, test_scores > thresholds["1pct"])
+    (with_scores, with_flags), (without_scores, without_flags) = (
+        (served, other) if served_has_feature else (other, served)
+    )
     target = test.target
     return {
         "feature": ABLATED_FEATURE,
+        "served_has_feature": served_has_feature,
         "model": model_report(test, test_scores, thresholds, boot),
         "difference": {
             "pr_auc": boot.interval(
                 lambda w: (
-                    weighted_pr_auc(target, test_scores, w)
-                    - weighted_pr_auc(target, reference[0], w)
+                    weighted_pr_auc(target, without_scores, w)
+                    - weighted_pr_auc(target, with_scores, w)
                 )
             ).as_dict(),
-            "recall": rate_difference(boot, flag_ref, flag_new, test.is_label("phishing")),
-            "ham_fpr": rate_difference(boot, flag_ref, flag_new, test.is_label("ham")),
-            "spam_fpr": rate_difference(boot, flag_ref, flag_new, test.is_label("spam")),
+            **{
+                name: rate_difference(boot, with_flags, without_flags, test.is_label(label))
+                for name, label in (
+                    ("recall", "phishing"),
+                    ("ham_fpr", "ham"),
+                    ("spam_fpr", "spam"),
+                )
+            },
         },
         "temporal": temporal_report(
             frame, test, test_scores, thresholds["1pct"], temporal_pipeline, n_boot
@@ -426,9 +437,14 @@ def evaluate(
     pipelines: Mapping[ModelName, Model],
     temporal_pipelines: Mapping[ModelName, Pipeline],
     n_boot: int = N_BOOT,
-    ablated: tuple[Pipeline, Pipeline] | None = None,
+    variant: tuple[Pipeline, Pipeline] | None = None,
+    served_has_feature: bool = True,
 ) -> dict[str, Any]:
-    """The whole report. `ablated`: LightGBM without `ABLATED_FEATURE`, main and temporal."""
+    """The whole report.
+
+    `variant`: LightGBM with `ABLATED_FEATURE` toggled, trained on the main and temporal splits;
+    `served_has_feature` says whether the served LightGBM uses it.
+    """
     val, test = Rows.of(frame, "split", "val"), Rows.of(frame, "split", "test")
     val_emails, test_emails = parse_rows(val), parse_rows(test)
     val_scores = {n: predict(p, val_emails) for n, p in pipelines.items()}
@@ -465,14 +481,15 @@ def evaluate(
         )
         for n in temporal_pipelines
     }
-    if ablated is not None and "lightgbm" in pipelines and "lightgbm" in temporal_pipelines:
+    if variant is not None and "lightgbm" in pipelines and "lightgbm" in temporal_pipelines:
         report["ablation"] = ablation_report(
             frame,
             val,
             test,
             (val_emails, test_emails),
             (test_scores["lightgbm"], thresholds["lightgbm"]["1pct"]),
-            ablated,
+            variant,
+            served_has_feature,
             boot,
             n_boot,
         )
@@ -570,7 +587,21 @@ def _ablation_markdown(report: Mapping[str, Any]) -> list[str]:
     if "ablation" not in report:
         return []
     a = report["ablation"]
-    feature, d = a["feature"], a["difference"]
+    feature, d, served_has = a["feature"], a["difference"], a["served_has_feature"]
+    served = (report["models"]["lightgbm"], report["temporal"]["lightgbm"])
+    other = (a["model"], a["temporal"])
+    with_feature, without_feature = (served, other) if served_has else (other, served)
+    labels = (
+        ("lightgbm (served)", f"lightgbm without `{feature}`")
+        if served_has
+        else (f"lightgbm with `{feature}`", "lightgbm (served)")
+    )
+    setup = (
+        "The served model uses it; the second row retrains the same configuration without it."
+        if served_has
+        else "The served model leaves it out (ADR 0006); the first row retrains the same "
+        "configuration with it."
+    )
 
     def row(name: str, model: Mapping[str, Any], temporal: Mapping[str, Any]) -> str:
         p = model["operating_points"]["1pct"]
@@ -582,17 +613,16 @@ def _ablation_markdown(report: Mapping[str, Any]) -> list[str]:
         )
 
     return [
-        f"## Ablation: LightGBM without `{feature}`",
+        f"## Ablation: LightGBM with and without `{feature}`",
         "",
-        f"`{feature}` is the strongest LightGBM feature and a suspected era marker (short URLs in "
-        "2002 ham). The same model is retrained without it, with the same configuration "
-        "otherwise. Thresholds are set on validation as above.",
+        f"`{feature}` encodes the corpus era more than phishing (short URLs in 2002 ham). "
+        f"{setup} Thresholds are set on validation as above.",
         "",
         "| Model | Recall at 1% | Ham FPR | Spam FPR | PR-AUC | Trained up to 2019: 2020-2025 "
         "recall |",
         "|---|---|---|---|---|---|",
-        row("lightgbm", report["models"]["lightgbm"], report["temporal"]["lightgbm"]),
-        row(f"lightgbm without `{feature}`", a["model"], a["temporal"]),
+        row(labels[0], *with_feature),
+        row(labels[1], *without_feature),
         "",
         f"Without minus with, paired: recall {_pct(d['recall'])}, ham FPR {_pct(d['ham_fpr'])}, "
         f"spam FPR {_pct(d['spam_fpr'])}, PR-AUC {_num(d['pr_auc'])}.",
@@ -828,10 +858,15 @@ def write_report(report: Mapping[str, Any], out_dir: Path) -> list[Path]:
 # --- models from the registry --------------------------------------------------------------
 
 
-def ablated_config(config: BaselineConfig) -> BaselineConfig:
-    """`config` with `ABLATED_FEATURE` left out of LightGBM."""
+def uses_ablated_feature(config: BaselineConfig) -> bool:
+    return ABLATED_FEATURE not in config.lightgbm.exclude_features
+
+
+def toggled_config(config: BaselineConfig) -> BaselineConfig:
+    """`config` with `ABLATED_FEATURE` removed from LightGBM if it is used, added back if not."""
     lightgbm = config.lightgbm
-    exclude = (*lightgbm.exclude_features, ABLATED_FEATURE)
+    others = tuple(f for f in lightgbm.exclude_features if f != ABLATED_FEATURE)
+    exclude = (*others, ABLATED_FEATURE) if uses_ablated_feature(config) else others
     return config.model_copy(
         update={"lightgbm": lightgbm.model_copy(update={"exclude_features": exclude})}
     )
@@ -889,13 +924,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         logger.error("%s", exc)
         return 1
     temporal = {n: train_baseline(n, frame, config, "temporal_split") for n in MODEL_NAMES}
-    without = ablated_config(config)
-    ablated = (
-        train_baseline("lightgbm", frame, without),
-        train_baseline("lightgbm", frame, without, "temporal_split"),
+    toggled = toggled_config(config)
+    variant = (
+        train_baseline("lightgbm", frame, toggled),
+        train_baseline("lightgbm", frame, toggled, "temporal_split"),
     )
 
-    report = evaluate(frame, pipelines, temporal, args.n_boot, ablated)
+    report = evaluate(
+        frame, pipelines, temporal, args.n_boot, variant, uses_ablated_feature(config)
+    )
     paths = write_report(report, args.out_dir)
     if not args.no_tracking:
         log_report(paths, settings)

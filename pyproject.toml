@@ -1,6 +1,6 @@
 [project]
 name = "mailguard"
-version = "0.1.0"
+version = "0.1.1"
 description = "Real-time phishing detection with an LLM investigation agent, built for privacy."
 readme = "README.md"
 authors = [

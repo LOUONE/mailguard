@@ -69,17 +69,17 @@
 <circle class="s1 dot" cx="453.4" cy="67.2" r="4.5"/>
 <line class="s1 line" x1="56" y1="38" x2="74" y2="38"/>
 <text class="text" x="80" y="42">logreg</text>
-<path class="s2 line" d="M57.9 365.6 L111.0 311.0 L159.0 254.0 L193.2 317.3 L226.9 266.7 L274.6 64.0 L323.1 140.0 L356.6 281.1 L395.7 174.5 L454.6 65.5"/>
-<circle class="s2 dot" cx="57.9" cy="365.6" r="4.5"/>
-<circle class="s2 dot" cx="111.0" cy="311.0" r="4.5"/>
-<circle class="s2 dot" cx="159.0" cy="254.0" r="4.5"/>
-<circle class="s2 dot" cx="193.2" cy="317.3" r="4.5"/>
-<circle class="s2 dot" cx="226.9" cy="266.7" r="4.5"/>
-<circle class="s2 dot" cx="274.6" cy="64.0" r="4.5"/>
-<circle class="s2 dot" cx="323.1" cy="140.0" r="4.5"/>
-<circle class="s2 dot" cx="356.6" cy="281.1" r="4.5"/>
-<circle class="s2 dot" cx="395.7" cy="174.5" r="4.5"/>
-<circle class="s2 dot" cx="454.6" cy="65.5" r="4.5"/>
+<path class="s2 line" d="M57.9 365.2 L115.3 292.0 L153.9 237.7 L194.8 292.0 L236.4 64.0 L277.5 281.1 L307.7 266.7 L363.2 266.7 L400.9 157.5 L454.9 66.3"/>
+<circle class="s2 dot" cx="57.9" cy="365.2" r="4.5"/>
+<circle class="s2 dot" cx="115.3" cy="292.0" r="4.5"/>
+<circle class="s2 dot" cx="153.9" cy="237.7" r="4.5"/>
+<circle class="s2 dot" cx="194.8" cy="292.0" r="4.5"/>
+<circle class="s2 dot" cx="236.4" cy="64.0" r="4.5"/>
+<circle class="s2 dot" cx="277.5" cy="281.1" r="4.5"/>
+<circle class="s2 dot" cx="307.7" cy="266.7" r="4.5"/>
+<circle class="s2 dot" cx="363.2" cy="266.7" r="4.5"/>
+<circle class="s2 dot" cx="400.9" cy="157.5" r="4.5"/>
+<circle class="s2 dot" cx="454.9" cy="66.3" r="4.5"/>
 <line class="s2 line" x1="176" y1="38" x2="194" y2="38"/>
 <text class="text" x="200" y="42">lightgbm</text>
 <line class="ideal" x1="296" y1="38" x2="314" y2="38"/>

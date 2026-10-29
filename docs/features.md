@@ -22,7 +22,7 @@ from `Email.urls` (text and HTML links) and the anchors of the HTML body.
 | `url_count` | URLs with a usable host |
 | `url_distinct_domains` | Distinct registrable domains (see below) |
 | `url_ip_hosts` | Hosts written as an IP, including the integer and hex forms browsers accept |
-| `url_max_length` | Longest URL, in characters |
+| `url_max_length` | Longest URL, in characters. Computed, but left out of the served LightGBM: an era marker ([ADR 0006](adr/0006-drop-url-max-length.md)) |
 | `url_max_host_entropy` | Highest Shannon entropy of a host, in bits per character |
 | `url_max_subdomain_depth` | Most labels in front of a registrable domain (`a.b.bank.com` is 2) |
 | `url_punycode_hosts` | Hosts with an `xn--` label (internationalised, possible lookalike) |
@@ -34,6 +34,10 @@ from `Email.urls` (text and HTML links) and the anchors of the HTML body.
 | `url_anchor_mismatches` | Links whose text names a domain other than their target |
 
 Left out on purpose: the share of `https` links. It mostly separates 2002 from 2020.
+
+Any of the header, attachment, URL or lexicon features can be left out of LightGBM without
+touching code, with `lightgbm.exclude_features` in `configs/baselines.toml`; the evaluation report
+retrains the model with `url_max_length` toggled to keep measuring what it does.
 
 **Registrable domains** come from a snapshot of the [Public Suffix List](https://publicsuffix.org)
 bundled in the package (`src/mailguard/features/data/public_suffix_list.dat`, MPL 2.0, version

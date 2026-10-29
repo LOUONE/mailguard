@@ -13,11 +13,11 @@ from mailguard.data.dataset import write_dataset
 from mailguard.models.config import BaselineConfig, LightGBMConfig, LogRegConfig, TextConfig
 from mailguard.models.evaluate import (
     Rows,
-    ablated_config,
     evaluate,
     load_registered,
     main,
     render_markdown,
+    toggled_config,
     write_report,
 )
 from mailguard.models.train import calibrate, split_data, track_run, train_baseline
@@ -68,7 +68,7 @@ def calibrated_models(frame: pd.DataFrame) -> dict:  # type: ignore[type-arg]
 def build_report(frame: pd.DataFrame) -> dict:  # type: ignore[type-arg]
     pipelines = calibrated_models(frame)
     temporal = {n: train_baseline(n, frame, TINY, "temporal_split") for n in ("logreg", "lightgbm")}
-    without = ablated_config(TINY)
+    without = toggled_config(TINY)
     ablated = (
         train_baseline("lightgbm", frame, without),
         train_baseline("lightgbm", frame, without, "temporal_split"),
@@ -163,6 +163,37 @@ def test_ablation_is_paired_against_the_registered_model(report: dict) -> None: 
     without = ablation["model"]["operating_points"]["1pct"]["recall"]["estimate"]
     assert ablation["difference"]["recall"]["estimate"] == pytest.approx(without - with_feature)
     assert ablation["temporal"]["trained_up_to_2019"]["phishing_messages"] > 0
+
+
+def test_toggled_config_round_trips() -> None:
+    without = toggled_config(TINY)
+
+    assert without.lightgbm.exclude_features == ("url_max_length",)
+    assert toggled_config(without) == TINY
+
+
+def test_ablation_keeps_its_sign_when_the_served_model_drops_the_feature() -> None:
+    frame = tiny_frame()
+    without = toggled_config(TINY)
+    served = {"lightgbm": train_baseline("lightgbm", frame, without)}
+    temporal = {"lightgbm": train_baseline("lightgbm", frame, without, "temporal_split")}
+    variant = (
+        train_baseline("lightgbm", frame, TINY),
+        train_baseline("lightgbm", frame, TINY, "temporal_split"),
+    )
+
+    report = evaluate(frame, served, temporal, 20, variant, served_has_feature=False)  # type: ignore[arg-type]
+
+    ablation = report["ablation"]
+    served_recall = report["models"]["lightgbm"]["operating_points"]["1pct"]["recall"]["estimate"]
+    with_recall = ablation["model"]["operating_points"]["1pct"]["recall"]["estimate"]
+    assert ablation["served_has_feature"] is False
+    assert ablation["difference"]["recall"]["estimate"] == pytest.approx(
+        served_recall - with_recall
+    )
+    markdown = render_markdown(report)
+    assert "lightgbm with `url_max_length`" in markdown and "lightgbm (served)" in markdown
+    assert "ADR 0006" in markdown
 
 
 def test_report_is_deterministic(report: dict) -> None:  # type: ignore[type-arg]
