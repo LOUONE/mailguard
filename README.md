@@ -79,10 +79,46 @@ make data    # downloads the corpora (~147 MB) into data/raw/, checksum-verified
 make dataset # parses them into data/processed/ with grouped train/val/test splits
 make train   # trains both baselines (~3 min) and registers them in a local MLflow
 make evaluate  # test-split report with intervals into reports/ (~3 min)
+make promote # gives the latest LightGBM the `production` alias
+make serve   # scoring API on http://127.0.0.1:8000 (interactive docs at /docs)
 make eda     # re-runs the exploratory notebook on the downloaded data
 ```
 
 See the `Makefile` for the full list of targets (`make help`).
+
+### Scoring an email
+
+```bash
+curl -s http://127.0.0.1:8000/v1/predict -H 'content-type: application/json' \
+  -d '{"raw": "From: PayPal <x@evil.example>\nSubject: verify your account\n\nConfirm your password now."}'
+```
+
+```json
+{
+  "schema_version": "v1",
+  "label": "phishing",
+  "score": 0.9993,
+  "probability": 0.9184,
+  "base_rate": 0.01,
+  "model": {"name": "mailguard-lightgbm", "version": "6", "operating_point": "1pct", "threshold": 0.3622},
+  "reasons": [
+    {"feature": "headers__hdr_display_name_brand_mismatch", "group": "headers", "contribution": 1.91, "direction": "phishing"},
+    {"feature": "lexicon__subject_credential_cues", "group": "lexicon", "contribution": 1.63, "direction": "phishing"},
+    {"feature": "lexicon__body_credential_cues", "group": "lexicon", "contribution": 0.94, "direction": "phishing"},
+    {"feature": "urls__url_count", "group": "urls", "contribution": -0.49, "direction": "legitimate"},
+    {"feature": "text__word:list", "group": "text", "contribution": 0.47, "direction": "phishing"}
+  ]
+}
+```
+
+(Rounded; the brand named in the display name does not match the sender's domain, and the
+subject and body ask for credentials.)
+
+`score` is the calibrated probability at the corpus base rate, and `label` compares it with the
+threshold recorded on the model version. `probability` converts the score to the share of
+phishing in the mailbox (`base_rate`, 1% by default, or per request), so a client can show it to
+a person. The contract is versioned (`/v1`, `schema_version`) and published as
+[`docs/api/openapi.json`](docs/api/openapi.json).
 
 ## Repository layout
 
