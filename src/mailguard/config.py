@@ -40,6 +40,12 @@ class Settings(BaseSettings):
     max_email_bytes: int = Field(default=2 * 1024 * 1024, gt=0)
     scoring_timeout_s: float = Field(default=2.0, gt=0)
 
+    # Drift monitoring. When set, the API appends the structured features of every scored email
+    # (numbers only) to daily files here; the drift job reads them and writes its summary to
+    # `drift_dir`, which the API exposes as metrics.
+    feature_log_dir: Path | None = None
+    drift_dir: Path | None = None
+
 
 def get_settings() -> Settings:
     return Settings()

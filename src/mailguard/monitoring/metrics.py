@@ -11,6 +11,8 @@ reports a missed phishing email. Names are documented in docs/monitoring.md.
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Final
 
 from prometheus_client import (
@@ -71,6 +73,19 @@ class Metrics:
             f"{PREFIX}_model_threshold", "Score above which mail is labelled phishing.", registry=r
         )
         self.model_ready = Gauge(f"{PREFIX}_model_ready", "1 when a model is loaded.", registry=r)
+        self.drift_share = Gauge(
+            f"{PREFIX}_drift_share", "Share of input features drifting (PSI).", registry=r
+        )
+        self.drift_detected = Gauge(
+            f"{PREFIX}_drift_detected", "1 when the last drift report flagged traffic.", registry=r
+        )
+        self.feature_psi = Gauge(
+            f"{PREFIX}_feature_psi",
+            "PSI of each recorded feature against the validation data.",
+            ["feature"],
+            registry=r,
+        )
+        self._drift_mtime = 0.0
 
     def request(self, route: str, method: str, status: int, seconds: float) -> None:
         self.requests.labels(route, method, str(status)).inc()
@@ -86,6 +101,23 @@ class Metrics:
         self.model_info.labels(name, version, operating_point).set(1)
         self.model_threshold.set(threshold)
         self.model_ready.set(1)
+
+    def drift(self, summary_path: Path | None) -> None:
+        """Load the drift job's latest summary, when it changed since the last scrape."""
+        if summary_path is None or not summary_path.is_file():
+            return
+        mtime = summary_path.stat().st_mtime
+        if mtime == self._drift_mtime:
+            return
+        try:
+            summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        except OSError, json.JSONDecodeError:  # being rewritten: next scrape
+            return
+        self._drift_mtime = mtime
+        self.drift_share.set(summary["share_drifted"])
+        self.drift_detected.set(float(summary["drifted"]))
+        for feature in summary["features"]:
+            self.feature_psi.labels(feature["feature"]).set(feature["psi"])
 
     def render(self) -> bytes:
         return generate_latest(self.registry)
