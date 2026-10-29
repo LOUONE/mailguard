@@ -15,6 +15,7 @@ system does; ADRs say *why it does not do something else*.
 | [0005](0005-model-choice.md) | Ship LightGBM, keep the text-only model as a challenger, no transformer yet | Accepted, amended by 0006 | 2026-10-28 |
 | [0006](0006-drop-url-max-length.md) | Drop `url_max_length` from the served model | Accepted, updated | 2026-10-29 |
 | [0007](0007-drift-without-evidently.md) | Detect drift with PSI and KS in our own code, not Evidently | Accepted | 2026-10-29 |
+| [0008](0008-significance-gated-promotion.md) | Promote a retrained model only on a significant gain, from a plain-Python flow | Accepted | 2026-10-29 |
 
 ## Writing one
 
