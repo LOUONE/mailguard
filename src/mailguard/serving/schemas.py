@@ -78,6 +78,24 @@ class PredictResponse(_Strict):
     reasons: list[Reason] = Field(description="Features that moved the score most, largest first.")
 
 
+class ErrorDetail(_Strict):
+    location: list[str] = Field(description='Where the problem is, e.g. `["body", "raw"]`.')
+    message: str
+
+
+class ErrorBody(_Strict):
+    code: str = Field(description="Stable machine-readable code, e.g. `payload_too_large`.")
+    message: str
+    request_id: str = Field(description="Also in the `X-Request-ID` response header.")
+    details: list[ErrorDetail] = Field(
+        default_factory=list, description="Validation problems; the offending values are omitted."
+    )
+
+
+class ErrorResponse(_Strict):
+    error: ErrorBody
+
+
 class Health(_Strict):
     status: Literal["ok", "unavailable"]
     model: ModelRef | None = None

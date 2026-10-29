@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     operating_point: Literal["1pct", "01pct"] = "1pct"
     # Share of phishing in the mailboxes served, to turn scores into probabilities (ADR 0001).
     base_rate: float = Field(default=0.01, gt=0, lt=1)
+    # Request limits. Only text and attachment metadata are read, so a bigger email adds cost
+    # without adding signal; 2 MiB holds all but one of the 14,084 corpus messages.
+    max_email_bytes: int = Field(default=2 * 1024 * 1024, gt=0)
+    scoring_timeout_s: float = Field(default=2.0, gt=0)
 
 
 def get_settings() -> Settings:
