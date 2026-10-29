@@ -34,6 +34,7 @@ from mailguard import __version__
 from mailguard.config import Settings, get_settings
 from mailguard.monitoring.logs import configure_logging
 from mailguard.monitoring.metrics import CONTENT_TYPE, Metrics
+from mailguard.monitoring.recorder import SUMMARY_FILE, FeatureRecorder
 from mailguard.parsing import parse_email
 from mailguard.serving import errors
 from mailguard.serving.access import RequestLog
@@ -67,6 +68,8 @@ def create_app(settings: Settings | None = None, loader: Loader = load_productio
     settings = settings or get_settings()
     configure_logging(settings.log_level, json=settings.log_json)
     metrics = Metrics()
+    recorder = FeatureRecorder(settings.feature_log_dir) if settings.feature_log_dir else None
+    drift_summary = settings.drift_dir / SUMMARY_FILE if settings.drift_dir else None
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -80,6 +83,8 @@ def create_app(settings: Settings | None = None, loader: Loader = load_productio
             app.state.load_error = f"{type(exc).__name__}: {exc}"
             log.error("model_not_loaded", error_type=type(exc).__name__, detail=str(exc))
         yield
+        if recorder is not None:
+            recorder.close()
 
     app = FastAPI(
         title="mailguard",
@@ -113,6 +118,7 @@ def create_app(settings: Settings | None = None, loader: Loader = load_productio
     @app.get("/metrics", include_in_schema=False)
     async def prometheus() -> Response:
         """Prometheus scrape endpoint (text exposition format)."""
+        metrics.drift(drift_summary)
         return Response(metrics.render(), media_type=CONTENT_TYPE)
 
     @app.post("/v1/predict", responses=_errors(413, 422, 500, 503))
@@ -140,6 +146,8 @@ def create_app(settings: Settings | None = None, loader: Loader = load_productio
         label = "phishing" if result.is_phishing else "legitimate"
         seconds = time.perf_counter() - start
         metrics.prediction(label, result.score, seconds, len(raw))
+        if recorder is not None:
+            recorder.record(model.version, result.score, label, result.features)
         request.state.log |= {
             "scoring_ms": round(1000 * seconds, 2),
             "label": label,

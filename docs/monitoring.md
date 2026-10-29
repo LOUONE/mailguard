@@ -42,6 +42,39 @@ histogram_quantile(0.95, sum by (le) (rate(mailguard_request_duration_seconds_bu
 sum(rate(mailguard_score_bucket{le="0.9"}[5m])) - sum(rate(mailguard_score_bucket{le="0.1"}[5m]))
 ```
 
+## Drift
+
+The metrics above say *that* the decisions moved; the drift report says *which inputs* moved.
+Method and thresholds in [`monitoring/drift.py`](../src/mailguard/monitoring/drift.py); why not
+Evidently in [ADR 0007](adr/0007-drift-without-evidently.md).
+
+1. **Recording.** With `MAILGUARD_FEATURE_LOG_DIR` set, the API appends one JSON line per scored
+   email: time, model version, score, label and the 38 structured features (header flags,
+   attachment, URL and wording counts). Never text, addresses, URLs, TF-IDF columns or request
+   ids; a test sends a canary through the API and searches the files for it.
+2. **Reference.** The served model's features and scores on the validation split: data it was
+   not trained on, drawn like its training data. Cached per model version.
+3. **Comparison.** For each feature and for the score, the PSI and the two-sample
+   Kolmogorov-Smirnov statistic over the last 2,000 emails scored by the same model version
+   (at least 200). A feature drifts above PSI 0.25; the traffic drifts when half the features
+   do, or when the score does.
+4. **Output.** `summary.json` (numbers only) and `report.html` in `MAILGUARD_DRIFT_DIR`. The API
+   reads the summary on each scrape and exposes it:
+
+| Metric | Type | Labels | Meaning |
+|---|---|---|---|
+| `mailguard_drift_detected` | gauge | | 1 when the last report flagged the traffic |
+| `mailguard_drift_share` | gauge | | Share of input features above the PSI threshold |
+| `mailguard_feature_psi` | gauge | `feature` | PSI of each recorded feature, and of `score` |
+
+In the compose stack the `drift` service runs the job every minute. Its first verdict on the
+demo traffic is "drift", which is correct: made-up short personal mail does not look like the
+2002 mailing-list ham and 2004-2025 phishing of the validation split.
+
+PSI reading, from credit scoring: below 0.1 stable, 0.1 to 0.25 a moderate shift worth a look,
+above 0.25 a significant shift. For two normal distributions d standard deviations apart, PSI is
+about d²: 0.25 is half a standard deviation.
+
 ## Logs
 
 One JSON object per line on stdout, from the API and from libraries alike. Fields:

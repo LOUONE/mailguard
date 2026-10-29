@@ -51,14 +51,29 @@ services:
 
   api:
     <<: *mailguard
-    # The registry over HTTP, the artifacts from the shared volume, read-only.
-    environment:
+    # The registry over HTTP, the artifacts from the shared volume, read-only. Feature vectors
+    # (numbers only) go to /data/traffic for the drift job, whose verdict it reads back.
+    environment: &monitoring
       MAILGUARD_MLFLOW_TRACKING_URI: http://mlflow:5000
+      MAILGUARD_FEATURE_LOG_DIR: /data/traffic
+      MAILGUARD_DRIFT_DIR: /data/drift
     volumes:
       - mlruns:/mlruns:ro
+      - data:/data
     ports: ["127.0.0.1:8000:8000"]
     depends_on:
       mlflow: { condition: service_healthy }
+
+  drift:
+    <<: *mailguard
+    command: ["python", "scripts/drift_report.py", "--every", "60"]
+    environment: *monitoring
+    volumes:
+      - mlruns:/mlruns:ro
+      - data:/data
+    healthcheck: { disable: true }
+    depends_on:
+      api: { condition: service_healthy }
 
   traffic:
     <<: *mailguard

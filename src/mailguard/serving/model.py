@@ -12,7 +12,7 @@ from sklearn.pipeline import Pipeline
 
 from mailguard.config import Settings
 from mailguard.models.calibration import CalibratedPipeline, adjust_prior
-from mailguard.models.explain import contributions_of, feature_names, top_reasons
+from mailguard.models.explain import TEXT_GROUP, contributions_of, feature_names, top_reasons
 from mailguard.models.registry import aliased_version, load_version
 from mailguard.parsing import Email
 from mailguard.serving.schemas import ModelRef
@@ -26,6 +26,9 @@ class Prediction:
     probability: float  # the same, at the requested base rate
     is_phishing: bool
     reasons: list[dict[str, Any]] = field(default_factory=list)
+    # The structured features (headers, attachments, URLs, lexicon): numbers about the message,
+    # never its text. What the drift monitor records; TF-IDF columns are left out.
+    features: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
@@ -38,14 +41,18 @@ class ServedModel:
     # Computed once at load: rebuilding tens of thousands of n-gram names was 38% of a request.
     names: NDArray[np.str_] = field(init=False, repr=False)
     features: Pipeline = field(init=False, repr=False)
+    structured: NDArray[np.intp] = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         if self.operating_point not in self.thresholds:
             raise LookupError(
                 f"{self.name} v{self.version} has no threshold for {self.operating_point}"
             )
-        object.__setattr__(self, "names", feature_names(self.model.pipeline))
+        names = feature_names(self.model.pipeline)
+        object.__setattr__(self, "names", names)
         object.__setattr__(self, "features", self.model.pipeline[:-1])
+        not_text = ~np.char.startswith(names, TEXT_GROUP + "__")
+        object.__setattr__(self, "structured", np.flatnonzero(not_text))
 
     @property
     def threshold(self) -> float:
@@ -81,7 +88,19 @@ class ServedModel:
         )
         score = float(self.model.calibrator.transform(raw)[0])
         probability = float(adjust_prior(score, self.model.calibrator.prior_, base_rate))
-        return Prediction(score, probability, score > self.threshold, top_reasons(c, TOP_REASONS))
+        return Prediction(
+            score,
+            probability,
+            score > self.threshold,
+            top_reasons(c, TOP_REASONS),
+            self.structured_features(features),
+        )
+
+    def structured_features(self, features: Any) -> dict[str, float]:
+        """The non-text columns of one row of the feature matrix, by name."""
+        row = features[:1, self.structured]
+        values = row.toarray().ravel() if hasattr(row, "toarray") else np.asarray(row).ravel()
+        return {str(self.names[i]): float(v) for i, v in zip(self.structured, values, strict=True)}
 
 
 def load_production(settings: Settings) -> ServedModel:
