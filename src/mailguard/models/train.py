@@ -40,6 +40,7 @@ logger = logging.getLogger(__name__)
 
 EXPERIMENT: Final = "mailguard-baselines"
 REGISTERED_PREFIX: Final = "mailguard-"
+SEEN_IDS: Final = "seen_ids.json"
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,6 +90,12 @@ def calibrate(pipeline: Pipeline, val: SplitData) -> tuple[CalibratedPipeline, d
     }
     logger.info("calibration: %s (cross-validated log loss %s)", method, losses)
     return model, report
+
+
+def seen_ids(frame: pd.DataFrame, column: str = "split") -> list[str]:
+    """Ids of the training and validation rows: what a model has seen, by fitting or tuning."""
+    seen: list[str] = frame.loc[frame[column].isin(["train", "val"]), "id"].astype(str).tolist()
+    return seen
 
 
 def operating_thresholds(model: CalibratedPipeline, val: SplitData) -> dict[str, float]:
@@ -152,11 +159,13 @@ def track_run(
     processed_dir: Path,
     settings: Settings,
     thresholds: Mapping[str, float] | None = None,
+    seen: Sequence[str] | None = None,
 ) -> str:
     """Log one fitted baseline to MLflow and register it. Returns the run id.
 
     `thresholds` (calibrated, from `operating_thresholds`) become `threshold_<target>` tags of the
-    registered model version.
+    registered model version. `seen` (from `seen_ids`) is saved as `seen_ids.json`: the messages
+    the model learnt from or was tuned on, which a later comparison must not test it on.
     """
     os.environ.setdefault("MLFLOW_DISABLE_AGENT_HINT", "1")
     import mlflow  # slow import, only needed here
@@ -187,6 +196,8 @@ def track_run(
         mlflow.log_metrics({f"val_{k}": v for k, v in metrics.items()})
         pipeline = model.pipeline if isinstance(model, CalibratedPipeline) else model
         mlflow.log_dict(feature_summary(pipeline), "features.json")
+        if seen is not None:
+            mlflow.log_dict({"ids": sorted(seen)}, SEEN_IDS)
         info = mlflow.sklearn.log_model(
             model,
             name="model",
@@ -242,6 +253,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         metrics |= calibration
         thresholds = operating_thresholds(model, val)
         if not args.no_tracking:
-            run_id = track_run(name, model, config, metrics, processed, settings, thresholds)
+            run_id = track_run(
+                name, model, config, metrics, processed, settings, thresholds, seen_ids(frame)
+            )
             logger.info("%s: MLflow run %s", name, run_id)
     return 0
