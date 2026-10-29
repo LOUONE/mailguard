@@ -1,6 +1,7 @@
-# Only pyproject.toml, uv.lock, README.md, src/, configs/ and scripts/ go into the image.
+# Only .python-version, pyproject.toml, uv.lock, README.md, src/, configs/ and scripts/ go in.
 # Data and models in particular never do: corpora are downloaded and models trained at runtime.
 *
+!.python-version
 !pyproject.toml
 !uv.lock
 !README.md
