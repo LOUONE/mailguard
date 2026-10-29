@@ -45,6 +45,10 @@ notebooks = [
     "nbconvert>=7.17.2",
     "nbformat>=5.11.1",
 ]
+perf = [
+    "locust>=2.40",
+    "py-spy>=0.4",
+]
 
 [tool.ruff]
 line-length = 100
@@ -73,6 +77,8 @@ indent-style = "space"
 python_version = "3.14"
 strict = true
 files = ["src", "tests", "scripts"]
+# The load test needs the optional `perf` group (locust), absent from CI and default installs.
+exclude = ["scripts/locustfile.py"]
 show_error_codes = true
 warn_unused_ignores = true
 warn_redundant_casts = true
