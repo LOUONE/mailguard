@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     app_name: str = "mailguard"
     environment: Environment = "dev"
     log_level: LogLevel = "INFO"
+    # JSON lines for machines (default); `false` gives coloured console lines for development.
+    log_json: bool = True
     data_dir: Path = Field(default_factory=lambda: Path("data"))
     # Local experiment tracking (gitignored). Phase 2 points this at the compose MLflow server.
     mlflow_tracking_uri: str = "sqlite:///mlruns/mlflow.db"

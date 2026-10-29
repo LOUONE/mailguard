@@ -2,12 +2,12 @@
 
 FastAPI's default 422 body echoes the offending input back; for this API the input is someone's
 email, so validation errors keep the location and the message and drop the value. Unexpected
-exceptions become a generic 500: the type goes to the logs, never a stack trace to the client.
+exceptions become a generic 500 (`access.RequestLog`): the type goes to the logs, never a stack
+trace to the client or to the server log.
 """
 
 from __future__ import annotations
 
-import logging
 from typing import Final
 
 from fastapi import FastAPI, Request, status
@@ -16,8 +16,6 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
 
 from mailguard.serving.schemas import ErrorBody, ErrorDetail, ErrorResponse
-
-logger = logging.getLogger(__name__)
 
 CODES: Final = {
     400: "bad_request",
@@ -64,13 +62,7 @@ async def on_validation_error(request: Request, exc: Exception) -> JSONResponse:
     )
 
 
-async def on_unexpected_error(request: Request, exc: Exception) -> JSONResponse:
-    # The exception type only: its message could quote the email.
-    logger.error("unexpected %s on %s", type(exc).__name__, request.url.path)
-    return error_response(request, status.HTTP_500_INTERNAL_SERVER_ERROR, "internal error")
-
-
 def install(app: FastAPI) -> None:
+    """Expected errors. Unexpected ones are caught by `access.RequestLog`, see why there."""
     app.add_exception_handler(HTTPException, on_http_error)
     app.add_exception_handler(RequestValidationError, on_validation_error)
-    app.add_exception_handler(Exception, on_unexpected_error)

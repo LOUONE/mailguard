@@ -50,7 +50,7 @@ promote:
 	uv run python scripts/promote.py
 
 serve:
-	uv run uvicorn --factory mailguard.serving.app:create_app --host 127.0.0.1 --port 8000
+	uv run uvicorn --factory mailguard.serving.app:create_app --host 127.0.0.1 --port 8000 --no-access-log
 
 openapi:
 	uv run python scripts/export_openapi.py

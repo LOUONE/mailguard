@@ -13,23 +13,29 @@ The endpoint receives hostile input by design, so every request is bounded:
   after `scoring_timeout_s`. Python cannot kill a thread, so a timed-out scoring still finishes
   in the background; the cap on size is what bounds that work;
 - errors: one JSON shape for every failure, without stack traces or echoed input (`errors.py`).
+
+Logs are JSON, one access line per request with sizes, timings, the score and the model version,
+and nothing the sender wrote (`monitoring/logs.py`, `access.py`).
 """
 
 from __future__ import annotations
 
 import asyncio
-import logging
+import time
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 from typing import Any, Final
 
+import structlog
 from fastapi import FastAPI, HTTPException, Request, Response, status
 from starlette.concurrency import run_in_threadpool
 
 from mailguard import __version__
 from mailguard.config import Settings, get_settings
+from mailguard.monitoring.logs import configure_logging
 from mailguard.parsing import parse_email
 from mailguard.serving import errors
+from mailguard.serving.access import RequestLog
 from mailguard.serving.limits import RequestLimits
 from mailguard.serving.model import Prediction, ServedModel, load_production
 from mailguard.serving.schemas import (
@@ -40,7 +46,7 @@ from mailguard.serving.schemas import (
     Reason,
 )
 
-logger = logging.getLogger(__name__)
+log = structlog.get_logger("mailguard.serving")
 
 Loader = Callable[[Settings], ServedModel]
 # Base64 is 4/3 of the bytes it encodes, plus room for the JSON around it.
@@ -58,16 +64,18 @@ def _errors(*codes: int) -> dict[int | str, dict[str, Any]]:
 
 def create_app(settings: Settings | None = None, loader: Loader = load_production) -> FastAPI:
     settings = settings or get_settings()
+    configure_logging(settings.log_level, json=settings.log_json)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.model, app.state.load_error = None, None
         try:
-            app.state.model = await run_in_threadpool(loader, settings)
-            logger.info("serving %s v%s", app.state.model.name, app.state.model.version)
+            model = await run_in_threadpool(loader, settings)
+            app.state.model = model
+            log.info("model_loaded", model=model.name, model_version=model.version)
         except Exception as exc:  # any failure must leave the API up, and not ready
             app.state.load_error = f"{type(exc).__name__}: {exc}"
-            logger.error("model not loaded: %s", app.state.load_error)
+            log.error("model_not_loaded", error_type=type(exc).__name__, detail=str(exc))
         yield
 
     app = FastAPI(
@@ -80,6 +88,7 @@ def create_app(settings: Settings | None = None, loader: Loader = load_productio
     app.add_middleware(
         RequestLimits, max_body_bytes=settings.max_email_bytes * 4 // 3 + JSON_OVERHEAD
     )
+    app.add_middleware(RequestLog)  # added last, so it is the outermost: it sees everything
 
     def served(request: Request) -> ServedModel:
         model: ServedModel | None = request.app.state.model
@@ -101,12 +110,14 @@ def create_app(settings: Settings | None = None, loader: Loader = load_productio
         """Score one raw email."""
         model = served(request)
         raw = body.raw_bytes()
+        request.state.log["email_bytes"] = len(raw)
         if len(raw) > settings.max_email_bytes:
             raise HTTPException(
                 status.HTTP_413_CONTENT_TOO_LARGE,
                 f"email over {settings.max_email_bytes} bytes",
             )
         base_rate = body.base_rate or settings.base_rate
+        start = time.perf_counter()
         try:
             result = await asyncio.wait_for(
                 run_in_threadpool(score, model, raw, base_rate), settings.scoring_timeout_s
@@ -116,8 +127,15 @@ def create_app(settings: Settings | None = None, loader: Loader = load_productio
                 status.HTTP_503_SERVICE_UNAVAILABLE,
                 f"scoring took over {settings.scoring_timeout_s} s",
             ) from None
+        label = "phishing" if result.is_phishing else "legitimate"
+        request.state.log |= {
+            "scoring_ms": round(1000 * (time.perf_counter() - start), 2),
+            "label": label,
+            "score": round(result.score, 4),
+            "model_version": model.version,
+        }
         return PredictResponse(
-            label="phishing" if result.is_phishing else "legitimate",
+            label=label,
             score=result.score,
             probability=result.probability,
             base_rate=base_rate,
