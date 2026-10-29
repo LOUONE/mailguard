@@ -8,6 +8,7 @@ flow (#39) will only move the alias when a new version is significantly better.
 from __future__ import annotations
 
 import os
+import tempfile
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any, Final
@@ -67,10 +68,20 @@ def promote(version: Version, settings: Settings, alias: str = PRODUCTION) -> No
 
 
 def load_version(version: Version, settings: Settings) -> Any:
-    """The registered model itself (skops-loaded: only trusted types are rebuilt)."""
+    """The registered model itself (skops-loaded: only trusted types are rebuilt).
+
+    The artifacts are copied to a temporary folder and loaded from there. Loading a
+    `models:/` URI in place writes metadata next to the artifacts, which would force the API to
+    mount the model store read-write; read-only, a compromised API cannot alter a model.
+    """
     os.environ.setdefault("MLFLOW_DISABLE_AGENT_HINT", "1")
     import mlflow
+    import mlflow.artifacts
     import mlflow.sklearn
 
     mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
-    return mlflow.sklearn.load_model(f"models:/{version.name}/{version.version}")
+    with tempfile.TemporaryDirectory(prefix="mailguard-model-") as folder:
+        local = mlflow.artifacts.download_artifacts(
+            artifact_uri=f"models:/{version.name}/{version.version}", dst_path=folder
+        )
+        return mlflow.sklearn.load_model(local)
