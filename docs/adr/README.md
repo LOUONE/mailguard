@@ -24,7 +24,8 @@ system does; ADRs say *why it does not do something else*.
    to evidence says so.
 4. Open it in the same PR as the code it governs, or before that PR if the code depends on it.
 5. ADRs are not edited once accepted. A new decision gets a new ADR that marks the old one
-   `Superseded by NNNN`.
+   `Superseded by NNNN`. When the evidence changes but the decision does not, a dated `Update`
+   section is appended, and the original text stays as it was written.
 
 Statuses: `Proposed`, `Accepted`, `Superseded by NNNN`, `Rejected`. A retroactive ADR documents a
 decision already in the code, so that it can be reviewed like the others.
