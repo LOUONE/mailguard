@@ -72,3 +72,27 @@ report keeps measuring both (the ablation section now retrains the variant *with
 - The drift report (#38) still watches URL lengths: if modern ham shows a feature still encodes
   the era, the same test (ablation plus temporal check) applies.
 - Revisit with modern ham, or if Phase 4 shows that URL length is a useful evasion signal.
+
+## Update, 2026-10-29: the temporal evidence did not hold
+
+Pinning the Python version (v0.1.2) changed the split of 850 spam messages
+([data](../data.md#reproducibility)). On the reproducible split the same ablation gives:
+
+| | With `url_max_length` | Without (served) |
+|---|---|---|
+| Recall at 1% ham FPR, test | 98.5% [97.5, 99.3] | 99.0% [98.1, 99.6] |
+| Spam flagged | 3.5% | 5.3% |
+| 2020-2025 phishing, trained up to 2019 | 96.7% [95.8, 97.6] | 96.1% [95.2, 97.0] |
+
+Paired, without minus with: recall +0.5 points [0.2, 0.9], ham FPR +0.3 [0.0, 0.8], spam FPR
++1.8 [0.4, 3.4].
+
+The temporal gain that was the main measured argument above (+2.3 points) is now a 0.6-point
+loss, inside the intervals. Its threshold rests on the ham of one validation split, and moving
+some spam between splits was enough to change it: a single split cannot measure an effect of this
+size, which the cluster bootstrap (resampling the test set, not the split) does not show.
+
+The decision stands, on narrower grounds: the feature encodes the era of the ham corpus by
+construction, the main-split recall is significantly better without it, and modern ham is full of
+the long tracking URLs it penalises. Measuring effects of a few points will need the comparison
+repeated over several split seeds; that is now part of the method for the next ablation (#73).

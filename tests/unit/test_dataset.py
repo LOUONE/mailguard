@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import platform
 from pathlib import Path
 
 import pandas as pd
@@ -275,3 +276,18 @@ def test_manifest_bytes_do_not_depend_on_the_os(tmp_path: Path) -> None:
     write_dataset(df, build_manifest(df, sources), tmp_path / "out")
 
     assert b"\r\n" not in (tmp_path / "out" / "manifest.json").read_bytes()
+
+
+def test_manifest_records_the_python_that_built_it(tmp_path: Path) -> None:
+    sources = write_corpus(tmp_path)
+
+    manifest = build_manifest(build_frame(tmp_path, sources), sources)
+
+    assert manifest["python"] == platform.python_version()
+
+
+def test_the_running_python_is_the_pinned_one() -> None:
+    """The stdlib email parser, hence the split, changes between patch releases (docs/data.md)."""
+    pinned = Path(".python-version").read_text(encoding="utf-8").strip()
+
+    assert platform.python_version() == pinned, "run `uv sync` to use the pinned interpreter"

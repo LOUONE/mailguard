@@ -15,31 +15,31 @@ Test split: 2,113 messages (622 ham, 285 spam, 1206 phishing) in 1,670 duplicate
 
 | Model | Recall | Recall 2004-2007 | Recall 2015-2025 | Ham FPR | Spam FPR |
 |---|---|---|---|---|---|
-| logreg | 97.9% [96.7, 98.9] | 97.5% [95.7, 98.9] | 98.5% [97.1, 99.6] | 1.1% [0.2, 2.8] (7 msg) | 3.5% [1.5, 5.8] |
-| lightgbm | 98.8% [97.9, 99.6] | 98.5% [97.1, 99.7] | 99.2% [98.1, 100.0] | 1.0% [0.0, 2.7] (6 msg) | 6.0% [3.3, 9.2] |
+| logreg | 97.9% [96.8, 98.9] | 97.5% [95.7, 99.0] | 98.5% [97.2, 99.4] | 1.1% [0.2, 2.7] (7 msg) | 5.6% [2.6, 8.5] |
+| lightgbm | 99.0% [98.1, 99.6] | 98.8% [97.3, 99.8] | 99.2% [98.2, 100.0] | 1.1% [0.2, 2.7] (7 msg) | 5.3% [2.7, 8.2] |
 
 ## Operating point: 0.1% ham FPR on validation, i.e. no validation ham flagged
 
 | Model | Recall | Recall 2004-2007 | Recall 2015-2025 | Ham FPR | Spam FPR |
 |---|---|---|---|---|---|
-| logreg | 94.5% [92.8, 96.0] | 93.1% [90.4, 95.4] | 96.3% [94.3, 98.0] | 0.8% [0.0, 2.4] (5 msg) | 2.5% [0.7, 4.7] |
-| lightgbm | 98.3% [97.3, 99.2] | 98.3% [96.7, 99.4] | 98.5% [97.2, 99.5] | 0.8% [0.0, 2.4] (5 msg) | 3.2% [1.1, 5.7] |
+| logreg | 94.3% [92.6, 95.8] | 92.6% [89.6, 95.0] | 96.5% [94.9, 98.0] | 0.8% [0.0, 2.2] (5 msg) | 2.5% [0.8, 4.2] |
+| lightgbm | 98.3% [97.2, 99.1] | 98.1% [96.3, 99.3] | 98.5% [97.2, 99.5] | 0.8% [0.0, 2.2] (5 msg) | 2.8% [0.7, 5.2] |
 
 ## Ranking
 
 | Model | PR-AUC |
 |---|---|
-| logreg | 0.9978 [0.9960, 0.9991] |
-| lightgbm | 0.9992 [0.9986, 0.9997] |
+| logreg | 0.9974 [0.9953, 0.9988] |
+| lightgbm | 0.9990 [0.9982, 0.9997] |
 
 ## LightGBM minus logistic regression (paired)
 
-PR-AUC difference: 0.0014 [0.0005, 0.0027].
+PR-AUC difference: 0.0017 [0.0006, 0.0032].
 
 | Operating point | Recall difference | Ham FPR difference | McNemar: only LR / only LGBM correct | p |
 |---|---|---|---|---|
-| 1% | 0.9% [0.3, 1.8] | -0.2% [-0.8, 0.3] | 12 / 17 | 0.46 |
-| 0.1% | 3.8% [2.6, 5.3] | 0.0% [0.0, 0.0] | 7 / 51 | 2.4e-09 |
+| 1% | 1.1% [0.4, 1.8] | 0.0% [-0.5, 0.5] | 6 / 20 | 0.0094 |
+| 0.1% | 4.0% [2.7, 5.4] | 0.0% [0.0, 0.0] | 7 / 54 | 4.3e-10 |
 
 McNemar assumes independent messages; duplicates make its p-value optimistic, so the paired cluster-bootstrap interval of the difference is the number to trust.
 
@@ -49,8 +49,8 @@ Calibrators are fitted on validation (method chosen by cross-validation grouped 
 
 | Model | Method | ECE raw | ECE calibrated | Brier raw | Brier calibrated |
 |---|---|---|---|---|---|
-| logreg | sigmoid | 1.6% [1.4, 2.5] | 1.0% [0.6, 1.9] | 0.0178 [0.0123, 0.0241] | 0.0172 [0.0109, 0.0246] |
-| lightgbm | sigmoid | 1.1% [0.6, 2.0] | 0.9% [0.5, 1.7] | 0.0138 [0.0077, 0.0207] | 0.0136 [0.0078, 0.0202] |
+| logreg | sigmoid | 1.7% [1.4, 2.7] | 1.1% [0.8, 2.1] | 0.0191 [0.0134, 0.0260] | 0.0186 [0.0123, 0.0260] |
+| lightgbm | sigmoid | 1.2% [0.7, 2.0] | 0.7% [0.5, 1.6] | 0.0133 [0.0073, 0.0203] | 0.0127 [0.0073, 0.0190] |
 
 ![Reliability diagram](reliability.svg)
 
@@ -58,26 +58,26 @@ Almost every score is below 0.1 or above 0.9. The bins in between hold a handful
 
 | Model | Bin | Messages | Mean probability | Observed phishing rate |
 |---|---|---|---|---|
-| logreg | 0.0-0.1 | 868 | 0.007 | 0.013 |
-| logreg | 0.1-0.2 | 21 | 0.145 | 0.286 |
-| logreg | 0.2-0.3 | 13 | 0.252 | 0.231 |
-| logreg | 0.3-0.4 | 5 | 0.351 | 0.400 |
-| logreg | 0.4-0.5 | 9 | 0.448 | 0.333 |
-| logreg | 0.5-0.6 | 5 | 0.574 | 0.800 |
-| logreg | 0.6-0.7 | 12 | 0.664 | 0.833 |
-| logreg | 0.7-0.8 | 5 | 0.748 | 1.000 |
-| logreg | 0.8-0.9 | 23 | 0.861 | 0.957 |
-| logreg | 0.9-1.0 | 1152 | 0.994 | 0.990 |
-| lightgbm | 0.0-0.1 | 877 | 0.005 | 0.009 |
-| lightgbm | 0.1-0.2 | 8 | 0.148 | 0.250 |
-| lightgbm | 0.2-0.3 | 7 | 0.245 | 0.429 |
-| lightgbm | 0.3-0.4 | 8 | 0.347 | 0.250 |
-| lightgbm | 0.4-0.5 | 2 | 0.451 | 1.000 |
-| lightgbm | 0.5-0.6 | 7 | 0.554 | 0.286 |
-| lightgbm | 0.6-0.7 | 3 | 0.629 | 0.333 |
-| lightgbm | 0.7-0.8 | 3 | 0.768 | 0.333 |
-| lightgbm | 0.8-0.9 | 13 | 0.862 | 0.692 |
-| lightgbm | 0.9-1.0 | 1185 | 0.997 | 0.992 |
+| logreg | 0.0-0.1 | 866 | 0.008 | 0.014 |
+| logreg | 0.1-0.2 | 21 | 0.147 | 0.238 |
+| logreg | 0.2-0.3 | 9 | 0.230 | 0.333 |
+| logreg | 0.3-0.4 | 9 | 0.350 | 0.333 |
+| logreg | 0.4-0.5 | 5 | 0.439 | 0.600 |
+| logreg | 0.5-0.6 | 18 | 0.553 | 0.667 |
+| logreg | 0.6-0.7 | 7 | 0.661 | 0.286 |
+| logreg | 0.7-0.8 | 9 | 0.756 | 1.000 |
+| logreg | 0.8-0.9 | 23 | 0.857 | 1.000 |
+| logreg | 0.9-1.0 | 1146 | 0.993 | 0.990 |
+| lightgbm | 0.0-0.1 | 872 | 0.005 | 0.010 |
+| lightgbm | 0.1-0.2 | 18 | 0.141 | 0.167 |
+| lightgbm | 0.2-0.3 | 8 | 0.255 | 0.125 |
+| lightgbm | 0.3-0.4 | 6 | 0.331 | 0.333 |
+| lightgbm | 0.4-0.5 | 5 | 0.442 | 0.600 |
+| lightgbm | 0.5-0.6 | 3 | 0.546 | 0.333 |
+| lightgbm | 0.6-0.7 | 6 | 0.653 | 0.833 |
+| lightgbm | 0.7-0.8 | 1 | 0.759 | 1.000 |
+| lightgbm | 0.8-0.9 | 18 | 0.843 | 0.556 |
+| lightgbm | 0.9-1.0 | 1176 | 0.995 | 0.996 |
 
 ## What the numbers mean in a real mailbox
 
@@ -85,14 +85,14 @@ The corpus is 57% phishing. Recall and FPR do not depend on that; precision and 
 
 | Model | Phishing share | Phishing messages | Caught | Ham flagged (false alarms) | Precision |
 |---|---|---|---|---|---|
-| logreg | 0.1% | 1 | 1.0 [1.0, 1.0] | 11.2 [1.6, 27.7] | 8.0% [3.4, 38.7] |
-| logreg | 0.5% | 5 | 4.9 [4.8, 4.9] | 11.2 [1.5, 27.6] | 30.4% [15.0, 76.0] |
-| logreg | 1% | 10 | 9.8 [9.7, 9.9] | 11.1 [1.5, 27.5] | 46.8% [26.2, 86.4] |
-| logreg | 5% | 50 | 49.0 [48.4, 49.4] | 10.7 [1.5, 26.4] | 82.1% [64.9, 97.1] |
-| lightgbm | 0.1% | 1 | 1.0 [1.0, 1.0] | 9.6 [0.0, 27.0] | 9.3% [3.6, 100.0] |
-| lightgbm | 0.5% | 5 | 4.9 [4.9, 5.0] | 9.6 [0.0, 26.9] | 34.0% [15.6, 100.0] |
-| lightgbm | 1% | 10 | 9.9 [9.8, 10.0] | 9.5 [0.0, 26.8] | 50.9% [27.1, 100.0] |
-| lightgbm | 5% | 50 | 49.4 [48.9, 49.8] | 9.2 [0.0, 25.7] | 84.4% [65.9, 100.0] |
+| logreg | 0.1% | 1 | 1.0 [1.0, 1.0] | 11.2 [1.6, 26.6] | 8.0% [3.5, 38.0] |
+| logreg | 0.5% | 5 | 4.9 [4.8, 4.9] | 11.2 [1.6, 26.5] | 30.4% [15.5, 75.5] |
+| logreg | 1% | 10 | 9.8 [9.7, 9.9] | 11.1 [1.6, 26.4] | 46.8% [26.9, 86.1] |
+| logreg | 5% | 50 | 49.0 [48.4, 49.5] | 10.7 [1.5, 25.3] | 82.1% [65.7, 97.0] |
+| lightgbm | 0.1% | 1 | 1.0 [1.0, 1.0] | 11.2 [1.6, 26.7] | 8.1% [3.6, 38.6] |
+| lightgbm | 0.5% | 5 | 5.0 [4.9, 5.0] | 11.2 [1.6, 26.6] | 30.7% [15.6, 75.9] |
+| lightgbm | 1% | 10 | 9.9 [9.8, 10.0] | 11.1 [1.6, 26.5] | 47.1% [27.2, 86.4] |
+| lightgbm | 5% | 50 | 49.5 [49.1, 49.8] | 10.7 [1.5, 25.4] | 82.2% [66.0, 97.1] |
 
 False alarms are ham FPR times the ham messages, so they carry its uncertainty: about five flagged test ham. An upper precision bound of 100% comes from replicates that drew no flagged ham at all. Spam is left out: flagging spam as phishing is the cheaper error (ADR 0001), and how much spam reaches a filtered inbox varies too much to assume.
 
@@ -114,71 +114,71 @@ Mean absolute contribution to the log-odds on test: exact TreeSHAP values for Li
 | Model | attachments | headers | lexicon | text | urls |
 |---|---|---|---|---|---|
 | logreg | 0.0% | 0.0% | 0.0% | 100.0% | 0.0% |
-| lightgbm | 1.1% | 3.2% | 9.7% | 76.7% | 9.3% |
+| lightgbm | 1.0% | 2.9% | 9.5% | 77.4% | 9.2% |
 
 Top 20 features, logreg:
 
 | # | Feature | Mean abs. contribution |
 |---|---|---|
-| 1 | `text__word:the` | 0.077 |
-| 2 | `text__word:account` | 0.063 |
+| 1 | `text__word:the` | 0.075 |
+| 2 | `text__word:account` | 0.065 |
 | 3 | `text__word:your` | 0.057 |
-| 4 | `text__word:urladdress` | 0.051 |
-| 5 | `text__word:is` | 0.042 |
-| 6 | `text__word:to` | 0.034 |
-| 7 | `text__word:of` | 0.034 |
-| 8 | `text__word:and` | 0.032 |
-| 9 | `text__word:your account` | 0.032 |
+| 4 | `text__word:urladdress` | 0.057 |
+| 5 | `text__word:is` | 0.038 |
+| 6 | `text__word:to` | 0.033 |
+| 7 | `text__word:of` | 0.033 |
+| 8 | `text__word:your account` | 0.032 |
+| 9 | `text__word:and` | 0.030 |
 | 10 | `text__word:list` | 0.029 |
-| 11 | `text__char: > ` | 0.028 |
-| 12 | `text__word:you` | 0.025 |
-| 13 | `text__char:___` | 0.025 |
-| 14 | `text__char:____` | 0.025 |
-| 15 | `text__char:_____` | 0.025 |
-| 16 | `text__word:on` | 0.024 |
-| 17 | `text__word:that` | 0.023 |
-| 18 | `text__char:the` | 0.022 |
+| 11 | `text__char: > ` | 0.027 |
+| 12 | `text__word:you` | 0.026 |
+| 13 | `text__word:that` | 0.025 |
+| 14 | `text__char:___` | 0.025 |
+| 15 | `text__char:____` | 0.025 |
+| 16 | `text__char:_____` | 0.024 |
+| 17 | `text__word:for` | 0.024 |
+| 18 | `text__word:on` | 0.023 |
 | 19 | `text__word:emailaddress` | 0.022 |
-| 20 | `text__word:ebay` | 0.021 |
+| 20 | `text__char:the` | 0.022 |
 
 Top 20 features, lightgbm:
 
 | # | Feature | Mean abs. contribution |
 |---|---|---|
-| 1 | `lexicon__subject_credential_cues` | 0.772 |
-| 2 | `urls__url_keyword_hits` | 0.738 |
-| 3 | `lexicon__body_credential_cues` | 0.603 |
-| 4 | `text__word:list` | 0.518 |
-| 5 | `urls__url_max_host_entropy` | 0.478 |
-| 6 | `text__char:ank ` | 0.386 |
-| 7 | `headers__hdr_return_path_mismatch` | 0.293 |
-| 8 | `text__word:your account` | 0.283 |
-| 9 | `urls__url_anchor_mismatches` | 0.280 |
-| 10 | `text__char: de` | 0.251 |
-| 11 | `text__char: © ` | 0.235 |
-| 12 | `text__char:ccou` | 0.232 |
-| 13 | `text__char:ccoun` | 0.209 |
-| 14 | `text__char:accou` | 0.208 |
-| 15 | `text__char: > ` | 0.202 |
-| 16 | `attachments__att_count` | 0.199 |
-| 17 | `text__char:ch ` | 0.168 |
-| 18 | `text__char: i ` | 0.151 |
-| 19 | `text__word:your` | 0.145 |
-| 20 | `text__word:emailaddress urladdress` | 0.144 |
+| 1 | `lexicon__subject_credential_cues` | 0.748 |
+| 2 | `urls__url_keyword_hits` | 0.719 |
+| 3 | `lexicon__body_credential_cues` | 0.570 |
+| 4 | `urls__url_max_host_entropy` | 0.512 |
+| 5 | `text__word:list` | 0.469 |
+| 6 | `headers__hdr_return_path_mismatch` | 0.312 |
+| 7 | `text__char: de` | 0.280 |
+| 8 | `text__char: © ` | 0.258 |
+| 9 | `text__char:ank ` | 0.255 |
+| 10 | `urls__url_anchor_mismatches` | 0.254 |
+| 11 | `text__char:accou` | 0.252 |
+| 12 | `text__char:unt ` | 0.231 |
+| 13 | `text__word:your account` | 0.207 |
+| 14 | `text__char:ccoun` | 0.206 |
+| 15 | `text__char:ccou` | 0.205 |
+| 16 | `text__char: > ` | 0.192 |
+| 17 | `attachments__att_count` | 0.183 |
+| 18 | `text__word:account` | 0.172 |
+| 19 | `text__char:...` | 0.168 |
+| 20 | `text__word:emailaddress urladdress` | 0.168 |
 
 Local explanation of a synthetic phishing email (`SYNTHETIC_EXAMPLE` in `mailguard.models.evaluate`), as the API will return it:
 
 | Model | Probability | Top reasons (log-odds) |
 |---|---|---|
-| logreg | 1.000 | `text__word:account` +0.27, `text__word:your account` +0.22, `text__word:your` +0.21, `text__word:customer` +0.20, `text__word:dear` +0.20 |
-| lightgbm | 1.000 | `lexicon__subject_credential_cues` +1.18, `urls__url_keyword_hits` +1.07, `lexicon__body_credential_cues` +0.86, `lexicon__subject_urgency_cues` +0.75, `urls__url_anchor_mismatches` +0.60 |
+| logreg | 1.000 | `text__word:account` +0.28, `text__word:your account` +0.21, `text__word:your` +0.21, `text__word:dear` +0.19, `text__word:customer` +0.19 |
+| lightgbm | 1.000 | `lexicon__subject_credential_cues` +1.14, `urls__url_keyword_hits` +1.04, `lexicon__subject_urgency_cues` +0.76, `lexicon__body_credential_cues` +0.75, `urls__url_anchor_mismatches` +0.53 |
 
 ## Temporal check: phishing from 2020-2025
 
 | Model | Trained up to 2019 | Trained on the main split |
 |---|---|---|
-| logreg | 96.5% [95.6, 97.4] on 1800 msg, ham FPR 1.3% [0.2, 3.0] | 97.7% [95.6, 99.3] on 259 msg |
-| lightgbm | 97.6% [96.8, 98.4] on 1800 msg, ham FPR 1.1% [0.0, 2.7] | 98.8% [97.3, 100.0] on 259 msg |
+| logreg | 96.8% [96.0, 97.6] on 1800 msg, ham FPR 1.6% [0.3, 3.3] | 97.7% [95.7, 99.2] on 259 msg |
+| lightgbm | 96.1% [95.2, 97.0] on 1800 msg, ham FPR 0.8% [0.0, 2.2] | 98.8% [97.5, 100.0] on 259 msg |
 
 Both at a 1% ham FPR threshold fixed on validation. The gap is what a model loses on campaigns from years it has never seen.
 
@@ -188,10 +188,10 @@ Both at a 1% ham FPR threshold fixed on validation. The gap is what a model lose
 
 | Model | Recall at 1% | Ham FPR | Spam FPR | PR-AUC | Trained up to 2019: 2020-2025 recall |
 |---|---|---|---|---|---|
-| lightgbm with `url_max_length` | 98.8% [97.8, 99.5] | 0.8% [0.0, 2.4] (5 msg) | 3.9% [1.5, 6.6] | 0.9993 [0.9985, 0.9998] | 95.3% [94.1, 96.3], ham FPR 0.6% [0.0, 2.0] |
-| lightgbm (served) | 98.8% [97.9, 99.6] | 1.0% [0.0, 2.7] (6 msg) | 6.0% [3.3, 9.2] | 0.9992 [0.9986, 0.9997] | 97.6% [96.8, 98.4], ham FPR 1.1% [0.0, 2.7] |
+| lightgbm with `url_max_length` | 98.5% [97.5, 99.3] | 0.8% [0.0, 2.2] (5 msg) | 3.5% [1.3, 6.2] | 0.9991 [0.9983, 0.9997] | 96.7% [95.8, 97.6], ham FPR 0.8% [0.0, 2.2] |
+| lightgbm (served) | 99.0% [98.1, 99.6] | 1.1% [0.2, 2.7] (7 msg) | 5.3% [2.7, 8.2] | 0.9990 [0.9982, 0.9997] | 96.1% [95.2, 97.0], ham FPR 0.8% [0.0, 2.2] |
 
-Without minus with, paired: recall 0.1% [0.0, 0.3], ham FPR 0.2% [0.0, 0.5], spam FPR 2.1% [0.7, 3.8], PR-AUC -0.0001 [-0.0003, 0.0004].
+Without minus with, paired: recall 0.5% [0.2, 0.9], ham FPR 0.3% [0.0, 0.8], spam FPR 1.8% [0.4, 3.4], PR-AUC -0.0001 [-0.0004, 0.0002].
 
 ## Slices: where the model is weak
 
@@ -199,8 +199,8 @@ At the 1% operating point. Words are those of the text the model reads (digits, 
 
 | Slice | Phishing | Recall logreg | Recall lightgbm | Ham | Ham FPR logreg | Ham FPR lightgbm |
 |---|---|---|---|---|---|---|
-| under 20 words | 87 | 95.4% [87.1, 100.0] | 100.0% [100.0, 100.0] | 27 | 3.7% [0.0, 12.0] | 3.7% [0.0, 12.0] |
-| 20 to 99 words | 401 | 99.0% [97.5, 100.0] | 99.3% [97.9, 100.0] | 201 | 3.0% [0.0, 7.7] | 2.0% [0.0, 6.5] |
-| 100 words or more | 718 | 97.6% [96.1, 99.0] | 98.5% [97.1, 99.6] | 394 | 0.0% [0.0, 0.0] | 0.3% [0.0, 0.8] |
-| 20+ words, mostly English | 1041 | 98.3% [97.1, 99.2] | 98.7% [97.5, 99.5] | 587 | 0.9% [0.0, 2.6] | 0.7% [0.0, 2.2] |
-| 20+ words, little English | 78 | 96.2% [91.5, 100.0] | 100.0% [100.0, 100.0] | 8 | 12.5% [0.0, 40.0] | 12.5% [0.0, 42.9] |
+| under 20 words | 87 | 95.4% [87.4, 100.0] | 100.0% [100.0, 100.0] | 27 | 3.7% [0.0, 12.0] | 3.7% [0.0, 12.0] |
+| 20 to 99 words | 401 | 99.0% [97.6, 100.0] | 99.3% [98.0, 100.0] | 201 | 3.0% [0.0, 7.8] | 3.0% [0.0, 7.8] |
+| 100 words or more | 718 | 97.6% [96.0, 98.9] | 98.7% [97.3, 99.7] | 394 | 0.0% [0.0, 0.0] | 0.0% [0.0, 0.0] |
+| 20+ words, mostly English | 1041 | 98.3% [97.1, 99.2] | 98.8% [97.9, 99.6] | 587 | 0.9% [0.0, 2.4] | 0.9% [0.0, 2.4] |
+| 20+ words, little English | 78 | 96.2% [91.2, 100.0] | 100.0% [100.0, 100.0] | 8 | 12.5% [0.0, 40.0] | 12.5% [0.0, 40.0] |

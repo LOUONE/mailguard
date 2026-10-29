@@ -2,24 +2,24 @@
   "ablation": {
     "difference": {
       "ham_fpr": {
-        "estimate": 0.0016077170418006444,
-        "high": 0.005000418060200669,
+        "estimate": 0.003215434083601287,
+        "high": 0.008171617081758568,
         "low": 0.0
       },
       "pr_auc": {
-        "estimate": -6.03728194142894e-05,
-        "high": 0.0003570972342962663,
-        "low": -0.0003357849602196177
+        "estimate": -0.00011049805355511921,
+        "high": 0.00024344967736905364,
+        "low": -0.00042405542929730404
       },
       "recall": {
-        "estimate": 0.0008291873963516272,
-        "high": 0.0026679347826087346,
-        "low": 0.0
+        "estimate": 0.004975124378109541,
+        "high": 0.00925990405447234,
+        "low": 0.0015412338955572403
       },
       "spam_fpr": {
-        "estimate": 0.021052631578947364,
-        "high": 0.03788337527524378,
-        "low": 0.006993006993006992
+        "estimate": 0.017543859649122806,
+        "high": 0.03395801623541349,
+        "low": 0.0036215766671824265
       }
     },
     "feature": "url_max_length",
@@ -29,89 +29,89 @@
           "ham_false_positives": 4,
           "ham_fpr": {
             "estimate": 0.006430868167202572,
-            "high": 0.020338983050847456,
+            "high": 0.019578263311314948,
             "low": 0.0
           },
           "recall": {
-            "estimate": 0.9635157545605307,
-            "high": 0.9762109824045838,
-            "low": 0.9500894512992487
+            "estimate": 0.9660033167495854,
+            "high": 0.9773803816736002,
+            "low": 0.9525935621964897
           },
           "recall_2004_2007": {
-            "estimate": 0.9635568513119533,
-            "high": 0.9803121772742026,
-            "low": 0.9436594877909431
+            "estimate": 0.967930029154519,
+            "high": 0.9830573300959431,
+            "low": 0.948355370317141
           },
           "recall_2015_2025": {
             "estimate": 0.9634615384615385,
-            "high": 0.980472535125969,
-            "low": 0.9440272353187334
+            "high": 0.9798170686593667,
+            "low": 0.9466073261953653
           },
           "spam_fpr": {
             "estimate": 0.0035087719298245615,
-            "high": 0.012002419354838707,
+            "high": 0.011410134542263818,
             "low": 0.0
           },
-          "threshold": 0.97583200075099
+          "threshold": 0.9755869303426603
         },
         "1pct": {
           "ham_false_positives": 5,
           "ham_fpr": {
             "estimate": 0.008038585209003215,
-            "high": 0.023815247252747248,
+            "high": 0.0223312323641271,
             "low": 0.0
           },
           "recall": {
-            "estimate": 0.9875621890547264,
-            "high": 0.9952832039927727,
-            "low": 0.9777936223214663
+            "estimate": 0.9850746268656716,
+            "high": 0.9929037515016828,
+            "low": 0.9749003533231474
           },
           "recall_2004_2007": {
-            "estimate": 0.9839650145772595,
-            "high": 0.9952734835240014,
-            "low": 0.9678970871927783
+            "estimate": 0.9825072886297376,
+            "high": 0.9937509704968944,
+            "low": 0.966304741616671
           },
           "recall_2015_2025": {
-            "estimate": 0.9923076923076923,
-            "high": 1.0,
-            "low": 0.9812012342176195
+            "estimate": 0.9884615384615385,
+            "high": 0.9980198998160685,
+            "low": 0.9776494387204293
           },
           "spam_fpr": {
-            "estimate": 0.03859649122807018,
-            "high": 0.06620209059233449,
-            "low": 0.015444015444015444
+            "estimate": 0.03508771929824561,
+            "high": 0.06188335242458951,
+            "low": 0.013108428654261773
           },
-          "threshold": 0.4439965532449968
+          "threshold": 0.636066055522453
         }
       },
       "pr_auc": {
-        "estimate": 0.999294215206496,
-        "high": 0.9997963174886192,
-        "low": 0.9985318258529673
+        "estimate": 0.999144337676873,
+        "high": 0.999726009501109,
+        "low": 0.9983392819116121
       }
     },
     "served_has_feature": false,
     "temporal": {
-      "threshold": 0.5997453014023048,
+      "threshold": 0.3301498656745945,
       "trained_on_main_split": {
         "phishing_messages": 259,
         "recall_2020_2025": {
-          "estimate": 0.9884169884169884,
-          "high": 1.0,
-          "low": 0.9730743243243243
+          "estimate": 0.9806949806949807,
+          "high": 0.9960788143382353,
+          "low": 0.9640244430961256
         }
       },
       "trained_up_to_2019": {
         "ham_fpr": {
-          "estimate": 0.006430868167202572,
-          "high": 0.020036755937767423,
+          "estimate": 0.008038585209003215,
+          "high": 0.022295668789808914,
           "low": 0.0
         },
         "phishing_messages": 1800,
         "recall_2020_2025": {
-          "estimate": 0.9527777777777777,
-          "high": 0.9630268086791787,
-          "low": 0.9407231949244294
+          "estimate": 0.9666666666666667,
+          "high": 0.9756132766293021,
+          "low": 0.9577068603953034
         }
       }
     }
@@ -121,73 +121,73 @@
       "per_1000_messages": {
         "0.001": {
           "ham_flagged": {
-            "estimate": 9.636655948553056,
-            "high": 27.003234824281147,
-            "low": 0.0
+            "estimate": 11.242765273311898,
+            "high": 26.692362270450744,
+            "low": 1.5805715419478499
           },
           "phishing_caught": {
-            "estimate": 0.988391376451078,
-            "high": 0.9957328116122987,
-            "low": 0.9788654941326697
+            "estimate": 0.9900497512437811,
+            "high": 0.996482964322588,
+            "low": 0.9813236348678421
           }
         },
         "0.005": {
           "ham_flagged": {
-            "estimate": 9.59807073954984,
-            "high": 26.895113763923668,
-            "low": 0.0
+            "estimate": 11.19774919614148,
+            "high": 26.585485945043533,
+            "low": 1.5742429271652758
           },
           "phishing_caught": {
-            "estimate": 4.94195688225539,
-            "high": 4.978664058061494,
-            "low": 4.894327470663348
+            "estimate": 4.9502487562189055,
+            "high": 4.98241482161294,
+            "low": 4.9066181743392105
           }
         },
         "0.01": {
           "ham_flagged": {
-            "estimate": 9.54983922829582,
-            "high": 26.759962438476812,
-            "low": 0.0
+            "estimate": 11.141479099678456,
+            "high": 26.451890538284523,
+            "low": 1.5663321586870582
           },
           "phishing_caught": {
-            "estimate": 9.88391376451078,
-            "high": 9.957328116122987,
-            "low": 9.788654941326696
+            "estimate": 9.900497512437811,
+            "high": 9.96482964322588,
+            "low": 9.813236348678421
           }
         },
         "0.05": {
           "ham_flagged": {
-            "estimate": 9.163987138263666,
-            "high": 25.678751834901995,
-            "low": 0.0
+            "estimate": 10.691318327974276,
+            "high": 25.38312728421242,
+            "low": 1.5030460108613186
           },
           "phishing_caught": {
-            "estimate": 49.4195688225539,
-            "high": 49.78664058061493,
-            "low": 48.94327470663348
+            "estimate": 49.50248756218906,
+            "high": 49.8241482161294,
+            "low": 49.06618174339211
           }
         }
       },
       "precision_at_1pct_threshold": {
         "0.001": {
-          "estimate": 0.09302465638200755,
-          "high": 1.0,
-          "low": 0.03550465492628625
+          "estimate": 0.08093392643119296,
+          "high": 0.3856631942111599,
+          "low": 0.035621069451781694
         },
         "0.005": {
-          "estimate": 0.33988634759153347,
-          "high": 1.0,
-          "low": 0.15597434785721503
+          "estimate": 0.30655495317890585,
+          "high": 0.7591218109620907,
+          "low": 0.15642171410464403
         },
         "0.01": {
-          "estimate": 0.5085952141189254,
-          "high": 1.0,
-          "low": 0.27085155362850355
+          "estimate": 0.4705117629841373,
+          "high": 0.8636633446505781,
+          "low": 0.27152242949349487
         },
         "0.05": {
-          "estimate": 0.8435740714614043,
-          "high": 1.0,
-          "low": 0.6593444271413502
+          "estimate": 0.8223850748450279,
+          "high": 0.9705947737744722,
+          "low": 0.6601064777776994
         }
       },
       "probability_at_prior": {
@@ -218,72 +218,72 @@
         "0.001": {
           "ham_flagged": {
             "estimate": 11.242765273311898,
-            "high": 27.711728350550672,
-            "low": 1.5536547433903576
+            "high": 26.648999999999994,
+            "low": 1.5933014354066986
           },
           "phishing_caught": {
             "estimate": 0.9792703150912107,
-            "high": 0.9889361702127659,
-            "low": 0.9673901051460148
+            "high": 0.9892404002078719,
+            "low": 0.9680215374014588
           }
         },
         "0.005": {
           "ham_flagged": {
             "estimate": 11.19774919614148,
-            "high": 27.600770479277198,
-            "low": 1.5474339035769828
+            "high": 26.542297297297292,
+            "low": 1.5869218500797448
           },
           "phishing_caught": {
             "estimate": 4.896351575456054,
-            "high": 4.944680851063829,
-            "low": 4.836950525730074
+            "high": 4.946202001039359,
+            "low": 4.840107687007294
           }
         },
         "0.01": {
           "ham_flagged": {
             "estimate": 11.141479099678456,
-            "high": 27.462073140185353,
-            "low": 1.5396578538102643
+            "high": 26.408918918918914,
+            "low": 1.5789473684210527
           },
           "phishing_caught": {
             "estimate": 9.792703150912107,
-            "high": 9.889361702127658,
-            "low": 9.673901051460147
+            "high": 9.892404002078719,
+            "low": 9.680215374014589
           }
         },
         "0.05": {
           "ham_flagged": {
             "estimate": 10.691318327974276,
-            "high": 26.35249442745059,
-            "low": 1.4774494556765163
+            "high": 25.341891891891887,
+            "low": 1.5151515151515151
           },
           "phishing_caught": {
             "estimate": 48.96351575456053,
-            "high": 49.4468085106383,
-            "low": 48.369505257300744
+            "high": 49.462020010393594,
+            "low": 48.40107687007294
           }
         }
       },
       "precision_at_1pct_threshold": {
         "0.001": {
           "estimate": 0.08012334017586992,
-          "high": 0.38709252632588803,
-          "low": 0.03398368711904573
+          "high": 0.3801308576522884,
+          "low": 0.03514834393116328
         },
         "0.005": {
           "estimate": 0.30423269028469196,
-          "high": 0.760222495552629,
-          "low": 0.15009573065263307
+          "high": 0.7548145150961308,
+          "low": 0.1546028529166319
         },
         "0.01": {
           "estimate": 0.46778532037647896,
-          "high": 0.8643716841377614,
-          "low": 0.2619871623846294
+          "high": 0.8608828431574173,
+          "low": 0.26879163649815413
         },
         "0.05": {
           "estimate": 0.8207803526335784,
-          "high": 0.9707663555663869,
-          "low": 0.6490837655146114
+          "high": 0.9699191173046621,
+          "low": 0.6569921769247569
         }
       },
       "probability_at_prior": {
@@ -318,24 +318,24 @@
   "calibration": {
     "lightgbm": {
       "brier_calibrated": {
-        "estimate": 0.013553250884172412,
-        "high": 0.020193593384651175,
-        "low": 0.007840924371287592
+        "estimate": 0.012710779487180524,
+        "high": 0.019042979289610976,
+        "low": 0.007289933947435325
       },
       "brier_raw": {
-        "estimate": 0.013819613564564171,
-        "high": 0.02068075086863813,
-        "low": 0.0077093763493079545
+        "estimate": 0.013287327552233809,
+        "high": 0.02029808670719367,
+        "low": 0.007320896003435442
       },
       "ece_calibrated": {
-        "estimate": 0.00931137200308049,
-        "high": 0.01746686494465507,
-        "low": 0.0050584500531906515
+        "estimate": 0.006959277089602978,
+        "high": 0.015790357193994888,
+        "low": 0.004677155263830343
       },
       "ece_raw": {
-        "estimate": 0.011122047168857145,
-        "high": 0.01974012189412049,
-        "low": 0.005950955779907769
+        "estimate": 0.012094521349586303,
+        "high": 0.02023533410768949,
+        "low": 0.00678287777719497
       },
       "fitted_on_prior": 0.5707524846190251,
       "method": "sigmoid",
@@ -343,311 +343,311 @@
         {
           "high": 0.1,
           "low": 0.0,
-          "mean_score": 0.004841037281118934,
-          "messages": 877,
-          "phishing_rate": 0.009122006841505131
+          "mean_score": 0.004903604552970873,
+          "messages": 872,
+          "phishing_rate": 0.010321100917431193
         },
         {
           "high": 0.2,
           "low": 0.1,
-          "mean_score": 0.1481414155407137,
-          "messages": 8,
-          "phishing_rate": 0.25
+          "mean_score": 0.1409330839164006,
+          "messages": 18,
+          "phishing_rate": 0.16666666666666666
         },
         {
           "high": 0.3,
           "low": 0.2,
-          "mean_score": 0.24469682518482067,
-          "messages": 7,
-          "phishing_rate": 0.42857142857142855
+          "mean_score": 0.25499617681567516,
+          "messages": 8,
+          "phishing_rate": 0.125
         },
         {
           "high": 0.4,
           "low": 0.3,
-          "mean_score": 0.34695365545307416,
-          "messages": 8,
-          "phishing_rate": 0.25
+          "mean_score": 0.3309470629966837,
+          "messages": 6,
+          "phishing_rate": 0.3333333333333333
         },
         {
           "high": 0.5,
           "low": 0.4,
-          "mean_score": 0.4510576232388964,
-          "messages": 2,
-          "phishing_rate": 1.0
+          "mean_score": 0.4416524811865326,
+          "messages": 5,
+          "phishing_rate": 0.6
         },
         {
           "high": 0.6,
           "low": 0.5,
-          "mean_score": 0.553730856397134,
-          "messages": 7,
-          "phishing_rate": 0.2857142857142857
-        },
-        {
-          "high": 0.7,
-          "low": 0.6,
-          "mean_score": 0.6291580422458815,
+          "mean_score": 0.5464706290336432,
           "messages": 3,
           "phishing_rate": 0.3333333333333333
         },
         {
-          "high": 0.8,
-          "low": 0.7,
-          "mean_score": 0.7680726039910141,
-          "messages": 3,
-          "phishing_rate": 0.3333333333333333
-        },
-        {
-          "high": 0.9,
-          "low": 0.8,
-          "mean_score": 0.8623675366585355,
-          "messages": 13,
-          "phishing_rate": 0.6923076923076923
-        },
-        {
-          "high": 1.0,
-          "low": 0.9,
-          "mean_score": 0.9971868590138999,
-          "messages": 1185,
-          "phishing_rate": 0.9924050632911392
-        }
-      ],
-      "reliability_raw": [
-        {
-          "high": 0.1,
-          "low": 0.0,
-          "mean_score": 0.002300444154485164,
-          "messages": 885,
-          "phishing_rate": 0.011299435028248588
-        },
-        {
-          "high": 0.2,
-          "low": 0.1,
-          "mean_score": 0.15069670903518076,
-          "messages": 7,
-          "phishing_rate": 0.42857142857142855
-        },
-        {
-          "high": 0.3,
-          "low": 0.2,
-          "mean_score": 0.2433872071719191,
-          "messages": 8,
-          "phishing_rate": 0.25
-        },
-        {
-          "high": 0.4,
-          "low": 0.3,
-          "mean_score": 0.35236893115983825,
-          "messages": 2,
-          "phishing_rate": 1.0
-        },
-        {
-          "high": 0.5,
-          "low": 0.4,
-          "mean_score": 0.45432880993344876,
-          "messages": 5,
-          "phishing_rate": 0.4
-        },
-        {
-          "high": 0.6,
-          "low": 0.5,
-          "mean_score": 0.5321796413875922,
-          "messages": 4,
-          "phishing_rate": 0.25
-        },
-        {
           "high": 0.7,
           "low": 0.6,
-          "mean_score": 0.6438298782203649,
-          "messages": 2,
-          "phishing_rate": 0.0
-        },
-        {
-          "high": 0.8,
-          "low": 0.7,
-          "mean_score": 0.7771502784670075,
-          "messages": 2,
-          "phishing_rate": 0.5
-        },
-        {
-          "high": 0.9,
-          "low": 0.8,
-          "mean_score": 0.8501000138453282,
-          "messages": 10,
-          "phishing_rate": 0.8
-        },
-        {
-          "high": 1.0,
-          "low": 0.9,
-          "mean_score": 0.9978957644447897,
-          "messages": 1188,
-          "phishing_rate": 0.9907407407407407
-        }
-      ]
-    },
-    "logreg": {
-      "brier_calibrated": {
-        "estimate": 0.017238548748671065,
-        "high": 0.024575926602849307,
-        "low": 0.010913961794083894
-      },
-      "brier_raw": {
-        "estimate": 0.017788284586915885,
-        "high": 0.02409467904338603,
-        "low": 0.012337793361478817
-      },
-      "ece_calibrated": {
-        "estimate": 0.009885355150043369,
-        "high": 0.019461236124684464,
-        "low": 0.006354237128070614
-      },
-      "ece_raw": {
-        "estimate": 0.01620156567889629,
-        "high": 0.025058466801461468,
-        "low": 0.01354404250477086
-      },
-      "fitted_on_prior": 0.5707524846190251,
-      "method": "sigmoid",
-      "reliability_calibrated": [
-        {
-          "high": 0.1,
-          "low": 0.0,
-          "mean_score": 0.00679192844182388,
-          "messages": 868,
-          "phishing_rate": 0.012672811059907835
-        },
-        {
-          "high": 0.2,
-          "low": 0.1,
-          "mean_score": 0.14451040104008053,
-          "messages": 21,
-          "phishing_rate": 0.2857142857142857
-        },
-        {
-          "high": 0.3,
-          "low": 0.2,
-          "mean_score": 0.2518788352971363,
-          "messages": 13,
-          "phishing_rate": 0.23076923076923078
-        },
-        {
-          "high": 0.4,
-          "low": 0.3,
-          "mean_score": 0.3506482713452642,
-          "messages": 5,
-          "phishing_rate": 0.4
-        },
-        {
-          "high": 0.5,
-          "low": 0.4,
-          "mean_score": 0.44819876151770455,
-          "messages": 9,
-          "phishing_rate": 0.3333333333333333
-        },
-        {
-          "high": 0.6,
-          "low": 0.5,
-          "mean_score": 0.573867733777475,
-          "messages": 5,
-          "phishing_rate": 0.8
-        },
-        {
-          "high": 0.7,
-          "low": 0.6,
-          "mean_score": 0.6638123800203014,
-          "messages": 12,
+          "mean_score": 0.6528472897349559,
+          "messages": 6,
           "phishing_rate": 0.8333333333333334
         },
         {
           "high": 0.8,
           "low": 0.7,
-          "mean_score": 0.7481990021866849,
-          "messages": 5,
+          "mean_score": 0.7589701310860668,
+          "messages": 1,
           "phishing_rate": 1.0
         },
         {
           "high": 0.9,
           "low": 0.8,
-          "mean_score": 0.861448771008792,
-          "messages": 23,
-          "phishing_rate": 0.9565217391304348
+          "mean_score": 0.8434086753262746,
+          "messages": 18,
+          "phishing_rate": 0.5555555555555556
         },
         {
           "high": 1.0,
           "low": 0.9,
-          "mean_score": 0.993621787637897,
-          "messages": 1152,
-          "phishing_rate": 0.9895833333333334
+          "mean_score": 0.9953002105723416,
+          "messages": 1176,
+          "phishing_rate": 0.9957482993197279
         }
       ],
       "reliability_raw": [
         {
           "high": 0.1,
           "low": 0.0,
-          "mean_score": 0.018120231106877327,
-          "messages": 811,
-          "phishing_rate": 0.009864364981504316
+          "mean_score": 0.0025484436155014493,
+          "messages": 885,
+          "phishing_rate": 0.013559322033898305
         },
         {
           "high": 0.2,
           "low": 0.1,
-          "mean_score": 0.1402384340763092,
-          "messages": 57,
-          "phishing_rate": 0.05263157894736842
+          "mean_score": 0.1387726583179345,
+          "messages": 8,
+          "phishing_rate": 0.0
         },
         {
           "high": 0.3,
           "low": 0.2,
-          "mean_score": 0.24555116891860962,
-          "messages": 22,
-          "phishing_rate": 0.2727272727272727
+          "mean_score": 0.2486002106397781,
+          "messages": 9,
+          "phishing_rate": 0.3333333333333333
         },
         {
           "high": 0.4,
           "low": 0.3,
-          "mean_score": 0.3460477888584137,
-          "messages": 14,
-          "phishing_rate": 0.2857142857142857
+          "mean_score": 0.36454103392933423,
+          "messages": 4,
+          "phishing_rate": 0.25
         },
         {
           "high": 0.5,
           "low": 0.4,
-          "mean_score": 0.4564155638217926,
-          "messages": 11,
-          "phishing_rate": 0.36363636363636365
+          "mean_score": 0.4605493649690315,
+          "messages": 2,
+          "phishing_rate": 1.0
         },
         {
           "high": 0.6,
           "low": 0.5,
-          "mean_score": 0.5522929430007935,
-          "messages": 7,
-          "phishing_rate": 0.7142857142857143
+          "mean_score": 0.5339640105313345,
+          "messages": 3,
+          "phishing_rate": 0.0
         },
         {
           "high": 0.7,
           "low": 0.6,
-          "mean_score": 0.6329813599586487,
-          "messages": 15,
-          "phishing_rate": 0.8666666666666667
+          "mean_score": 0.6833689386954012,
+          "messages": 4,
+          "phishing_rate": 0.75
         },
         {
           "high": 0.8,
           "low": 0.7,
-          "mean_score": 0.7636188268661499,
-          "messages": 20,
-          "phishing_rate": 0.95
+          "mean_score": 0.7402718359052116,
+          "messages": 3,
+          "phishing_rate": 1.0
         },
         {
           "high": 0.9,
           "low": 0.8,
-          "mean_score": 0.8579502701759338,
-          "messages": 94,
-          "phishing_rate": 0.8723404255319149
+          "mean_score": 0.8783714108760549,
+          "messages": 4,
+          "phishing_rate": 0.5
         },
         {
           "high": 1.0,
           "low": 0.9,
-          "mean_score": 0.9902427792549133,
-          "messages": 1062,
+          "mean_score": 0.997682758205062,
+          "messages": 1191,
+          "phishing_rate": 0.9907640638119227
+        }
+      ]
+    },
+    "logreg": {
+      "brier_calibrated": {
+        "estimate": 0.018630546204412526,
+        "high": 0.02601951716814187,
+        "low": 0.012340662840259057
+      },
+      "brier_raw": {
+        "estimate": 0.019105746940941394,
+        "high": 0.0259571684549718,
+        "low": 0.013376397838332185
+      },
+      "ece_calibrated": {
+        "estimate": 0.010826694666340028,
+        "high": 0.0207422623184712,
+        "low": 0.008021935164357355
+      },
+      "ece_raw": {
+        "estimate": 0.016664491007056026,
+        "high": 0.026549737624175854,
+        "low": 0.014094741758451435
+      },
+      "fitted_on_prior": 0.5707524846190251,
+      "method": "sigmoid",
+      "reliability_calibrated": [
+        {
+          "high": 0.1,
+          "low": 0.0,
+          "mean_score": 0.007673783518916538,
+          "messages": 866,
+          "phishing_rate": 0.013856812933025405
+        },
+        {
+          "high": 0.2,
+          "low": 0.1,
+          "mean_score": 0.14658767455966942,
+          "messages": 21,
+          "phishing_rate": 0.23809523809523808
+        },
+        {
+          "high": 0.3,
+          "low": 0.2,
+          "mean_score": 0.22971649422210635,
+          "messages": 9,
+          "phishing_rate": 0.3333333333333333
+        },
+        {
+          "high": 0.4,
+          "low": 0.3,
+          "mean_score": 0.35033249517005555,
+          "messages": 9,
+          "phishing_rate": 0.3333333333333333
+        },
+        {
+          "high": 0.5,
+          "low": 0.4,
+          "mean_score": 0.43861094296491715,
+          "messages": 5,
+          "phishing_rate": 0.6
+        },
+        {
+          "high": 0.6,
+          "low": 0.5,
+          "mean_score": 0.5528686827839744,
+          "messages": 18,
+          "phishing_rate": 0.6666666666666666
+        },
+        {
+          "high": 0.7,
+          "low": 0.6,
+          "mean_score": 0.6614788879051007,
+          "messages": 7,
+          "phishing_rate": 0.2857142857142857
+        },
+        {
+          "high": 0.8,
+          "low": 0.7,
+          "mean_score": 0.7556860704116608,
+          "messages": 9,
+          "phishing_rate": 1.0
+        },
+        {
+          "high": 0.9,
+          "low": 0.8,
+          "mean_score": 0.8569032527621612,
+          "messages": 23,
+          "phishing_rate": 1.0
+        },
+        {
+          "high": 1.0,
+          "low": 0.9,
+          "mean_score": 0.9926172667987913,
+          "messages": 1146,
+          "phishing_rate": 0.9895287958115183
+        }
+      ],
+      "reliability_raw": [
+        {
+          "high": 0.1,
+          "low": 0.0,
+          "mean_score": 0.018593020737171173,
+          "messages": 789,
+          "phishing_rate": 0.008871989860583017
+        },
+        {
+          "high": 0.2,
+          "low": 0.1,
+          "mean_score": 0.13776765763759613,
+          "messages": 68,
+          "phishing_rate": 0.058823529411764705
+        },
+        {
+          "high": 0.3,
+          "low": 0.2,
+          "mean_score": 0.24172070622444153,
+          "messages": 27,
+          "phishing_rate": 0.2222222222222222
+        },
+        {
+          "high": 0.4,
+          "low": 0.3,
+          "mean_score": 0.3369288146495819,
+          "messages": 12,
+          "phishing_rate": 0.25
+        },
+        {
+          "high": 0.5,
+          "low": 0.4,
+          "mean_score": 0.45110607147216797,
+          "messages": 12,
+          "phishing_rate": 0.3333333333333333
+        },
+        {
+          "high": 0.6,
+          "low": 0.5,
+          "mean_score": 0.5734436511993408,
+          "messages": 20,
+          "phishing_rate": 0.7
+        },
+        {
+          "high": 0.7,
+          "low": 0.6,
+          "mean_score": 0.6623649597167969,
+          "messages": 10,
+          "phishing_rate": 0.5
+        },
+        {
+          "high": 0.8,
+          "low": 0.7,
+          "mean_score": 0.7630441188812256,
+          "messages": 18,
+          "phishing_rate": 1.0
+        },
+        {
+          "high": 0.9,
+          "low": 0.8,
+          "mean_score": 0.8640626072883606,
+          "messages": 96,
+          "phishing_rate": 0.875
+        },
+        {
+          "high": 1.0,
+          "low": 0.9,
+          "mean_score": 0.9908376932144165,
+          "messages": 1061,
           "phishing_rate": 1.0
         }
       ]
@@ -662,71 +662,71 @@
       },
       "mcnemar": {
         "only_a_correct": 7,
-        "only_b_correct": 51,
-        "p_value": 2.4021645783633976e-09,
-        "statistic": 31.879310344827587
+        "only_b_correct": 54,
+        "p_value": 4.32210722073334e-10,
+        "statistic": 34.68852459016394
       },
       "recall_difference": {
-        "estimate": 0.03814262023217241,
-        "high": 0.05268262922421263,
-        "low": 0.025661237941480355
+        "estimate": 0.03980099502487566,
+        "high": 0.053558105792626244,
+        "low": 0.027075114803676
       }
     },
     "1pct": {
       "ham_fpr_difference": {
-        "estimate": -0.0016077170418006426,
-        "high": 0.0033059219528214097,
-        "low": -0.00782472613458529
+        "estimate": 0.0,
+        "high": 0.004808078778135048,
+        "low": -0.004724409448818898
       },
       "mcnemar": {
-        "only_a_correct": 12,
-        "only_b_correct": 17,
-        "p_value": 0.45825831964612007,
-        "statistic": 0.5517241379310345
+        "only_a_correct": 6,
+        "only_b_correct": 20,
+        "p_value": 0.009355306625366211,
+        "statistic": 6.5
       },
       "recall_difference": {
-        "estimate": 0.009121061359867344,
-        "high": 0.017800039560222154,
-        "low": 0.002583868237050632
+        "estimate": 0.010779436152570487,
+        "high": 0.018105407523510978,
+        "low": 0.004392244119032364
       }
     },
     "pr_auc_difference": {
-      "estimate": 0.0014332102381443557,
-      "high": 0.0027448114209880996,
-      "low": 0.0005027756131729679
+      "estimate": 0.0016809542759737006,
+      "high": 0.003189230633467102,
+      "low": 0.0006212570027568006
     }
   },
   "explanations": {
     "lightgbm": {
       "example": {
-        "probability": 0.9999549104728488,
+        "probability": 0.9999105194757468,
         "reasons": [
           {
-            "contribution": 1.1836986075480804,
+            "contribution": 1.1351539368669201,
             "direction": "phishing",
             "feature": "lexicon__subject_credential_cues",
             "group": "lexicon"
           },
           {
-            "contribution": 1.0691242877442586,
+            "contribution": 1.0440735464356357,
             "direction": "phishing",
             "feature": "urls__url_keyword_hits",
             "group": "urls"
           },
           {
-            "contribution": 0.8607081291470765,
-            "direction": "phishing",
-            "feature": "lexicon__body_credential_cues",
-            "group": "lexicon"
-          },
-          {
-            "contribution": 0.7494937110411408,
+            "contribution": 0.7551415003332034,
             "direction": "phishing",
             "feature": "lexicon__subject_urgency_cues",
             "group": "lexicon"
           },
           {
-            "contribution": 0.5977261249548984,
+            "contribution": 0.7511305861754002,
+            "direction": "phishing",
+            "feature": "lexicon__body_credential_cues",
+            "group": "lexicon"
+          },
+          {
+            "contribution": 0.5307430517435399,
             "direction": "phishing",
             "feature": "urls__url_anchor_mismatches",
             "group": "urls"
@@ -734,127 +734,127 @@
         ]
       },
       "group_share": {
-        "attachments": 0.010687806551402168,
-        "headers": 0.03181501739364091,
-        "lexicon": 0.09746326827155836,
-        "text": 0.7674169973801546,
-        "urls": 0.09261691040324399
+        "attachments": 0.010112566029094884,
+        "headers": 0.02909860458119336,
+        "lexicon": 0.09513004129064016,
+        "text": 0.7738392075582166,
+        "urls": 0.09181958054085503
       },
       "top_features": [
         {
           "feature": "lexicon__subject_credential_cues",
-          "mean_abs_contribution": 0.7720365166735916
+          "mean_abs_contribution": 0.7482758565043381
         },
         {
           "feature": "urls__url_keyword_hits",
-          "mean_abs_contribution": 0.7380029047120141
+          "mean_abs_contribution": 0.7191434061714086
         },
         {
           "feature": "lexicon__body_credential_cues",
-          "mean_abs_contribution": 0.6029781574921688
-        },
-        {
-          "feature": "text__word:list",
-          "mean_abs_contribution": 0.5183633197240572
+          "mean_abs_contribution": 0.5698319060890276
         },
         {
           "feature": "urls__url_max_host_entropy",
-          "mean_abs_contribution": 0.47771525345431887
+          "mean_abs_contribution": 0.5116967523611266
         },
         {
-          "feature": "text__char:ank ",
-          "mean_abs_contribution": 0.3862069752715669
+          "feature": "text__word:list",
+          "mean_abs_contribution": 0.46900908343166625
         },
         {
           "feature": "headers__hdr_return_path_mismatch",
-          "mean_abs_contribution": 0.2929063854037854
-        },
-        {
-          "feature": "text__word:your account",
-          "mean_abs_contribution": 0.2826967256629815
-        },
-        {
-          "feature": "urls__url_anchor_mismatches",
-          "mean_abs_contribution": 0.2802579920056551
+          "mean_abs_contribution": 0.31175463900151257
         },
         {
           "feature": "text__char: de",
-          "mean_abs_contribution": 0.2505462721411783
+          "mean_abs_contribution": 0.2800385344157322
         },
         {
           "feature": "text__char: \u00a9 ",
-          "mean_abs_contribution": 0.234543492756832
+          "mean_abs_contribution": 0.2582231995854805
         },
         {
-          "feature": "text__char:ccou",
-          "mean_abs_contribution": 0.2324939976069248
+          "feature": "text__char:ank ",
+          "mean_abs_contribution": 0.2553185635890048
         },
         {
-          "feature": "text__char:ccoun",
-          "mean_abs_contribution": 0.2091288182745791
+          "feature": "urls__url_anchor_mismatches",
+          "mean_abs_contribution": 0.2538129034925438
         },
         {
           "feature": "text__char:accou",
-          "mean_abs_contribution": 0.2081962993222108
+          "mean_abs_contribution": 0.25235360466529794
+        },
+        {
+          "feature": "text__char:unt ",
+          "mean_abs_contribution": 0.23117291564298767
+        },
+        {
+          "feature": "text__word:your account",
+          "mean_abs_contribution": 0.206706063191025
+        },
+        {
+          "feature": "text__char:ccoun",
+          "mean_abs_contribution": 0.20580752131738647
+        },
+        {
+          "feature": "text__char:ccou",
+          "mean_abs_contribution": 0.2046570583493793
         },
         {
           "feature": "text__char: > ",
-          "mean_abs_contribution": 0.2023405063430301
+          "mean_abs_contribution": 0.19199272770773546
         },
         {
           "feature": "attachments__att_count",
-          "mean_abs_contribution": 0.1988767432355667
+          "mean_abs_contribution": 0.1830703706286696
         },
         {
-          "feature": "text__char:ch ",
-          "mean_abs_contribution": 0.16824308134834706
+          "feature": "text__word:account",
+          "mean_abs_contribution": 0.17229890369451878
         },
         {
-          "feature": "text__char: i ",
-          "mean_abs_contribution": 0.15102884457999322
-        },
-        {
-          "feature": "text__word:your",
-          "mean_abs_contribution": 0.1454225668172691
+          "feature": "text__char:...",
+          "mean_abs_contribution": 0.16828939710661406
         },
         {
           "feature": "text__word:emailaddress urladdress",
-          "mean_abs_contribution": 0.14404630073095012
+          "mean_abs_contribution": 0.16804016440891248
         }
       ]
     },
     "logreg": {
       "example": {
-        "probability": 0.9999987639581699,
+        "probability": 0.9999977818612767,
         "reasons": [
           {
-            "contribution": 0.27001962065696716,
+            "contribution": 0.2777579426765442,
             "direction": "phishing",
             "feature": "text__word:account",
             "group": "text"
           },
           {
-            "contribution": 0.21801738440990448,
+            "contribution": 0.21303370594978333,
             "direction": "phishing",
             "feature": "text__word:your account",
             "group": "text"
           },
           {
-            "contribution": 0.21279817819595337,
+            "contribution": 0.21133211255073547,
             "direction": "phishing",
             "feature": "text__word:your",
             "group": "text"
           },
           {
-            "contribution": 0.20178821682929993,
+            "contribution": 0.19489842653274536,
             "direction": "phishing",
-            "feature": "text__word:customer",
+            "feature": "text__word:dear",
             "group": "text"
           },
           {
-            "contribution": 0.20130744576454163,
+            "contribution": 0.19381174445152283,
             "direction": "phishing",
-            "feature": "text__word:dear",
+            "feature": "text__word:customer",
             "group": "text"
           }
         ]
@@ -865,83 +865,83 @@
       "top_features": [
         {
           "feature": "text__word:the",
-          "mean_abs_contribution": 0.07658065855503082
+          "mean_abs_contribution": 0.07482808083295822
         },
         {
           "feature": "text__word:account",
-          "mean_abs_contribution": 0.06326420605182648
+          "mean_abs_contribution": 0.06497567147016525
         },
         {
           "feature": "text__word:your",
-          "mean_abs_contribution": 0.05704202502965927
+          "mean_abs_contribution": 0.05708262696862221
         },
         {
           "feature": "text__word:urladdress",
-          "mean_abs_contribution": 0.05098940432071686
+          "mean_abs_contribution": 0.056840930134058
         },
         {
           "feature": "text__word:is",
-          "mean_abs_contribution": 0.04234403744339943
+          "mean_abs_contribution": 0.038167595863342285
         },
         {
           "feature": "text__word:to",
-          "mean_abs_contribution": 0.03378497436642647
+          "mean_abs_contribution": 0.033280059695243835
         },
         {
           "feature": "text__word:of",
-          "mean_abs_contribution": 0.033512648195028305
-        },
-        {
-          "feature": "text__word:and",
-          "mean_abs_contribution": 0.032475635409355164
+          "mean_abs_contribution": 0.03287439048290253
         },
         {
           "feature": "text__word:your account",
-          "mean_abs_contribution": 0.03239763528108597
+          "mean_abs_contribution": 0.031690943986177444
+        },
+        {
+          "feature": "text__word:and",
+          "mean_abs_contribution": 0.030163181945681572
         },
         {
           "feature": "text__word:list",
-          "mean_abs_contribution": 0.029365157708525658
+          "mean_abs_contribution": 0.02937452681362629
         },
         {
           "feature": "text__char: > ",
-          "mean_abs_contribution": 0.028114695101976395
+          "mean_abs_contribution": 0.027446338906884193
         },
         {
           "feature": "text__word:you",
-          "mean_abs_contribution": 0.02525254152715206
-        },
-        {
-          "feature": "text__char:___",
-          "mean_abs_contribution": 0.024979259818792343
-        },
-        {
-          "feature": "text__char:____",
-          "mean_abs_contribution": 0.024849016219377518
-        },
-        {
-          "feature": "text__char:_____",
-          "mean_abs_contribution": 0.024702081456780434
-        },
-        {
-          "feature": "text__word:on",
-          "mean_abs_contribution": 0.024218613281846046
+          "mean_abs_contribution": 0.026461279019713402
         },
         {
           "feature": "text__word:that",
-          "mean_abs_contribution": 0.023379698395729065
+          "mean_abs_contribution": 0.02479606866836548
         },
         {
-          "feature": "text__char:the",
-          "mean_abs_contribution": 0.02203254960477352
+          "feature": "text__char:___",
+          "mean_abs_contribution": 0.024709416553378105
+        },
+        {
+          "feature": "text__char:____",
+          "mean_abs_contribution": 0.024566300213336945
+        },
+        {
+          "feature": "text__char:_____",
+          "mean_abs_contribution": 0.02442321367561817
+        },
+        {
+          "feature": "text__word:for",
+          "mean_abs_contribution": 0.024121778085827827
+        },
+        {
+          "feature": "text__word:on",
+          "mean_abs_contribution": 0.023412983864545822
         },
         {
           "feature": "text__word:emailaddress",
-          "mean_abs_contribution": 0.021707914769649506
+          "mean_abs_contribution": 0.022288164123892784
         },
         {
-          "feature": "text__word:ebay",
-          "mean_abs_contribution": 0.020977290347218513
+          "feature": "text__char:the",
+          "mean_abs_contribution": 0.02153872884809971
         }
       ]
     }
@@ -953,65 +953,65 @@
           "ham_false_positives": 5,
           "ham_fpr": {
             "estimate": 0.008038585209003215,
-            "high": 0.023815247252747248,
+            "high": 0.0223312323641271,
             "low": 0.0
           },
           "recall": {
-            "estimate": 0.9834162520729685,
-            "high": 0.9917970580376984,
-            "low": 0.9734188507444322
+            "estimate": 0.9825870646766169,
+            "high": 0.9910813474705347,
+            "low": 0.9721924137226874
           },
           "recall_2004_2007": {
-            "estimate": 0.9825072886297376,
-            "high": 0.9941462193500614,
-            "low": 0.9665475745534661
+            "estimate": 0.9810495626822158,
+            "high": 0.9925708550667767,
+            "low": 0.9633888043063261
           },
           "recall_2015_2025": {
             "estimate": 0.9846153846153847,
-            "high": 0.9947372299407303,
-            "low": 0.9716951808036463
+            "high": 0.9946465773809524,
+            "low": 0.9715895614110747
           },
           "spam_fpr": {
-            "estimate": 0.031578947368421054,
-            "high": 0.05724486241727621,
-            "low": 0.011109068627450983
+            "estimate": 0.028070175438596492,
+            "high": 0.05243938497930219,
+            "low": 0.0073522678302090074
           },
-          "threshold": 0.7901990345199144
+          "threshold": 0.6468910774676284
         },
         "1pct": {
-          "ham_false_positives": 6,
+          "ham_false_positives": 7,
           "ham_fpr": {
-            "estimate": 0.00964630225080386,
-            "high": 0.02703026508937052,
-            "low": 0.0
+            "estimate": 0.011254019292604502,
+            "high": 0.026719081351802548,
+            "low": 0.0015821536956434933
           },
           "recall": {
-            "estimate": 0.988391376451078,
-            "high": 0.9957328116122987,
-            "low": 0.9788654941326697
+            "estimate": 0.9900497512437811,
+            "high": 0.996482964322588,
+            "low": 0.9813236348678421
           },
           "recall_2004_2007": {
-            "estimate": 0.9854227405247813,
-            "high": 0.9967807894575919,
-            "low": 0.9706366799697818
+            "estimate": 0.9883381924198251,
+            "high": 0.9984664914708963,
+            "low": 0.9734056685138739
           },
           "recall_2015_2025": {
             "estimate": 0.9923076923076923,
             "high": 1.0,
-            "low": 0.9812012342176195
+            "low": 0.9821419696109059
           },
           "spam_fpr": {
-            "estimate": 0.05964912280701754,
-            "high": 0.09160052910052907,
-            "low": 0.032721365277321966
+            "estimate": 0.05263157894736842,
+            "high": 0.08224084614626453,
+            "low": 0.02651233873387339
           },
-          "threshold": 0.3621583958264023
+          "threshold": 0.2907898370924234
         }
       },
       "pr_auc": {
-        "estimate": 0.9992338423870817,
-        "high": 0.9996825517565969,
-        "low": 0.9986378498052839
+        "estimate": 0.9990338396233179,
+        "high": 0.9996500482370045,
+        "low": 0.9982069880877278
       }
     },
     "logreg": {
@@ -1020,65 +1020,65 @@
           "ham_false_positives": 5,
           "ham_fpr": {
             "estimate": 0.008038585209003215,
-            "high": 0.023815247252747248,
+            "high": 0.0223312323641271,
             "low": 0.0
           },
           "recall": {
-            "estimate": 0.945273631840796,
-            "high": 0.9601076703663801,
-            "low": 0.9275352083845083
+            "estimate": 0.9427860696517413,
+            "high": 0.9582971862073081,
+            "low": 0.9259509254989791
           },
           "recall_2004_2007": {
-            "estimate": 0.9314868804664723,
-            "high": 0.9543687704151832,
-            "low": 0.9044461924181453
+            "estimate": 0.9256559766763849,
+            "high": 0.9502315211799005,
+            "low": 0.8964664008041636
           },
           "recall_2015_2025": {
-            "estimate": 0.9634615384615385,
-            "high": 0.980360297589132,
-            "low": 0.9429080188335978
+            "estimate": 0.9653846153846154,
+            "high": 0.9800733646513091,
+            "low": 0.9485959648872169
           },
           "spam_fpr": {
             "estimate": 0.02456140350877193,
-            "high": 0.046588319406586524,
-            "low": 0.007039207563721432
+            "high": 0.04247515788213462,
+            "low": 0.008427848101265832
           },
-          "threshold": 0.9019640121489726
+          "threshold": 0.8941593462850738
         },
         "1pct": {
           "ham_false_positives": 7,
           "ham_fpr": {
             "estimate": 0.011254019292604502,
-            "high": 0.027739467818369043,
-            "low": 0.0015552099533437014
+            "high": 0.026675675675675668,
+            "low": 0.001594896331738437
           },
           "recall": {
             "estimate": 0.9792703150912107,
-            "high": 0.9889361702127659,
-            "low": 0.9673901051460148
+            "high": 0.9892404002078719,
+            "low": 0.9680215374014588
           },
           "recall_2004_2007": {
             "estimate": 0.9752186588921283,
-            "high": 0.9894606293492091,
-            "low": 0.9572101707401
+            "high": 0.9897679385328343,
+            "low": 0.9572306522354272
           },
           "recall_2015_2025": {
             "estimate": 0.9846153846153847,
-            "high": 0.995985718020009,
-            "low": 0.9707588061951754
+            "high": 0.9944964155010779,
+            "low": 0.971856088391711
           },
           "spam_fpr": {
-            "estimate": 0.03508771929824561,
-            "high": 0.05822974801285302,
-            "low": 0.015029301194161881
+            "estimate": 0.056140350877192984,
+            "high": 0.0851063829787234,
+            "low": 0.025974025974025976
           },
-          "threshold": 0.47043011888955416
+          "threshold": 0.4655739979905013
         }
       },
       "pr_auc": {
-        "estimate": 0.9978006321489373,
-        "high": 0.9990535708029535,
-        "low": 0.9960316643534126
+        "estimate": 0.9973528853473442,
+        "high": 0.9988179070472647,
+        "low": 0.9952894159433232
       }
     }
   },
@@ -1121,7 +1121,7 @@
         "recall": {
           "estimate": 0.9540229885057471,
           "high": 1.0,
-          "low": 0.8709435483870968
+          "low": 0.8738691322901849
         }
       },
       "phishing": 87,
@@ -1131,26 +1131,26 @@
       "ham": 201,
       "lightgbm": {
         "ham_fpr": {
-          "estimate": 0.01990049751243781,
-          "high": 0.06452484742807323,
+          "estimate": 0.029850746268656716,
+          "high": 0.07813265931372548,
           "low": 0.0
         },
         "recall": {
           "estimate": 0.9925187032418953,
           "high": 1.0,
-          "low": 0.9788859884805973
+          "low": 0.9797898338220918
         }
       },
       "logreg": {
         "ham_fpr": {
           "estimate": 0.029850746268656716,
-          "high": 0.0773202995956029,
+          "high": 0.0776380565068493,
           "low": 0.0
         },
         "recall": {
           "estimate": 0.9900249376558603,
           "high": 1.0,
-          "low": 0.975300925925926
+          "low": 0.975902159362086
         }
       },
       "phishing": 401,
@@ -1160,14 +1160,14 @@
       "ham": 394,
       "lightgbm": {
         "ham_fpr": {
-          "estimate": 0.0025380710659898475,
-          "high": 0.008131188941317206,
+          "estimate": 0.0,
+          "high": 0.0,
           "low": 0.0
         },
         "recall": {
-          "estimate": 0.9846796657381616,
-          "high": 0.9958864397460889,
-          "low": 0.9706999831891963
+          "estimate": 0.9874651810584958,
+          "high": 0.9971348751534997,
+          "low": 0.9729020151230369
         }
       },
       "logreg": {
@@ -1178,8 +1178,8 @@
         },
         "recall": {
           "estimate": 0.9763231197771588,
-          "high": 0.9895064221620533,
-          "low": 0.9605585403802207
+          "high": 0.9893761822735583,
+          "low": 0.9598119711340665
         }
       },
       "phishing": 718,
@@ -1189,26 +1189,26 @@
       "ham": 587,
       "lightgbm": {
         "ham_fpr": {
-          "estimate": 0.0068143100511073255,
-          "high": 0.021590610723100347,
+          "estimate": 0.008517887563884156,
+          "high": 0.024025267185644534,
           "low": 0.0
         },
         "recall": {
-          "estimate": 0.9865513928914506,
-          "high": 0.9949264568981567,
-          "low": 0.9752039363208324
+          "estimate": 0.9884726224783862,
+          "high": 0.9958605878732895,
+          "low": 0.9785045932882507
         }
       },
       "logreg": {
         "ham_fpr": {
           "estimate": 0.008517887563884156,
-          "high": 0.026026411696347625,
+          "high": 0.02366192293329598,
           "low": 0.0
         },
         "recall": {
           "estimate": 0.9827089337175793,
-          "high": 0.9918715578284815,
-          "low": 0.9714008506959637
+          "high": 0.9921193845500644,
+          "low": 0.9709960583153348
         }
       },
       "phishing": 1041,
@@ -1219,7 +1219,7 @@
       "lightgbm": {
         "ham_fpr": {
           "estimate": 0.125,
-          "high": 0.42857142857142855,
+          "high": 0.4,
           "low": 0.0
         },
         "recall": {
@@ -1237,7 +1237,7 @@
         "recall": {
           "estimate": 0.9615384615384616,
           "high": 1.0,
-          "low": 0.9152387350144688
+          "low": 0.9120798319327731
         }
       },
       "phishing": 78,
@@ -1246,50 +1246,50 @@
   ],
   "temporal": {
     "lightgbm": {
-      "threshold": 0.23374477865309815,
+      "threshold": 0.35823130888286137,
       "trained_on_main_split": {
         "phishing_messages": 259,
         "recall_2020_2025": {
           "estimate": 0.9884169884169884,
           "high": 1.0,
-          "low": 0.9730743243243243
+          "low": 0.974722324698938
         }
       },
       "trained_up_to_2019": {
         "ham_fpr": {
-          "estimate": 0.011254019292604502,
-          "high": 0.02700396825396824,
+          "estimate": 0.008038585209003215,
+          "high": 0.022295668789808914,
           "low": 0.0
         },
         "phishing_messages": 1800,
         "recall_2020_2025": {
-          "estimate": 0.9761111111111112,
-          "high": 0.9837845795608767,
-          "low": 0.967849223946785
+          "estimate": 0.9605555555555556,
+          "high": 0.970082479991499,
+          "low": 0.9515752117675736
         }
       }
     },
     "logreg": {
-      "threshold": 0.46373334527015686,
+      "threshold": 0.4370672106742859,
       "trained_on_main_split": {
         "phishing_messages": 259,
         "recall_2020_2025": {
           "estimate": 0.9768339768339769,
-          "high": 0.9926746611053181,
-          "low": 0.9560317460317461
+          "high": 0.9924242424242424,
+          "low": 0.9565174258109042
         }
       },
       "trained_up_to_2019": {
         "ham_fpr": {
-          "estimate": 0.012861736334405145,
-          "high": 0.029610814467487392,
-          "low": 0.0016179275518659227
+          "estimate": 0.01607717041800643,
+          "high": 0.03297093285263632,
+          "low": 0.003424657534246575
         },
         "phishing_messages": 1800,
         "recall_2020_2025": {
-          "estimate": 0.965,
-          "high": 0.973716613333906,
-          "low": 0.9562360439527631
+          "estimate": 0.9683333333333334,
+          "high": 0.9763520163864652,
+          "low": 0.9597762216174743
         }
       }
     }
