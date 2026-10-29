@@ -119,6 +119,12 @@ is suspicious: on the test split, ham without list headers is flagged 3.4% of th
 0.4% for list mail. The predicted phishing rate panel is exactly where an operator would see such
 a shift. Measured and tracked in [#73](https://github.com/LOUONE/mailguard/issues/73).
 
+### Latency
+
+On real test-split emails, one process answers in **18 ms at the median and 30 ms at p95**, and
+four processes sustain about 300 requests per second on an 8-core desktop
+([docs/performance.md](docs/performance.md): method, profile and the 2.4x speed-up it led to).
+
 ### Scoring an email
 
 ```bash
