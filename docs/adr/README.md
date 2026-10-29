@@ -13,7 +13,8 @@ system does; ADRs say *why it does not do something else*.
 | [0003](0003-model-serialisation.md) | Save models with skops and an explicit list of trusted types | Accepted | 2026-10-27 |
 | [0004](0004-grouped-splits.md) | Split by duplicate cluster before any feature, with a separate temporal check | Accepted | 2026-10-27 |
 | [0005](0005-model-choice.md) | Ship LightGBM, keep the text-only model as a challenger, no transformer yet | Accepted, amended by 0006 | 2026-10-28 |
-| [0006](0006-drop-url-max-length.md) | Drop `url_max_length` from the served model | Accepted | 2026-10-29 |
+| [0006](0006-drop-url-max-length.md) | Drop `url_max_length` from the served model | Accepted, updated | 2026-10-29 |
+| [0007](0007-drift-without-evidently.md) | Detect drift with PSI and KS in our own code, not Evidently | Accepted | 2026-10-29 |
 
 ## Writing one
 
