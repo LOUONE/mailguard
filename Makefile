@@ -1,4 +1,4 @@
-.PHONY: help setup sync data dataset audit train evaluate mlflow-ui eda lint format test test-unit test-integration coverage pre-commit clean all
+.PHONY: help setup sync data dataset audit train evaluate promote serve openapi mlflow-ui eda lint format test test-unit test-integration coverage pre-commit clean all
 
 help:
 	@echo "mailguard — available targets:"
@@ -9,6 +9,9 @@ help:
 	@echo "  audit           Era-leakage audit of each feature group (needs make dataset)"
 	@echo "  train           Train both baselines, log and register them in MLflow (needs make dataset)"
 	@echo "  evaluate        Test-split report with cluster-bootstrap intervals into reports/ (needs make train)"
+	@echo "  promote         Point the production alias at the latest LightGBM (needs make train)"
+	@echo "  serve           Run the scoring API at http://127.0.0.1:8000/docs (needs make promote)"
+	@echo "  openapi         Regenerate docs/api/openapi.json after a schema change"
 	@echo "  mlflow-ui       Browse local MLflow runs at http://127.0.0.1:5000"
 	@echo "  eda          Re-execute notebooks/01_eda.ipynb in place (needs make data)"
 	@echo "  lint            Ruff check + format check + mypy"
@@ -42,6 +45,15 @@ train:
 
 evaluate:
 	uv run python scripts/evaluate.py
+
+promote:
+	uv run python scripts/promote.py
+
+serve:
+	uv run uvicorn --factory mailguard.serving.app:create_app --host 127.0.0.1 --port 8000
+
+openapi:
+	uv run python scripts/export_openapi.py
 
 mlflow-ui:
 	uv run mlflow ui --backend-store-uri sqlite:///mlruns/mlflow.db
