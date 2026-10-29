@@ -12,7 +12,7 @@ import argparse
 import logging
 import os
 import subprocess
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from importlib.metadata import version
 from pathlib import Path
@@ -32,7 +32,7 @@ from mailguard.models.calibration import (
     expected_calibration_error,
 )
 from mailguard.models.config import DEFAULT_CONFIG, BaselineConfig, flatten, load_config
-from mailguard.models.metrics import validation_metrics
+from mailguard.models.metrics import FPR_TARGETS, threshold_at_fpr, validation_metrics
 from mailguard.models.pipelines import MODEL_NAMES, TRUSTED_TYPES, ModelName, build_pipeline
 from mailguard.parsing import Email, parse_email
 
@@ -91,6 +91,16 @@ def calibrate(pipeline: Pipeline, val: SplitData) -> tuple[CalibratedPipeline, d
     return model, report
 
 
+def operating_thresholds(model: CalibratedPipeline, val: SplitData) -> dict[str, float]:
+    """Thresholds on the calibrated score for each FPR target, chosen on validation ham.
+
+    They are what the API compares a score to, so they travel with the model version instead of
+    being recomputed, or hard-coded, by the service.
+    """
+    ham = scores(model, val)[val.labels == "ham"]
+    return {name: threshold_at_fpr(ham, fpr) for name, fpr in FPR_TARGETS.items()}
+
+
 def git_state(cwd: Path | None = None) -> dict[str, str]:
     """Commit and dirty flag of the working tree, or "unknown" outside a git checkout."""
 
@@ -141,8 +151,13 @@ def track_run(
     metrics: dict[str, float],
     processed_dir: Path,
     settings: Settings,
+    thresholds: Mapping[str, float] | None = None,
 ) -> str:
-    """Log one fitted baseline to MLflow and register it. Returns the run id."""
+    """Log one fitted baseline to MLflow and register it. Returns the run id.
+
+    `thresholds` (calibrated, from `operating_thresholds`) become `threshold_<target>` tags of the
+    registered model version.
+    """
     os.environ.setdefault("MLFLOW_DISABLE_AGENT_HINT", "1")
     import mlflow  # slow import, only needed here
     import mlflow.sklearn
@@ -172,7 +187,7 @@ def track_run(
         mlflow.log_metrics({f"val_{k}": v for k, v in metrics.items()})
         pipeline = model.pipeline if isinstance(model, CalibratedPipeline) else model
         mlflow.log_dict(feature_summary(pipeline), "features.json")
-        mlflow.sklearn.log_model(
+        info = mlflow.sklearn.log_model(
             model,
             name="model",
             registered_model_name=REGISTERED_PREFIX + name,
@@ -183,6 +198,12 @@ def track_run(
             pip_requirements=runtime_requirements(),
         )
         run_id: str = run.info.run_id
+    client = mlflow.MlflowClient(settings.mlflow_tracking_uri)
+    for target, value in (thresholds or {}).items():
+        client.set_model_version_tag(
+            REGISTERED_PREFIX + name, str(info.registered_model_version), f"threshold_{target}",
+            repr(value),
+        )  # fmt: skip
     return run_id
 
 
@@ -219,7 +240,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         model, calibration = calibrate(pipeline, val)
         metrics |= calibration
+        thresholds = operating_thresholds(model, val)
         if not args.no_tracking:
-            run_id = track_run(name, model, config, metrics, processed, settings)
+            run_id = track_run(name, model, config, metrics, processed, settings, thresholds)
             logger.info("%s: MLflow run %s", name, run_id)
     return 0

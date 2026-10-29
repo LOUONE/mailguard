@@ -27,6 +27,7 @@ from mailguard.models.train import (
     feature_summary,
     git_state,
     main,
+    operating_thresholds,
     runtime_requirements,
     scores,
     split_data,
@@ -172,6 +173,19 @@ def test_excluding_an_unknown_feature_fails_loudly() -> None:
         lightgbm_pipeline(TINY.model_copy(update={"lightgbm": lightgbm}))
 
 
+def test_operating_thresholds_are_on_calibrated_validation_ham() -> None:
+    frame = tiny_frame()
+    val = split_data(frame, "val")
+    model, _ = calibrate(train_baseline("lightgbm", frame, TINY), val)
+
+    thresholds = operating_thresholds(model, val)
+
+    ham = scores(model, val)[val.labels == "ham"]
+    assert set(thresholds) == {"1pct", "01pct"}
+    assert thresholds["1pct"] == ham.max()  # 6 ham: 1% lets none through
+    assert (ham > thresholds["1pct"]).sum() == 0
+
+
 def test_feature_summary_hides_tfidf_terms() -> None:
     summary = feature_summary(train_baseline("lightgbm", tiny_frame(), TINY))
 
@@ -203,9 +217,13 @@ def test_track_run_records_lineage_and_registers(processed: Path, tmp_path: Path
     frame = tiny_frame()
     pipeline = train_baseline("logreg", frame, TINY)
 
-    run_id = track_run("logreg", pipeline, TINY, {"pr_auc": 0.9}, processed, settings)
+    run_id = track_run(
+        "logreg", pipeline, TINY, {"pr_auc": 0.9}, processed, settings, {"1pct": 0.25}
+    )
 
-    run = mlflow.MlflowClient(settings.mlflow_tracking_uri).get_run(run_id)
+    client = mlflow.MlflowClient(settings.mlflow_tracking_uri)
+    assert client.get_model_version("mailguard-logreg", "1").tags == {"threshold_1pct": "0.25"}
+    run = client.get_run(run_id)
     assert run.data.metrics == {"val_pr_auc": 0.9}
     assert run.data.params["text.word_max_features"] == "60"
     assert run.data.tags["dataset_assignment_sha256"] == "a" * 64
