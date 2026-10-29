@@ -24,6 +24,7 @@ class Version:
     name: str
     version: str
     tags: Mapping[str, str]
+    run_id: str = ""  # the training run, for its artifacts and dataset tags
 
     @property
     def thresholds(self) -> dict[str, float]:
@@ -47,7 +48,7 @@ def latest_version(name: str, settings: Settings) -> Version:
     if not versions:
         raise LookupError(f"no registered model {name}: run `make train` first")
     latest = max(versions, key=lambda v: int(v.version))
-    return Version(name, str(latest.version), dict(latest.tags))
+    return Version(name, str(latest.version), dict(latest.tags), latest.run_id or "")
 
 
 def aliased_version(name: str, settings: Settings, alias: str = PRODUCTION) -> Version:
@@ -55,7 +56,7 @@ def aliased_version(name: str, settings: Settings, alias: str = PRODUCTION) -> V
         found = client(settings).get_model_version_by_alias(name, alias)
     except Exception as exc:  # MLflow raises its own RestException for a missing alias
         raise LookupError(f"{name} has no @{alias} version: run `make promote`") from exc
-    return Version(name, str(found.version), dict(found.tags))
+    return Version(name, str(found.version), dict(found.tags), found.run_id or "")
 
 
 def promote(version: Version, settings: Settings, alias: str = PRODUCTION) -> None:
@@ -65,6 +66,23 @@ def promote(version: Version, settings: Settings, alias: str = PRODUCTION) -> No
             f"{version.name} v{version.version} has no operating thresholds: retrain it"
         )
     client(settings).set_registered_model_alias(version.name, alias, version.version)
+
+
+def training_record(version: Version, settings: Settings) -> tuple[str | None, set[str] | None]:
+    """The split hash a version was trained on, and the ids it saw (None when not recorded)."""
+    if not version.run_id:
+        return None, None
+    import mlflow.artifacts
+
+    mlflow_client = client(settings)
+    assignment = mlflow_client.get_run(version.run_id).data.tags.get("dataset_assignment_sha256")
+    try:
+        seen = mlflow.artifacts.load_dict(
+            mlflow_client.get_run(version.run_id).info.artifact_uri + "/seen_ids.json"
+        )
+    except Exception:  # versions trained before the ids were recorded
+        return assignment, None
+    return assignment, set(seen["ids"])
 
 
 def load_version(version: Version, settings: Settings) -> Any:

@@ -14,6 +14,7 @@ from mailguard.models.registry import (
     aliased_version,
     latest_version,
     promote,
+    training_record,
 )
 from mailguard.models.train import track_run
 from mailguard.serving.model import ServedModel, load_production
@@ -99,3 +100,27 @@ def test_thresholds_ignore_other_tags() -> None:
     version = Version("m", "1", {"threshold_1pct": "0.4", "owner": "x"})
 
     assert version.thresholds == {"1pct": 0.4}
+
+
+def test_training_record_of_old_and_new_versions(settings: Settings) -> None:
+    register(settings)  # trained before ids were recorded: no seen_ids.json
+    model, thresholds = tiny_model()
+    track_run(
+        "lightgbm", model, TINY, {}, settings.data_dir / "processed", settings, thresholds,
+        seen=["m1", "m2"],
+    )  # fmt: skip
+
+    old = latest_version("mailguard-lightgbm", settings)
+    old = Version(old.name, "1", old.tags, aliased_or_run(settings, "1"))
+    new = latest_version("mailguard-lightgbm", settings)
+
+    assert training_record(old, settings) == ("a" * 64, None)
+    assert training_record(new, settings) == ("a" * 64, {"m1", "m2"})
+    assert training_record(Version("m", "1", {}), settings) == (None, None)
+
+
+def aliased_or_run(settings: Settings, version: str) -> str:
+    from mailguard.models.registry import client
+
+    run_id: str = client(settings).get_model_version("mailguard-lightgbm", version).run_id
+    return run_id

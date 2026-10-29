@@ -29,7 +29,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             version = latest_version(args.model, settings)
         else:
             found = client(settings).get_model_version(args.model, args.version)
-            version = Version(args.model, str(found.version), dict(found.tags))
+            version = Version(args.model, str(found.version), dict(found.tags), found.run_id or "")
         promote(version, settings, args.alias)
     except (LookupError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
