@@ -27,6 +27,13 @@ class Settings(BaseSettings):
     mlflow_tracking_uri: str = "sqlite:///mlruns/mlflow.db"
     mlflow_artifact_dir: Path = Field(default_factory=lambda: Path("mlruns/artifacts"))
 
+    # Serving (Phase 2). The API serves the registered version behind `model_alias`.
+    model_name: str = "mailguard-lightgbm"
+    model_alias: str = "production"
+    operating_point: Literal["1pct", "01pct"] = "1pct"
+    # Share of phishing in the mailboxes served, to turn scores into probabilities (ADR 0001).
+    base_rate: float = Field(default=0.01, gt=0, lt=1)
+
 
 def get_settings() -> Settings:
     return Settings()
