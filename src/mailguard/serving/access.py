@@ -20,6 +20,7 @@ import structlog
 from starlette.requests import Request
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
+from mailguard.monitoring.metrics import Metrics
 from mailguard.serving.errors import error_response
 
 REQUEST_ID_HEADER: Final = "x-request-id"
@@ -39,8 +40,9 @@ def request_id_from(scope: Scope) -> str:
 
 
 class RequestLog:
-    def __init__(self, app: ASGIApp) -> None:
+    def __init__(self, app: ASGIApp, metrics: Metrics | None = None) -> None:
         self.app = app
+        self.metrics = metrics
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] != "http":
@@ -69,13 +71,16 @@ class RequestLog:
                 )
         finally:
             # The route template, not the raw path: a client can put anything in a URL.
-            route = scope.get("route")
+            path = getattr(scope.get("route"), "path", "unmatched")
+            seconds = time.perf_counter() - start
+            if self.metrics is not None:
+                self.metrics.request(path, scope["method"], response["status"], seconds)
             log.info(
                 "request",
                 request_id=rid,
                 method=scope["method"],
-                path=getattr(route, "path", "unmatched"),
+                path=path,
                 status=response["status"],
-                duration_ms=round(1000 * (time.perf_counter() - start), 2),
+                duration_ms=round(1000 * seconds, 2),
                 **state.get("log", {}),
             )

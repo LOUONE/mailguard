@@ -13,6 +13,7 @@ dependencies = [
     "mlflow>=3.15",
     "numpy>=2.5.4",
     "pandas>=3.1.0",
+    "prometheus-client>=0.23",
     "pyarrow>=21",
     "pydantic>=2.14.0",
     "pydantic-settings>=2.16.0",

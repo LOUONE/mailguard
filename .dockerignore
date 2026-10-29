@@ -1,0 +1,11 @@
+# Only pyproject.toml, uv.lock, README.md, src/, configs/ and scripts/ go into the image.
+# Data and models in particular never do: corpora are downloaded and models trained at runtime.
+*
+!pyproject.toml
+!uv.lock
+!README.md
+!src/
+!configs/
+!scripts/
+**/__pycache__
+**/*.pyc

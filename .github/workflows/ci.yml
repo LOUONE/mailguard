@@ -45,3 +45,51 @@ jobs:
           name: coverage-xml
           path: coverage.xml
           if-no-files-found: ignore
+
+  docker-smoke:
+    name: Docker image smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build the image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.api
+          tags: mailguard:ci
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Validate the compose file
+        run: docker compose config --quiet
+
+      - name: Register a tiny synthetic model
+        run: |
+          docker volume create smoke
+          docker run --rm -v smoke:/mlruns -e MAILGUARD_DATA_DIR=/mlruns/data mailguard:ci \
+            python scripts/bootstrap.py --smoke
+
+      - name: Start the API on a read-only model store
+        run: docker run -d --name api -p 127.0.0.1:8000:8000 -v smoke:/mlruns:ro mailguard:ci
+
+      - name: Health, one prediction, non-root user
+        run: |
+          for i in $(seq 1 60); do
+            [ "$(docker inspect -f '{{.State.Health.Status}}' api)" = healthy ] && break
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:8000/health
+          curl -fsS http://127.0.0.1:8000/v1/predict -H 'content-type: application/json' \
+            -d '{"raw": "From: a@b.example\nSubject: hello\n\nSee you tomorrow."}' \
+            | python3 -c "import json, sys; body = json.load(sys.stdin); assert body['schema_version'] == 'v1', body; print(body['label'])"
+          test "$(docker exec api id -u)" = 10001
+
+      - name: API logs
+        if: always()
+        run: docker logs api || true
