@@ -18,6 +18,7 @@ dependencies = [
     "pydantic-settings>=2.16.0",
     "scikit-learn>=1.9.1",
     "skops>=0.16",
+    "structlog>=25.4",
     "uvicorn>=0.38",
 ]
 
