@@ -86,6 +86,33 @@ make eda     # re-runs the exploratory notebook on the downloaded data
 
 See the `Makefile` for the full list of targets (`make help`).
 
+### The whole system in one command
+
+Requires Docker only (no Python, no data on the host):
+
+```bash
+make demo        # or: docker compose up --build -d
+```
+
+| Service | URL | What it is |
+|---|---|---|
+| API | http://127.0.0.1:8000/docs | The scoring API and its interactive documentation |
+| Grafana | http://127.0.0.1:3000 | The `mailguard` dashboard: traffic, latency, predicted phishing rate, scores |
+| Prometheus | http://127.0.0.1:9090 | The metrics behind it ([docs/monitoring.md](docs/monitoring.md)) |
+| MLflow | http://127.0.0.1:5000 | Runs, registered models and the `production` alias |
+
+The first start downloads the corpora and trains the models inside a container (about 5 minutes,
+`docker compose logs -f bootstrap`); later starts take seconds. A `traffic` service sends
+made-up emails, so the dashboard fills on its own. Every port listens on 127.0.0.1 only, the API
+runs as a non-root user and mounts the model store read-only. `make demo-down` stops it all.
+
+**What the dashboard shows is a real finding, not a demo bug.** About 80% of the demo traffic is
+short, made-up personal mail, and the model labels nearly all of it phishing. 75% of the training
+ham comes from mailing lists, and the model has partly learnt that mail which is not from a list
+is suspicious: on the test split, ham without list headers is flagged 2.7% of the time, against
+0.4% for list mail. The predicted phishing rate panel is exactly where an operator would see such
+a shift. Measured and tracked in [#73](https://github.com/LOUONE/mailguard/issues/73).
+
 ### Scoring an email
 
 ```bash
