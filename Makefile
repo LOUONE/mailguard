@@ -1,4 +1,4 @@
-.PHONY: help setup sync data dataset audit train evaluate promote serve openapi demo demo-down mlflow-ui eda lint format test test-unit test-integration coverage pre-commit clean all
+.PHONY: help setup sync data dataset audit train evaluate promote retrain serve openapi demo demo-down mlflow-ui eda lint format test test-unit test-integration coverage pre-commit clean all
 
 help:
 	@echo "mailguard — available targets:"
@@ -10,6 +10,7 @@ help:
 	@echo "  train           Train both baselines, log and register them in MLflow (needs make dataset)"
 	@echo "  evaluate        Test-split report with cluster-bootstrap intervals into reports/ (needs make train)"
 	@echo "  promote         Point the production alias at the latest LightGBM (needs make train)"
+	@echo "  retrain         Rebuild, train a candidate, promote it only on a significant gain (ADR 0008)"
 	@echo "  serve           Run the scoring API at http://127.0.0.1:8000/docs (needs make promote)"
 	@echo "  openapi         Regenerate docs/api/openapi.json after a schema change"
 	@echo "  demo            Whole stack in Docker: API, MLflow, Prometheus, Grafana, demo traffic"
@@ -50,6 +51,9 @@ evaluate:
 
 promote:
 	uv run python scripts/promote.py
+
+retrain:
+	uv run python scripts/retrain.py
 
 serve:
 	uv run uvicorn --factory mailguard.serving.app:create_app --host 127.0.0.1 --port 8000 --no-access-log
