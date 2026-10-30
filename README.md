@@ -6,7 +6,7 @@ Real-time phishing detection with an LLM investigation agent, built for privacy.
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.14+](https://img.shields.io/badge/python-3.14+-blue.svg)](pyproject.toml)
 
-> **Status: work in progress.** Phase 1 is complete: data pipeline, grouped splits, leakage-audited features, two tracked and calibrated baselines, a test-set [evaluation report](reports/evaluation.md) and a [model card](docs/model_card.md). Phase 2 (serving in production) is next. Expected final version: `v1.0.0`.
+> **Status: work in progress.** Phases 1 and 2 are complete. The model is evaluated with intervals and documented ([evaluation report](reports/evaluation.md), [model card](docs/model_card.md)). It runs as a monitored service that starts with one command, detects drift, and retrains itself behind a statistical gate ([architecture](docs/architecture.md)). Phase 3, the LLM investigation agent, is next. Expected final version: `v1.0.0`.
 
 ## Results
 
@@ -65,8 +65,8 @@ per task, ordered by dependency, and ends with a tagged release.
 |---|---|---|---|
 | 0 — Foundations | Repo scaffolded, CI green, `main` protected | `v0.0.1` | Released 2026-10-18 |
 | 1 — Data + classical model | Parsed corpora, grouped splits, features, LightGBM baseline, rigorous eval, SHAP, MLflow | `v0.1.0` | Released 2026-10-28 |
-| 2 — Production | FastAPI service, Docker, Prometheus/Grafana, drift reports, gated auto-retraining | `v0.2.0` | Next, target 2026-12-13 |
-| 3 — Agent | LLM agent (Ollama, OpenAI-compatible fallback), typed tools, prompt-injection defence | `v0.3.0` | Target 2027-01-10 |
+| 2 — Production | FastAPI service, Docker, Prometheus/Grafana, drift reports, gated auto-retraining | `v0.2.0` | Released 2026-10-30 |
+| 3 — Agent | LLM agent (Ollama, OpenAI-compatible fallback), typed tools, prompt-injection defence | `v0.3.0` | Next, target 2027-01-10 |
 | 4 — Adversarial | Attack suite + hardening, before/after metrics | `v1.0.0` | Target 2027-01-24 |
 
 Current board: [mailguard roadmap](https://github.com/users/LOUONE/projects/1).
@@ -87,6 +87,8 @@ make train   # trains both baselines (~3 min) and registers them in a local MLfl
 make evaluate  # test-split report with intervals into reports/ (~3 min)
 make promote # gives the latest LightGBM the `production` alias
 make serve   # scoring API on http://127.0.0.1:8000 (interactive docs at /docs)
+make retrain # trains a candidate, promotes it only on a significant gain (ADR 0008)
+make simulate-drift  # holds out 2024-2025 phishing and replays drift and retraining
 make eda     # re-runs the exploratory notebook on the downloaded data
 ```
 
@@ -167,9 +169,10 @@ src/mailguard/
 ├── parsing/        raw email -> validated Email model
 ├── features/       header, URL, text features
 ├── models/         training, evaluation, registry
-├── serving/        FastAPI app, schemas, metrics
+├── serving/        FastAPI app, schemas, limits, errors, access log
 ├── agent/          LLM tools + investigation loop
-├── monitoring/     drift reports, metrics
+├── monitoring/     metrics, JSON logs, feature recording, drift (PSI, KS)
+├── pipeline/       retraining flow, promotion gate, drift simulation
 └── adversarial/    attack suite + robustness eval
 ```
 
@@ -191,8 +194,15 @@ Structural choices are recorded as short [architecture decision records](docs/ad
 the binary target ([0001](docs/adr/0001-binary-target.md)), the parser design
 ([0002](docs/adr/0002-parser-design.md)), model serialisation without pickle
 ([0003](docs/adr/0003-model-serialisation.md)), the grouped splits
-([0004](docs/adr/0004-grouped-splits.md)) and the model choice
-([0005](docs/adr/0005-model-choice.md)) so far.
+([0004](docs/adr/0004-grouped-splits.md)), the model choice
+([0005](docs/adr/0005-model-choice.md)), dropping an era-marker feature
+([0006](docs/adr/0006-drop-url-max-length.md), with an update on evidence that did not hold),
+drift detection without Evidently ([0007](docs/adr/0007-drift-without-evidently.md)) and the
+significance-gated promotion of retrained models ([0008](docs/adr/0008-significance-gated-promotion.md)).
+
+How it fits together: [architecture](docs/architecture.md). How fast it is and why:
+[performance](docs/performance.md). What it watches: [monitoring](docs/monitoring.md). What a
+held-out year of phishing did to it: [drift simulation](docs/drift_simulation.md).
 
 ## License
 

@@ -2,8 +2,16 @@
 
 The phishing classifier behind mailguard, as of release `v0.1.2`. Every metric on this page comes
 from [`reports/evaluation.md`](../reports/evaluation.md), which `make evaluate` regenerates
-byte for byte, on Windows and on Linux; brackets are 95% intervals from a bootstrap over
-duplicate clusters.
+byte for byte on the same platform; brackets are 95% intervals from a bootstrap over duplicate
+clusters.
+
+**Across platforms**, the split is identical (same hash on Windows and on Linux), but the trained
+models are not bit-identical: LightGBM and scikit-learn do their floating-point arithmetic slightly
+differently in their Windows and Linux builds, and a few messages near a threshold land on the
+other side. The report committed here comes from Windows; the Docker image (Linux), trained from
+scratch on the same data, gives 98.9% recall at 1% FPR instead of 99.0%, 6 flagged test ham
+instead of 7, and 98.0% instead of 98.3% at the strict threshold. Differences of that size are
+within every interval on this page, and they are one more reason not to read a single decimal.
 
 **Changes since v0.1.0.**
 - v0.1.1: `url_max_length`, an era marker, is left out of the model
