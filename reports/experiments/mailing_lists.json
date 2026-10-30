@@ -1,0 +1,688 @@
+{
+  "summary": {
+    "seeds": [
+      20261027,
+      20261028,
+      20261029,
+      20261030,
+      20261031
+    ],
+    "baseline": "served",
+    "variants": {
+      "served": {
+        "recall": {
+          "mean": 0.9696517412935324,
+          "min": 0.8864013266998342,
+          "max": 0.9950248756218906
+        },
+        "ham_fpr": {
+          "mean": 0.00997095235876167,
+          "min": 0.0,
+          "max": 0.02090032154340836
+        },
+        "list_ham_fpr": {
+          "mean": 0.0021286952344968446,
+          "min": 0.0,
+          "max": 0.00425531914893617
+        },
+        "other_ham_fpr": {
+          "mean": 0.03470845213486665,
+          "min": 0.0,
+          "max": 0.07236842105263158
+        },
+        "spam_fpr": {
+          "mean": 0.03855232486811434,
+          "min": 0.0,
+          "max": 0.06315789473684211
+        },
+        "probe_flagged": {
+          "mean": 0.41133333333333333,
+          "min": 0.0,
+          "max": 0.6733333333333333
+        }
+      },
+      "served, personal threshold": {
+        "recall": {
+          "mean": 0.9650082918739635,
+          "min": 0.8864013266998342,
+          "max": 0.9908789386401327,
+          "difference_mean": -0.004643449419568846,
+          "difference_min": -0.015754560530679917,
+          "difference_max": 0.0,
+          "seeds_lower": 3,
+          "seeds_higher": 0
+        },
+        "ham_fpr": {
+          "mean": 0.006754482708627822,
+          "min": 0.0,
+          "max": 0.011254019292604502,
+          "difference_mean": -0.003216469650133847,
+          "difference_min": -0.009646302250803858,
+          "difference_max": 0.0,
+          "seeds_lower": 3,
+          "seeds_higher": 0
+        },
+        "list_ham_fpr": {
+          "mean": 0.0008483648958661329,
+          "min": 0.0,
+          "max": 0.002127659574468085,
+          "difference_mean": -0.0012803303386307117,
+          "difference_min": -0.0021598272138228943,
+          "difference_max": 0.0,
+          "seeds_lower": 3,
+          "seeds_higher": 0
+        },
+        "other_ham_fpr": {
+          "mean": 0.02552140010244084,
+          "min": 0.0,
+          "max": 0.039473684210526314,
+          "difference_mean": -0.009187052032425811,
+          "difference_min": -0.03289473684210527,
+          "difference_max": 0.0,
+          "seeds_lower": 3,
+          "seeds_higher": 0
+        },
+        "spam_fpr": {
+          "mean": 0.025930560667402774,
+          "min": 0.0,
+          "max": 0.04895104895104895,
+          "difference_mean": -0.012621764200711571,
+          "difference_min": -0.028070175438596495,
+          "difference_max": 0.0,
+          "seeds_lower": 3,
+          "seeds_higher": 0
+        },
+        "probe_flagged": {
+          "mean": 0.27399999999999997,
+          "min": 0.0,
+          "max": 0.44666666666666666,
+          "difference_mean": -0.13733333333333334,
+          "difference_min": -0.26333333333333336,
+          "difference_max": 0.0,
+          "seeds_lower": 3,
+          "seeds_higher": 0
+        }
+      },
+      "no_return_path": {
+        "recall": {
+          "mean": 0.9723051409618574,
+          "min": 0.9038142620232172,
+          "max": 0.9933665008291874,
+          "difference_mean": 0.0026533996683250293,
+          "difference_min": -0.0033167495854063977,
+          "difference_max": 0.01741293532338306,
+          "seeds_lower": 2,
+          "seeds_higher": 2
+        },
+        "ham_fpr": {
+          "mean": 0.011579187183828592,
+          "min": 0.0,
+          "max": 0.022508038585209004,
+          "difference_mean": 0.001608234825066924,
+          "difference_min": 0.0,
+          "difference_max": 0.003215434083601287,
+          "seeds_lower": 0,
+          "seeds_higher": 4
+        },
+        "list_ham_fpr": {
+          "mean": 0.005097001058835546,
+          "min": 0.0,
+          "max": 0.010638297872340425,
+          "difference_mean": 0.0029683058243387015,
+          "difference_min": 0.0,
+          "difference_max": 0.006382978723404255,
+          "seeds_lower": 0,
+          "seeds_higher": 4
+        },
+        "other_ham_fpr": {
+          "mean": 0.032173440229166905,
+          "min": 0.0,
+          "max": 0.05921052631578947,
+          "difference_mean": -0.0025350119056997433,
+          "difference_min": -0.013157894736842111,
+          "difference_max": 0.007194244604316551,
+          "seeds_lower": 2,
+          "seeds_higher": 1
+        },
+        "spam_fpr": {
+          "mean": 0.04135443503864557,
+          "min": 0.0,
+          "max": 0.06993006993006994,
+          "difference_mean": 0.0028021101705312237,
+          "difference_min": -0.007017543859649124,
+          "difference_max": 0.01052631578947369,
+          "seeds_lower": 1,
+          "seeds_higher": 3
+        },
+        "probe_flagged": {
+          "mean": 0.4073333333333333,
+          "min": 0.0,
+          "max": 0.6,
+          "difference_mean": -0.003999999999999998,
+          "difference_min": -0.10333333333333339,
+          "difference_max": 0.12000000000000002,
+          "seeds_lower": 3,
+          "seeds_higher": 1
+        }
+      },
+      "no_return_path, personal threshold": {
+        "recall": {
+          "mean": 0.9686567164179104,
+          "min": 0.9038142620232172,
+          "max": 0.9900497512437811,
+          "difference_mean": -0.000995024875621886,
+          "difference_min": -0.014096185737976774,
+          "difference_max": 0.01741293532338306,
+          "seeds_lower": 3,
+          "seeds_higher": 2
+        },
+        "ham_fpr": {
+          "mean": 0.008041174125334618,
+          "min": 0.0,
+          "max": 0.011254019292604502,
+          "difference_mean": -0.0019297782334270516,
+          "difference_min": -0.009646302250803858,
+          "difference_max": 0.003215434083601287,
+          "seeds_lower": 3,
+          "seeds_higher": 1
+        },
+        "list_ham_fpr": {
+          "mean": 0.002117241994551468,
+          "min": 0.0,
+          "max": 0.004228329809725159,
+          "difference_mean": -1.1453239945376833e-05,
+          "difference_min": -0.002127659574468085,
+          "difference_max": 0.002070393374741201,
+          "seeds_lower": 1,
+          "seeds_higher": 1
+        },
+        "other_ham_fpr": {
+          "mean": 0.02696024902330415,
+          "min": 0.0,
+          "max": 0.04316546762589928,
+          "difference_mean": -0.007748203111562502,
+          "difference_min": -0.03289473684210527,
+          "difference_max": 0.007194244604316551,
+          "seeds_lower": 3,
+          "seeds_higher": 1
+        },
+        "spam_fpr": {
+          "mean": 0.027331615752668383,
+          "min": 0.0,
+          "max": 0.05244755244755245,
+          "difference_mean": -0.011220709115445959,
+          "difference_min": -0.028070175438596495,
+          "difference_max": 0.00350877192982456,
+          "seeds_lower": 3,
+          "seeds_higher": 1
+        },
+        "probe_flagged": {
+          "mean": 0.304,
+          "min": 0.0,
+          "max": 0.47333333333333333,
+          "difference_mean": -0.10733333333333332,
+          "difference_min": -0.26333333333333336,
+          "difference_max": 0.12000000000000002,
+          "seeds_lower": 3,
+          "seeds_higher": 1
+        }
+      },
+      "reweighted": {
+        "recall": {
+          "mean": 0.9769485903814262,
+          "min": 0.917910447761194,
+          "max": 0.9966832504145937,
+          "difference_mean": 0.007296849087893853,
+          "difference_min": -0.0016583747927031434,
+          "difference_max": 0.031509121061359835,
+          "seeds_lower": 1,
+          "seeds_higher": 4
+        },
+        "ham_fpr": {
+          "mean": 0.011579704967094873,
+          "min": 0.0,
+          "max": 0.02572347266881029,
+          "difference_mean": 0.001608752608333204,
+          "difference_min": 0.0,
+          "difference_max": 0.00482315112540193,
+          "seeds_lower": 0,
+          "seeds_higher": 2
+        },
+        "list_ham_fpr": {
+          "mean": 0.003828123960150211,
+          "min": 0.0,
+          "max": 0.010638297872340425,
+          "difference_mean": 0.0016994287256533666,
+          "difference_min": 0.0,
+          "difference_max": 0.006382978723404255,
+          "seeds_lower": 0,
+          "seeds_higher": 2
+        },
+        "other_ham_fpr": {
+          "mean": 0.03589781582529227,
+          "min": 0.0,
+          "max": 0.07236842105263158,
+          "difference_mean": 0.0011893636904256218,
+          "difference_min": -0.006711409395973155,
+          "difference_max": 0.012658227848101264,
+          "seeds_lower": 1,
+          "seeds_higher": 1
+        },
+        "spam_fpr": {
+          "mean": 0.0448582995951417,
+          "min": 0.0,
+          "max": 0.07692307692307693,
+          "difference_mean": 0.0063059747270273565,
+          "difference_min": 0.0,
+          "difference_max": 0.013986013986013984,
+          "seeds_lower": 0,
+          "seeds_higher": 3
+        },
+        "probe_flagged": {
+          "mean": 0.43466666666666665,
+          "min": 0.0,
+          "max": 0.7,
+          "difference_mean": 0.023333333333333345,
+          "difference_min": -0.05999999999999994,
+          "difference_max": 0.07666666666666669,
+          "seeds_lower": 1,
+          "seeds_higher": 3
+        }
+      },
+      "reweighted, personal threshold": {
+        "recall": {
+          "mean": 0.9723051409618574,
+          "min": 0.917910447761194,
+          "max": 0.9925373134328358,
+          "difference_mean": 0.002653399668325007,
+          "difference_min": -0.014925373134328401,
+          "difference_max": 0.031509121061359835,
+          "seeds_lower": 3,
+          "seeds_higher": 2
+        },
+        "ham_fpr": {
+          "mean": 0.007719112933708208,
+          "min": 0.0,
+          "max": 0.01607717041800643,
+          "difference_mean": -0.002251839425053461,
+          "difference_min": -0.00482315112540193,
+          "difference_max": 0.0,
+          "seeds_lower": 3,
+          "seeds_higher": 0
+        },
+        "list_ham_fpr": {
+          "mean": 0.00127389681075975,
+          "min": 0.0,
+          "max": 0.00425531914893617,
+          "difference_mean": -0.0008547984237370947,
+          "difference_min": -0.0021598272138228943,
+          "difference_max": 0.0,
+          "seeds_lower": 2,
+          "seeds_higher": 0
+        },
+        "other_ham_fpr": {
+          "mean": 0.028152979049809256,
+          "min": 0.0,
+          "max": 0.05263157894736842,
+          "difference_mean": -0.006555473085057391,
+          "difference_min": -0.019736842105263164,
+          "difference_max": 0.0,
+          "seeds_lower": 3,
+          "seeds_higher": 0
+        },
+        "spam_fpr": {
+          "mean": 0.030141086983192244,
+          "min": 0.0,
+          "max": 0.04912280701754386,
+          "difference_mean": -0.008411237884922096,
+          "difference_min": -0.021052631578947364,
+          "difference_max": 0.007017543859649122,
+          "seeds_lower": 3,
+          "seeds_higher": 1
+        },
+        "probe_flagged": {
+          "mean": 0.308,
+          "min": 0.0,
+          "max": 0.48333333333333334,
+          "difference_mean": -0.10333333333333332,
+          "difference_min": -0.31666666666666665,
+          "difference_max": 0.07666666666666669,
+          "seeds_lower": 3,
+          "seeds_higher": 1
+        }
+      }
+    }
+  },
+  "runs": [
+    {
+      "seed": 20261027,
+      "variant": "served",
+      "threshold": 0.24687530456211407,
+      "recall": 0.9900497512437811,
+      "ham_fpr": 0.011254019292604502,
+      "list_ham_fpr": 0.004228329809725159,
+      "other_ham_fpr": 0.03355704697986577,
+      "spam_fpr": 0.05263157894736842,
+      "probe_flagged": 0.6333333333333333
+    },
+    {
+      "seed": 20261027,
+      "variant": "served, personal threshold",
+      "threshold": 0.6027611338520606,
+      "recall": 0.9850746268656716,
+      "ham_fpr": 0.008038585209003215,
+      "list_ham_fpr": 0.0021141649048625794,
+      "other_ham_fpr": 0.026845637583892617,
+      "spam_fpr": 0.031578947368421054,
+      "probe_flagged": 0.44666666666666666
+    },
+    {
+      "seed": 20261027,
+      "variant": "no_return_path",
+      "threshold": 0.24345988674623242,
+      "recall": 0.9867330016583747,
+      "ham_fpr": 0.012861736334405145,
+      "list_ham_fpr": 0.008456659619450317,
+      "other_ham_fpr": 0.026845637583892617,
+      "spam_fpr": 0.06315789473684211,
+      "probe_flagged": 0.6
+    },
+    {
+      "seed": 20261027,
+      "variant": "no_return_path, personal threshold",
+      "threshold": 0.6188628207144397,
+      "recall": 0.9842454394693201,
+      "ham_fpr": 0.00964630225080386,
+      "list_ham_fpr": 0.004228329809725159,
+      "other_ham_fpr": 0.026845637583892617,
+      "spam_fpr": 0.031578947368421054,
+      "probe_flagged": 0.47333333333333333
+    },
+    {
+      "seed": 20261027,
+      "variant": "reweighted",
+      "threshold": 0.27036466231936185,
+      "recall": 0.988391376451078,
+      "ham_fpr": 0.011254019292604502,
+      "list_ham_fpr": 0.006342494714587738,
+      "other_ham_fpr": 0.026845637583892617,
+      "spam_fpr": 0.05263157894736842,
+      "probe_flagged": 0.5733333333333334
+    },
+    {
+      "seed": 20261027,
+      "variant": "reweighted, personal threshold",
+      "threshold": 0.6770090457126005,
+      "recall": 0.9834162520729685,
+      "ham_fpr": 0.008038585209003215,
+      "list_ham_fpr": 0.0021141649048625794,
+      "other_ham_fpr": 0.026845637583892617,
+      "spam_fpr": 0.031578947368421054,
+      "probe_flagged": 0.39666666666666667
+    },
+    {
+      "seed": 20261028,
+      "variant": "served",
+      "threshold": 0.25339296295552055,
+      "recall": 0.9933665008291874,
+      "ham_fpr": 0.02090032154340836,
+      "list_ham_fpr": 0.00425531914893617,
+      "other_ham_fpr": 0.07236842105263158,
+      "spam_fpr": 0.06315789473684211,
+      "probe_flagged": 0.5233333333333333
+    },
+    {
+      "seed": 20261028,
+      "variant": "served, personal threshold",
+      "threshold": 0.6525773898122555,
+      "recall": 0.9908789386401327,
+      "ham_fpr": 0.011254019292604502,
+      "list_ham_fpr": 0.002127659574468085,
+      "other_ham_fpr": 0.039473684210526314,
+      "spam_fpr": 0.03508771929824561,
+      "probe_flagged": 0.2866666666666667
+    },
+    {
+      "seed": 20261028,
+      "variant": "no_return_path",
+      "threshold": 0.27326203488751033,
+      "recall": 0.9933665008291874,
+      "ham_fpr": 0.022508038585209004,
+      "list_ham_fpr": 0.010638297872340425,
+      "other_ham_fpr": 0.05921052631578947,
+      "spam_fpr": 0.056140350877192984,
+      "probe_flagged": 0.52
+    },
+    {
+      "seed": 20261028,
+      "variant": "no_return_path, personal threshold",
+      "threshold": 0.6152017478172951,
+      "recall": 0.9900497512437811,
+      "ham_fpr": 0.011254019292604502,
+      "list_ham_fpr": 0.002127659574468085,
+      "other_ham_fpr": 0.039473684210526314,
+      "spam_fpr": 0.03508771929824561,
+      "probe_flagged": 0.29
+    },
+    {
+      "seed": 20261028,
+      "variant": "reweighted",
+      "threshold": 0.14014304673446346,
+      "recall": 0.9941956882255389,
+      "ham_fpr": 0.02572347266881029,
+      "list_ham_fpr": 0.010638297872340425,
+      "other_ham_fpr": 0.07236842105263158,
+      "spam_fpr": 0.07368421052631578,
+      "probe_flagged": 0.5966666666666667
+    },
+    {
+      "seed": 20261028,
+      "variant": "reweighted, personal threshold",
+      "threshold": 0.3500153982876406,
+      "recall": 0.9925373134328358,
+      "ham_fpr": 0.01607717041800643,
+      "list_ham_fpr": 0.00425531914893617,
+      "other_ham_fpr": 0.05263157894736842,
+      "spam_fpr": 0.04912280701754386,
+      "probe_flagged": 0.48333333333333334
+    },
+    {
+      "seed": 20261029,
+      "variant": "served",
+      "threshold": 0.994671910692576,
+      "recall": 0.8864013266998342,
+      "ham_fpr": 0.0,
+      "list_ham_fpr": 0.0,
+      "other_ham_fpr": 0.0,
+      "spam_fpr": 0.0,
+      "probe_flagged": 0.0
+    },
+    {
+      "seed": 20261029,
+      "variant": "served, personal threshold",
+      "threshold": 0.994671910692576,
+      "recall": 0.8864013266998342,
+      "ham_fpr": 0.0,
+      "list_ham_fpr": 0.0,
+      "other_ham_fpr": 0.0,
+      "spam_fpr": 0.0,
+      "probe_flagged": 0.0
+    },
+    {
+      "seed": 20261029,
+      "variant": "no_return_path",
+      "threshold": 0.9908401825154665,
+      "recall": 0.9038142620232172,
+      "ham_fpr": 0.0,
+      "list_ham_fpr": 0.0,
+      "other_ham_fpr": 0.0,
+      "spam_fpr": 0.0,
+      "probe_flagged": 0.0
+    },
+    {
+      "seed": 20261029,
+      "variant": "no_return_path, personal threshold",
+      "threshold": 0.9908401825154665,
+      "recall": 0.9038142620232172,
+      "ham_fpr": 0.0,
+      "list_ham_fpr": 0.0,
+      "other_ham_fpr": 0.0,
+      "spam_fpr": 0.0,
+      "probe_flagged": 0.0
+    },
+    {
+      "seed": 20261029,
+      "variant": "reweighted",
+      "threshold": 0.9880424134204834,
+      "recall": 0.917910447761194,
+      "ham_fpr": 0.0,
+      "list_ham_fpr": 0.0,
+      "other_ham_fpr": 0.0,
+      "spam_fpr": 0.0,
+      "probe_flagged": 0.0
+    },
+    {
+      "seed": 20261029,
+      "variant": "reweighted, personal threshold",
+      "threshold": 0.9880424134204834,
+      "recall": 0.917910447761194,
+      "ham_fpr": 0.0,
+      "list_ham_fpr": 0.0,
+      "other_ham_fpr": 0.0,
+      "spam_fpr": 0.0,
+      "probe_flagged": 0.0
+    },
+    {
+      "seed": 20261030,
+      "variant": "served",
+      "threshold": 0.22593579629630856,
+      "recall": 0.9950248756218906,
+      "ham_fpr": 0.00966183574879227,
+      "list_ham_fpr": 0.0021598272138228943,
+      "other_ham_fpr": 0.03164556962025317,
+      "spam_fpr": 0.06293706293706294,
+      "probe_flagged": 0.6733333333333333
+    },
+    {
+      "seed": 20261030,
+      "variant": "served, personal threshold",
+      "threshold": 0.7482261638868829,
+      "recall": 0.9792703150912107,
+      "ham_fpr": 0.00644122383252818,
+      "list_ham_fpr": 0.0,
+      "other_ham_fpr": 0.02531645569620253,
+      "spam_fpr": 0.04895104895104895,
+      "probe_flagged": 0.41
+    },
+    {
+      "seed": 20261030,
+      "variant": "no_return_path",
+      "threshold": 0.20412882116479178,
+      "recall": 0.9933665008291874,
+      "ham_fpr": 0.011272141706924315,
+      "list_ham_fpr": 0.004319654427645789,
+      "other_ham_fpr": 0.03164556962025317,
+      "spam_fpr": 0.06993006993006994,
+      "probe_flagged": 0.57
+    },
+    {
+      "seed": 20261030,
+      "variant": "no_return_path, personal threshold",
+      "threshold": 0.6418837301857548,
+      "recall": 0.9809286898839138,
+      "ham_fpr": 0.008051529790660225,
+      "list_ham_fpr": 0.0021598272138228943,
+      "other_ham_fpr": 0.02531645569620253,
+      "spam_fpr": 0.05244755244755245,
+      "probe_flagged": 0.41
+    },
+    {
+      "seed": 20261030,
+      "variant": "reweighted",
+      "threshold": 0.09524264104903293,
+      "recall": 0.9966832504145937,
+      "ham_fpr": 0.01288244766505636,
+      "list_ham_fpr": 0.0021598272138228943,
+      "other_ham_fpr": 0.04430379746835443,
+      "spam_fpr": 0.07692307692307693,
+      "probe_flagged": 0.7
+    },
+    {
+      "seed": 20261030,
+      "variant": "reweighted, personal threshold",
+      "threshold": 0.7548131012275818,
+      "recall": 0.9800995024875622,
+      "ham_fpr": 0.00644122383252818,
+      "list_ham_fpr": 0.0,
+      "other_ham_fpr": 0.02531645569620253,
+      "spam_fpr": 0.04895104895104895,
+      "probe_flagged": 0.3566666666666667
+    },
+    {
+      "seed": 20261031,
+      "variant": "served",
+      "threshold": 0.6974222541456788,
+      "recall": 0.9834162520729685,
+      "ham_fpr": 0.008038585209003215,
+      "list_ham_fpr": 0.0,
+      "other_ham_fpr": 0.03597122302158273,
+      "spam_fpr": 0.014035087719298246,
+      "probe_flagged": 0.22666666666666666
+    },
+    {
+      "seed": 20261031,
+      "variant": "served, personal threshold",
+      "threshold": 0.6974222541456788,
+      "recall": 0.9834162520729685,
+      "ham_fpr": 0.008038585209003215,
+      "list_ham_fpr": 0.0,
+      "other_ham_fpr": 0.03597122302158273,
+      "spam_fpr": 0.014035087719298246,
+      "probe_flagged": 0.22666666666666666
+    },
+    {
+      "seed": 20261031,
+      "variant": "no_return_path",
+      "threshold": 0.6288638652262493,
+      "recall": 0.9842454394693201,
+      "ham_fpr": 0.011254019292604502,
+      "list_ham_fpr": 0.002070393374741201,
+      "other_ham_fpr": 0.04316546762589928,
+      "spam_fpr": 0.017543859649122806,
+      "probe_flagged": 0.3466666666666667
+    },
+    {
+      "seed": 20261031,
+      "variant": "no_return_path, personal threshold",
+      "threshold": 0.6288638652262493,
+      "recall": 0.9842454394693201,
+      "ham_fpr": 0.011254019292604502,
+      "list_ham_fpr": 0.002070393374741201,
+      "other_ham_fpr": 0.04316546762589928,
+      "spam_fpr": 0.017543859649122806,
+      "probe_flagged": 0.3466666666666667
+    },
+    {
+      "seed": 20261031,
+      "variant": "reweighted",
+      "threshold": 0.5008587550214407,
+      "recall": 0.9875621890547264,
+      "ham_fpr": 0.008038585209003215,
+      "list_ham_fpr": 0.0,
+      "other_ham_fpr": 0.03597122302158273,
+      "spam_fpr": 0.021052631578947368,
+      "probe_flagged": 0.30333333333333334
+    },
+    {
+      "seed": 20261031,
+      "variant": "reweighted, personal threshold",
+      "threshold": 0.5008587550214407,
+      "recall": 0.9875621890547264,
+      "ham_fpr": 0.008038585209003215,
+      "list_ham_fpr": 0.0,
+      "other_ham_fpr": 0.03597122302158273,
+      "spam_fpr": 0.021052631578947368,
+      "probe_flagged": 0.30333333333333334
+    }
+  ]
+}

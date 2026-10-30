@@ -17,46 +17,8 @@ import urllib.error
 import urllib.request
 from collections.abc import Sequence
 
-NAMES = ("alice", "bob", "carol", "dave", "erin", "frank")
-TOPICS = (
-    ("Lunch on Thursday?", "Are we still on for lunch on Thursday? I can bring the slides."),
-    ("Re: quarterly report", "Thanks, the figures look right. I left two comments in section 3."),
-    ("Your order has shipped", "Your parcel is on its way and should arrive within 3 days."),
-    ("Team offsite", "The offsite moves to the 14th. Please confirm your dietary needs."),
-    ("Weekly newsletter", "This week: five tips for better meetings, and our new podcast."),
-)
-LURES = (
-    ("Urgent: verify your account", "Unusual activity was detected. Confirm your password at"),
-    ("Your mailbox is full", "You have 5 pending messages. Upgrade your quota now at"),
-    ("Payment declined", "We could not process your last payment. Update your billing at"),
-    ("Invoice #{n} attached", "Please review the attached invoice and sign in to view it at"),
-)
-BRANDS = ("PayPal", "Microsoft", "DHL", "Netflix", "Your Bank")
-
-
-def legitimate(rng: random.Random) -> str:
-    sender, recipient = rng.sample(NAMES, 2)
-    subject, body = rng.choice(TOPICS)
-    return (
-        f"Return-Path: <{sender}@example.org>\nFrom: {sender.title()} <{sender}@example.org>\n"
-        f"To: {recipient}@example.org\nSubject: {subject}\n"
-        f"Message-ID: <{rng.getrandbits(48):x}@example.org>\n"
-        f"Date: Thu, 29 Oct 2026 10:00:00 +0000\n\nHi {recipient.title()},\n\n{body}\n\n"
-        f"{sender.title()}\n"
-    )
-
-
-def phishing(rng: random.Random) -> str:
-    brand = rng.choice(BRANDS)
-    subject, lure = rng.choice(LURES)
-    host = f"198.51.100.{rng.randint(1, 254)}"
-    return (
-        f'From: "{brand} Security" <no-reply@secure-{brand.lower().replace(" ", "")}.example>\n'
-        f"Reply-To: support@other.example\nSubject: {subject.format(n=rng.randint(1000, 9999))}\n"
-        f"Content-Type: text/html\n\n<p>Dear customer,</p><p>{lure} "
-        f'<a href="http://{host}/login.php?id={rng.getrandbits(32):x}">www.{brand.lower()}.com</a>'
-        "</p>\n"
-    )
+from mailguard.data.synthetic import personal as legitimate
+from mailguard.data.synthetic import phishing
 
 
 def request(rng: random.Random) -> dict[str, object]:

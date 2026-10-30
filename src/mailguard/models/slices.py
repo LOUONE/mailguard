@@ -36,6 +36,21 @@ LONG_TEXT: Final = 100
 MIN_ENGLISH_SHARE: Final = 0.1
 
 
+LIST_HEADERS: Final = ("list-id", "list-unsubscribe", "list-post", "mailing-list", "x-mailing-list")
+
+
+def from_mailing_list(email: Email) -> bool:
+    """Mail sent through a list or a bulk sender, by its headers (RFC 2369, RFC 2919).
+
+    75% of the ham corpus is list mail (#73), so the model knows that kind of legitimate mail
+    far better than personal mail: slicing by it shows where false alarms concentrate.
+    """
+    if any(email.header_values(name) for name in LIST_HEADERS):
+        return True
+    precedence = " ".join(email.header_values("precedence")).casefold()
+    return "list" in precedence or "bulk" in precedence
+
+
 def readable_words(email: Email) -> list[str]:
     """Words of the text the model reads, lowercased, without placeholders or digits."""
     words = _WORD_RE.findall(scrubbed_text(email).casefold())
@@ -53,10 +68,13 @@ def slice_masks(emails: Sequence[Email]) -> dict[str, NDArray[np.bool_]]:
     counts = np.array([len(w) for w in words], dtype=np.int64)
     english = np.array([english_share(w) >= MIN_ENGLISH_SHARE for w in words], dtype=bool)
     enough = counts >= SHORT_TEXT
+    listed = np.array([from_mailing_list(email) for email in emails], dtype=bool)
     return {
         f"under {SHORT_TEXT} words": ~enough,
         f"{SHORT_TEXT} to {LONG_TEXT - 1} words": enough & (counts < LONG_TEXT),
         f"{LONG_TEXT} words or more": counts >= LONG_TEXT,
         f"{SHORT_TEXT}+ words, mostly English": enough & english,
         f"{SHORT_TEXT}+ words, little English": enough & ~english,
+        "from a mailing list": listed,
+        "not from a mailing list": ~listed,
     }
