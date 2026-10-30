@@ -49,9 +49,9 @@ Method and thresholds in [`monitoring/drift.py`](../src/mailguard/monitoring/dri
 Evidently in [ADR 0007](adr/0007-drift-without-evidently.md).
 
 1. **Recording.** With `MAILGUARD_FEATURE_LOG_DIR` set, the API appends one JSON line per scored
-   email: time, model version, score, label and the 38 structured features (header flags,
-   attachment, URL and wording counts). Never text, addresses, URLs, TF-IDF columns or request
-   ids; a test sends a canary through the API and searches the files for it.
+   email: time, model version, score, label and the structured features (37 for the served
+   model: header flags, attachment, URL and wording counts). Never text, addresses, URLs, TF-IDF
+   columns or request ids; a test sends a canary through the API and searches the files for it.
 2. **Reference.** The served model's features and scores on the validation split: data it was
    not trained on, drawn like its training data. Cached per model version.
 3. **Comparison.** For each feature and for the score, the PSI and the two-sample

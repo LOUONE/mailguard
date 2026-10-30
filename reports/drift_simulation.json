@@ -1,0 +1,165 @@
+{
+  "held_out": {
+    "messages": 895,
+    "phishing": 895
+  },
+  "production_version": "1",
+  "recall_on_new_campaigns": {
+    "production": 0.9810055865921787,
+    "candidate_on_test_part": null
+  },
+  "normal_traffic": {
+    "messages": 1988,
+    "flagged_phishing": 1089,
+    "drifted": false,
+    "share_drifted": 0.0,
+    "score_drifted": false,
+    "top_features": [
+      {
+        "feature": "lexicon__body_credential_cues",
+        "psi": 0.07127514322924795,
+        "reference_mean": 1.11791730474732,
+        "current_mean": 0.9537223340040242
+      },
+      {
+        "feature": "lexicon__subject_uppercase_ratio",
+        "psi": 0.04987625307649355,
+        "reference_mean": 0.18408057708997771,
+        "current_mean": 0.18581185683214466
+      },
+      {
+        "feature": "urls__url_keyword_hits",
+        "psi": 0.03491458155337436,
+        "reference_mean": 0.45176110260336905,
+        "current_mean": 0.432092555331992
+      },
+      {
+        "feature": "urls__url_anchor_mismatches",
+        "psi": 0.029295758628673955,
+        "reference_mean": 0.4221541602858601,
+        "current_mean": 0.24496981891348088
+      },
+      {
+        "feature": "urls__url_max_subdomain_depth",
+        "psi": 0.026520294483461493,
+        "reference_mean": 0.9938744257274119,
+        "current_mean": 0.9748490945674044
+      },
+      {
+        "feature": "lexicon__body_uppercase_ratio",
+        "psi": 0.024240276551616445,
+        "reference_mean": 0.07571729676007881,
+        "current_mean": 0.08056880748220399
+      },
+      {
+        "feature": "lexicon__subject_urgency_cues",
+        "psi": 0.023872400603720215,
+        "reference_mean": 0.07708014293006636,
+        "current_mean": 0.07494969818913481
+      },
+      {
+        "feature": "urls__url_max_host_entropy",
+        "psi": 0.023458073649800466,
+        "reference_mean": 3.1135327241280604,
+        "current_mean": 3.1082501060934726
+      }
+    ]
+  },
+  "new_campaigns": {
+    "messages": 1802,
+    "flagged_phishing": 901,
+    "drifted": true,
+    "share_drifted": 0.13513513513513514,
+    "score_drifted": true,
+    "top_features": [
+      {
+        "feature": "urls__url_keyword_hits",
+        "psi": 0.34116112061297754,
+        "reference_mean": 0.45176110260336905,
+        "current_mean": 0.1148723640399556
+      },
+      {
+        "feature": "urls__url_ip_hosts",
+        "psi": 0.30933958103676007,
+        "reference_mean": 0.23226135783563043,
+        "current_mean": 0.048834628190899
+      },
+      {
+        "feature": "lexicon__body_credential_cues",
+        "psi": 0.3080981757532618,
+        "reference_mean": 1.11791730474732,
+        "current_mean": 0.5099889012208657
+      },
+      {
+        "feature": "urls__url_anchor_mismatches",
+        "psi": 0.267075441221329,
+        "reference_mean": 0.4221541602858601,
+        "current_mean": 0.08712541620421754
+      },
+      {
+        "feature": "headers__hdr_message_id_domain_mismatch",
+        "psi": 0.26133123936357716,
+        "reference_mean": 0.482899438489025,
+        "current_mean": 0.24084350721420644
+      },
+      {
+        "feature": "score",
+        "psi": 0.2517383819304459,
+        "reference_mean": 0.5369293712980727,
+        "current_mean": 0.4858010882071007
+      },
+      {
+        "feature": "urls__url_max_subdomain_depth",
+        "psi": 0.2073926215914831,
+        "reference_mean": 0.9938744257274119,
+        "current_mean": 0.7475027746947835
+      },
+      {
+        "feature": "urls__url_distinct_domains",
+        "psi": 0.1268069705265285,
+        "reference_mean": 3.0724859622256253,
+        "current_mean": 1.5011098779134295
+      }
+    ]
+  },
+  "retraining": {
+    "candidate": "2",
+    "production": "1",
+    "promoted": false,
+    "reasons": [
+      "pass: recall gain +0.33 points, interval [+0.08, +0.69] above zero",
+      "fail: McNemar 8 only-candidate vs 3 only-production, p = 0.227 below 0.05",
+      "fail: ham FPR difference upper bound +0.79 points within 0.5"
+    ],
+    "evidence": {
+      "messages": 2113,
+      "clusters": 1670,
+      "production_recall": {
+        "estimate": 0.9867330016583747,
+        "low": 0.9769883905050413,
+        "high": 0.9943914736421725
+      },
+      "candidate_recall": {
+        "estimate": 0.9900497512437811,
+        "low": 0.9808468500508666,
+        "high": 0.9968594477007674
+      },
+      "recall_difference": {
+        "estimate": 0.0033167495854063977,
+        "low": 0.0007842830162604897,
+        "high": 0.006932442392375363
+      },
+      "ham_fpr_difference": {
+        "estimate": 0.0016077170418006426,
+        "low": -0.003305785123966941,
+        "high": 0.00789920661107445
+      },
+      "mcnemar": {
+        "only_a_correct": 3,
+        "only_b_correct": 8,
+        "statistic": 1.4545454545454546,
+        "p_value": 0.2265625
+      }
+    }
+  }
+}
