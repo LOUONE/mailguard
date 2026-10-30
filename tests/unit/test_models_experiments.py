@@ -61,7 +61,7 @@ def test_variants_over_seeds_are_paired_with_the_baseline() -> None:
     results = [r for s in seeds(2) for r in run_seed(frame, emails, is_list, probe, s, variants)]
     summary = summarise(results, "served")
 
-    assert len(results) == 8 and summary["seeds"] == seeds(2)  # 2 seeds x 2 models x 2 rules
+    assert len(results) == 12 and summary["seeds"] == seeds(2)  # 2 seeds x 2 models x 3 rules
     reweighted = summary["variants"]["reweighted"]["recall"]
     assert reweighted["seeds_lower"] + reweighted["seeds_higher"] <= 2
     assert "difference_mean" not in summary["variants"]["served"]["recall"]
@@ -80,5 +80,9 @@ def test_the_personal_threshold_is_set_on_ham_outside_lists() -> None:
 
     results = run_seed(frame, emails, is_list, probe, seeds(1)[0], [Variant("served", TINY)])
 
-    assert [r["variant"] for r in results] == ["served", "served, personal threshold"]
+    assert [r["variant"] for r in results] == [
+        "served",
+        "served, personal threshold",
+        "served, cluster threshold",
+    ]
     assert all(0 <= r["threshold"] <= 1 for r in results)
