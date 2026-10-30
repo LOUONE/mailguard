@@ -32,4 +32,6 @@ def test_slice_masks() -> None:
         "100 words or more": [False, False, False],
         "20+ words, mostly English": [False, True, False],
         "20+ words, little English": [False, False, True],
+        "from a mailing list": [False, False, False],
+        "not from a mailing list": [True, True, True],
     }
