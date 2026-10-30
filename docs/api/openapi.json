@@ -3,7 +3,7 @@
   "info": {
     "title": "mailguard",
     "summary": "Phishing detection for raw email, with calibrated scores and reasons.",
-    "version": "0.1.2"
+    "version": "0.2.0"
   },
   "paths": {
     "/health": {
