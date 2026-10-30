@@ -8,11 +8,12 @@ most `max_fpr` of it would be flagged.
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Final
+from typing import Any, Final
 
 import numpy as np
+import pandas as pd
 from numpy.typing import ArrayLike, NDArray
 from sklearn.metrics import average_precision_score, brier_score_loss, log_loss, roc_auc_score
 
@@ -27,14 +28,23 @@ class OperatingPoint:
     spam_fpr: float  # share of spam flagged, reported apart (ADR 0001)
 
 
-def threshold_at_fpr(negative_scores: ArrayLike, max_fpr: float) -> float:
+def threshold_at_fpr(
+    negative_scores: ArrayLike, max_fpr: float, groups: Sequence[str] | None = None
+) -> float:
     """Lowest threshold that flags at most `max_fpr` of `negative_scores` (flag: score > t).
 
     With n negatives, at most k = floor(max_fpr * n) may be flagged, so the threshold is the
     (k + 1)-th highest negative score. Ties at the threshold are not flagged, which errs on the
     side of fewer false positives.
+
+    With `groups` (duplicate clusters), each cluster counts once, by its highest score: k of the
+    n clusters may be flagged. Nine copies of one email then weigh as one campaign, as they do in
+    the splits and the bootstrap, instead of filling the top of the ranking by themselves.
     """
-    scores = np.sort(np.asarray(negative_scores, dtype=np.float64))[::-1]
+    values: NDArray[np.floating[Any]] = np.asarray(negative_scores, dtype=np.float64)
+    if groups is not None:
+        values = pd.Series(values).groupby(list(groups)).max().to_numpy(dtype=np.float64)
+    scores = np.sort(values)[::-1]
     if scores.size == 0:
         raise ValueError("need at least one negative score")
     if not 0 <= max_fpr < 1:

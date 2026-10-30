@@ -34,7 +34,9 @@ from mailguard.parsing import Email
 logger = logging.getLogger(__name__)
 
 FPR: Final = 0.01
-METRICS: Final = ("recall", "ham_fpr", "list_ham_fpr", "other_ham_fpr", "spam_fpr", "probe_flagged")
+METRICS: Final = (
+    "recall", "ham_fpr", "list_ham_fpr", "other_ham_fpr", "spam_fpr", "probe_flagged", "threshold"
+)  # fmt: skip
 
 
 @dataclass(frozen=True, slots=True)
@@ -86,6 +88,7 @@ def run_seed(
     train, val, test = subset("train"), subset("val"), subset("test")
     val_ham = labels[part["val"]] == "ham"
     val_personal = val_ham & ~is_list[part["val"]]
+    val_clusters = frame["cluster"].astype(str).to_numpy()[part["val"]]
     test_labels, test_list = labels[part["test"]], is_list[part["test"]]
     ham = test_labels == "ham"
     out = []
@@ -100,15 +103,18 @@ def run_seed(
         val_scores = pipeline.predict_proba(val)[:, 1]
         test_scores = pipeline.predict_proba(test)[:, 1]
         probe_scores = pipeline.predict_proba(probe)[:, 1]
-        # Two ways to set the same 1% target: on all validation ham, three quarters of which is
-        # list mail that scores near zero, or on the ham that is not list mail, the kind a real
-        # inbox is full of. Same model, different decision.
+        # Three ways to set the same 1% target: on all validation ham, three quarters of which is
+        # list mail that scores near zero; on the ham that is not list mail, the kind a real
+        # inbox is full of; or on all validation ham with each duplicate cluster counted once
+        # (#85). Same model, different decisions.
         rules = {
-            variant.name: val_scores[val_ham],
-            f"{variant.name}, personal threshold": val_scores[val_personal],
+            variant.name: threshold_at_fpr(val_scores[val_ham], FPR),
+            f"{variant.name}, personal threshold": threshold_at_fpr(val_scores[val_personal], FPR),
+            f"{variant.name}, cluster threshold": threshold_at_fpr(
+                val_scores[val_ham], FPR, val_clusters[val_ham].tolist()
+            ),
         }
-        for name, reference in rules.items():
-            threshold = threshold_at_fpr(reference, FPR)
+        for name, threshold in rules.items():
             flags = test_scores > threshold
             result: dict[str, Any] = {
                 "seed": seed,
@@ -138,6 +144,7 @@ LABELS: Final = {
     "other_ham_fpr": "Ham FPR, other ham",
     "spam_fpr": "Spam flagged",
     "probe_flagged": "Made-up personal emails flagged",
+    "threshold": "Threshold (raw model score, before calibration)",
 }
 
 
@@ -163,12 +170,14 @@ def render(summary: dict[str, Any], title: str) -> str:
         ]
         for name, entry in summary["variants"].items():
             s = entry[metric]
-            spread = f"{100 * s['min']:.2f} to {100 * s['max']:.2f}"
-            row = f"| {name} | {100 * s['mean']:.2f}% | {spread} |"
+            scale, unit = (1, "") if metric == "threshold" else (100, "%")  # a score, not a rate
+            spread = f"{scale * s['min']:.2f} to {scale * s['max']:.2f}"
+            row = f"| {name} | {scale * s['mean']:.2f}{unit} | {spread} |"
             if "difference_mean" in s:
                 row += (
-                    f" {100 * s['difference_mean']:+.2f} | {100 * s['difference_min']:+.2f} to "
-                    f"{100 * s['difference_max']:+.2f} | {s['seeds_lower']} / {s['seeds_higher']} |"
+                    f" {scale * s['difference_mean']:+.2f} | {scale * s['difference_min']:+.2f} "
+                    f"to {scale * s['difference_max']:+.2f} | "
+                    f"{s['seeds_lower']} / {s['seeds_higher']} |"
                 )
             else:
                 row += " | | |"

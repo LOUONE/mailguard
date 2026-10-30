@@ -85,3 +85,16 @@ def test_validation_metrics_choose_thresholds_on_ham() -> None:
         assert metrics[f"ham_fpr_at_{name}_fpr"] <= fpr
         assert 0 < metrics[f"recall_at_{name}_fpr"] <= 1
     assert metrics["threshold_at_01pct_fpr"] >= metrics["threshold_at_1pct_fpr"]
+
+
+def test_a_cluster_of_copies_counts_once_for_the_threshold() -> None:
+    # 90 distinct ham with low scores, and 9 copies of one email scoring 0.99.
+    scores = [i / 1000 for i in range(90)] + [0.99] * 9
+    groups = [f"c{i}" for i in range(90)] + ["copies"] * 9
+
+    per_message = threshold_at_fpr(scores, 0.05)  # k = 4 of 99: the threshold falls in the copies
+    per_cluster = threshold_at_fpr(scores, 0.05, groups)  # k = 4 of 91 clusters
+
+    assert per_message == 0.99
+    assert per_cluster == 0.086  # the copies are one flagged campaign; four more are allowed
+    assert threshold_at_fpr(scores, 0.05, [str(i) for i in range(99)]) == per_message
