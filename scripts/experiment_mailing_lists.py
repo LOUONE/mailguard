@@ -75,7 +75,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             json.dumps(payload, indent=2) + "\n", encoding="utf-8", newline="\n"
         )
         (OUT / "mailing_lists.md").write_text(
-            render(summary, "Mailing-list artefact: variants over split seeds") + "\n",
+            render(summary, "Mailing-list artefact: variants over split seeds").rstrip() + "\n",
             encoding="utf-8",
             newline="\n",
         )
