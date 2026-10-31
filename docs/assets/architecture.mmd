@@ -1,0 +1,28 @@
+%% Source of architecture-{light,dark}.png in the README. Re-render after a change with mermaid-cli:
+%%   docker run --rm -u root -v "$PWD/docs/assets:/data" minlag/mermaid-cli:11.4.2 \
+%%     -i /data/architecture.mmd -o /data/architecture-dark.png -t dark -b transparent -w 1100 -s 2
+%%   (and -t default -o /data/architecture-light.png for the light version)
+flowchart TB
+    subgraph offline [Training and retraining]
+        direction LR
+        corpora[(Public corpora)] --> splits["Grouped splits<br/>by duplicate cluster"] --> train["Train, calibrate,<br/>fix thresholds"] --> registry[("MLflow registry<br/>@production")]
+        retrain["Retrain<br/>on drift or schedule"] --> gate{"Significant gain?<br/>bootstrap + McNemar"} -- yes --> registry
+    end
+
+    subgraph online ["Online, per request: p50 18 ms"]
+        direction LR
+        mail([Raw email]) --> api["FastAPI<br/>size cap, validation"] --> features["Parser + features<br/>headers, URLs, text"] --> model["LightGBM<br/>calibrated, TreeSHAP"] --> verdict(["label, probability,<br/>top 5 reasons"])
+        model -. "grey zone" .-> agent["LLM investigation agent<br/>Phase 3"]
+    end
+
+    subgraph monitoring [Monitoring]
+        direction LR
+        prometheus[(Prometheus)] --> grafana["Grafana<br/>14 panels"]
+        drift["Drift job<br/>PSI and KS"]
+    end
+
+    offline -- "model loaded at start, read-only" --> online
+    online -- "metrics, feature vectors (numbers only)" --> monitoring
+
+    classDef next stroke-dasharray: 5 5
+    class agent next
