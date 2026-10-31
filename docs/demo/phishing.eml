@@ -1,0 +1,9 @@
+From: "PayPal Security" <no-reply@secure-paypal.example>
+Reply-To: support@other.example
+To: alice@example.org
+Subject: Urgent: verify your account
+Content-Type: text/html
+
+<p>Dear customer,</p>
+<p>Unusual activity was detected. Confirm your password within 24 hours at
+<a href="http://198.51.100.23/login.php?id=8f3a">www.paypal.com</a></p>
