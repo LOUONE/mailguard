@@ -366,7 +366,9 @@
       },
       "options": {
         "legend": {
-          "displayMode": "hidden"
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
         },
         "tooltip": {
           "mode": "single"
@@ -401,7 +403,11 @@
         "defaults": {
           "unit": "short",
           "decimals": 0,
-          "min": 0
+          "min": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
         },
         "overrides": []
       },
@@ -613,7 +619,9 @@
       },
       "options": {
         "legend": {
-          "displayMode": "hidden"
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
         },
         "tooltip": {
           "mode": "single"
