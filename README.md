@@ -44,34 +44,16 @@ An LLM agent for the grey zone comes next.
 
 ## Architecture
 
-```mermaid
-flowchart TB
-    subgraph offline [Training and retraining]
-        direction LR
-        corpora[(Public corpora)] --> splits["Grouped splits<br/>by duplicate cluster"] --> train["Train, calibrate,<br/>fix thresholds"] --> registry[("MLflow registry<br/>@production")]
-        retrain["Retrain<br/>on drift or schedule"] --> gate{"Significant gain?<br/>bootstrap + McNemar"} -- yes --> registry
-    end
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/architecture-dark.png"/>
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/architecture-light.png"/>
+  <img src="docs/assets/architecture-light.png" alt="Architecture: training and retraining (grouped splits, calibration, a significance gate before the MLflow production alias) feeds the online path (FastAPI, parser and features, LightGBM with TreeSHAP, returning label, probability and reasons, with grey-zone emails going to the Phase 3 LLM agent), which feeds monitoring (Prometheus, Grafana, drift job)." width="760"/>
+</picture>
+</p>
 
-    subgraph online ["Online, per request: p50 18 ms"]
-        direction LR
-        mail([Raw email]) --> api["FastAPI<br/>size cap, validation"] --> features["Parser + features<br/>headers, URLs, text"] --> model["LightGBM<br/>calibrated, TreeSHAP"] --> verdict(["label, probability,<br/>top 5 reasons"])
-        model -. "grey zone" .-> agent["LLM investigation agent<br/>Phase 3"]
-    end
-
-    subgraph monitoring [Monitoring]
-        direction LR
-        prometheus[(Prometheus)] --> grafana["Grafana<br/>14 panels"]
-        drift["Drift job<br/>PSI and KS"]
-    end
-
-    offline -- "model loaded at start, read-only" --> online
-    online -- "metrics, feature vectors (numbers only)" --> monitoring
-
-    classDef next stroke-dasharray: 5 5
-    class agent next
-```
-
-Components, flows and what crosses each boundary: [docs/architecture.md](docs/architecture.md).
+Rendered from [docs/assets/architecture.mmd](docs/assets/architecture.mmd) (Mermaid). Components,
+flows and what crosses each boundary: [docs/architecture.md](docs/architecture.md).
 
 ## Results
 
