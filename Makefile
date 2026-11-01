@@ -1,4 +1,4 @@
-.PHONY: help setup sync data dataset audit train evaluate promote retrain simulate-drift serve openapi demo demo-down demo-gif mlflow-ui eda lint format test test-unit test-integration coverage pre-commit clean all
+.PHONY: help setup sync data dataset audit train evaluate promote retrain simulate-drift serve openapi demo demo-down demo-gif llm-fixtures mlflow-ui eda lint format test test-unit test-integration coverage pre-commit clean all
 
 help:
 	@echo "mailguard — available targets:"
@@ -17,6 +17,7 @@ help:
 	@echo "  demo            Whole stack in Docker: API, MLflow, Prometheus, Grafana, demo traffic"
 	@echo "  demo-down       Stop the stack (volumes kept; add -v to docker compose down to drop them)"
 	@echo "  demo-gif        Re-record docs/demo/demo.gif with VHS against the running stack (needs make demo)"
+	@echo "  llm-fixtures    Re-record the LLM client contract fixtures from a local Ollama (needs ollama)"
 	@echo "  mlflow-ui       Browse local MLflow runs at http://127.0.0.1:5000"
 	@echo "  eda          Re-execute notebooks/01_eda.ipynb in place (needs make data)"
 	@echo "  lint            Ruff check + format check + mypy"
@@ -78,6 +79,9 @@ demo-down:
 demo-gif:
 	docker build -q -t mailguard-vhs docs/demo
 	docker run --rm --network container:mailguard-api-1 -v "$(CURDIR)/docs/demo:/vhs" mailguard-vhs demo.tape
+
+llm-fixtures:
+	uv run python scripts/record_llm_fixtures.py
 
 mlflow-ui:
 	uv run mlflow ui --backend-store-uri sqlite:///mlruns/mlflow.db

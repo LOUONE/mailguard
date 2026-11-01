@@ -1,0 +1,143 @@
+{
+  "input": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a terse assistant for a mail security team.",
+        "tool_calls": [],
+        "tool_call_id": null,
+        "name": null
+      },
+      {
+        "role": "user",
+        "content": "Use the tool to check the domain paypa1-login.example, then stop.",
+        "tool_calls": [],
+        "tool_call_id": null,
+        "name": null
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "call_y09b9562",
+            "name": "check_domain",
+            "arguments": {
+              "domain": "paypa1-login.example"
+            }
+          }
+        ],
+        "tool_call_id": null,
+        "name": null
+      },
+      {
+        "role": "tool",
+        "content": "{\"age_days\": 3}",
+        "tool_calls": [],
+        "tool_call_id": "call_y09b9562",
+        "name": "check_domain"
+      }
+    ],
+    "tools": [
+      {
+        "name": "check_domain",
+        "description": "Look up how long ago a domain was registered.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "domain": {
+              "type": "string",
+              "description": "Domain name, no scheme."
+            }
+          },
+          "required": [
+            "domain"
+          ]
+        }
+      }
+    ],
+    "schema": null
+  },
+  "path": "/v1/chat/completions",
+  "request": {
+    "model": "qwen3:8b",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a terse assistant for a mail security team."
+      },
+      {
+        "role": "user",
+        "content": "Use the tool to check the domain paypa1-login.example, then stop."
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "call_y09b9562",
+            "type": "function",
+            "function": {
+              "name": "check_domain",
+              "arguments": "{\"domain\": \"paypa1-login.example\"}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "content": "{\"age_days\": 3}",
+        "tool_call_id": "call_y09b9562"
+      }
+    ],
+    "temperature": 0.0,
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "check_domain",
+          "description": "Look up how long ago a domain was registered.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "domain": {
+                "type": "string",
+                "description": "Domain name, no scheme."
+              }
+            },
+            "required": [
+              "domain"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "status": 200,
+  "response": {
+    "id": "chatcmpl-961",
+    "object": "chat.completion",
+    "created": 1793558038,
+    "model": "qwen3:8b",
+    "system_fingerprint": "fp_ollama",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "The domain **paypa1-login.example** was registered **3 days ago**.",
+          "reasoning": "Okay, the user asked to check the domain \"paypa1-login.example\" and then stop. I called the check_domain function with that domain. The response came back saying the age is 3 days. Now I need to relay this information clearly.\n\nFirst, I should confirm the domain they asked about. Then state the registration age. Since the user is in a security team, maybe they're checking for recently registered domains which could be suspicious. But the user just wants the info, so I'll keep it straightforward. No need for extra analysis unless asked. Just present the data clearly.\n"
+        },
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 212,
+      "prompt_tokens_details": {
+        "cached_tokens": 170
+      },
+      "completion_tokens": 141,
+      "total_tokens": 353
+    }
+  }
+}

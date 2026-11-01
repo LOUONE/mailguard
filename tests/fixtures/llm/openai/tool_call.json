@@ -1,0 +1,113 @@
+{
+  "input": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a terse assistant for a mail security team.",
+        "tool_calls": [],
+        "tool_call_id": null,
+        "name": null
+      },
+      {
+        "role": "user",
+        "content": "Use the tool to check the domain paypa1-login.example, then stop.",
+        "tool_calls": [],
+        "tool_call_id": null,
+        "name": null
+      }
+    ],
+    "tools": [
+      {
+        "name": "check_domain",
+        "description": "Look up how long ago a domain was registered.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "domain": {
+              "type": "string",
+              "description": "Domain name, no scheme."
+            }
+          },
+          "required": [
+            "domain"
+          ]
+        }
+      }
+    ],
+    "schema": null
+  },
+  "path": "/v1/chat/completions",
+  "request": {
+    "model": "qwen3:8b",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a terse assistant for a mail security team."
+      },
+      {
+        "role": "user",
+        "content": "Use the tool to check the domain paypa1-login.example, then stop."
+      }
+    ],
+    "temperature": 0.0,
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "check_domain",
+          "description": "Look up how long ago a domain was registered.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "domain": {
+                "type": "string",
+                "description": "Domain name, no scheme."
+              }
+            },
+            "required": [
+              "domain"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "status": 200,
+  "response": {
+    "id": "chatcmpl-249",
+    "object": "chat.completion",
+    "created": 1793558036,
+    "model": "qwen3:8b",
+    "system_fingerprint": "fp_ollama",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "",
+          "reasoning": "Okay, the user wants me to check the domain paypa1-login.example using the provided tool. Let me make sure I understand the task correctly. The tool is called check_domain, and it requires the domain name as an argument. The domain in question has a typo, with \"paypa1\" instead of \"paypal\". But I should probably use the exact domain provided by the user, even if it's a typo. Wait, maybe the user made a mistake in the domain name? Or is it a typo for PayPal's login page? But the user specified paypa1-login.example, so I should use that exact string.\n\nFirst, I need to call the check_domain function with the domain parameter set to \"paypa1-login.example\". The function's purpose is to look up how long ago the domain was registered. So the tool will probably return the registration date or the time elapsed since registration. But I need to make sure that the function is called correctly. The parameters are straightforward: just the domain name. \n\nWait, the user said \"then stop\" after using the tool. Does that mean after the tool call, I should not perform any other actions? So my response should be just the tool call, and then stop. The user might be testing if I follow instructions to halt after the tool call. So I should generate the tool call in the specified XML format and then stop, not adding any further text. \n\nLet me double-check the function signature. The function is check_domain, and it takes a domain as a string. The example domain is paypa1-login.example. So the arguments should be {\"domain\": \"paypa1-login.example\"}. \n\nI need to make sure that the JSON is correctly formatted, with the domain key and the value. No typos in the domain name, even though it's likely a typo. The user might have intended paypal-login.example, but I should use exactly what they provided. \n\nAlright, the tool call should be within the XML tags as specified. Let me structure it properly.\n",
+          "tool_calls": [
+            {
+              "id": "call_y09b9562",
+              "index": 0,
+              "type": "function",
+              "function": {
+                "name": "check_domain",
+                "arguments": "{\"domain\":\"paypa1-login.example\"}"
+              }
+            }
+          ]
+        },
+        "finish_reason": "tool_calls"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 170,
+      "prompt_tokens_details": {
+        "cached_tokens": 13
+      },
+      "completion_tokens": 443,
+      "total_tokens": 613
+    }
+  }
+}

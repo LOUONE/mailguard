@@ -1,0 +1,110 @@
+{
+  "input": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a terse assistant for a mail security team.",
+        "tool_calls": [],
+        "tool_call_id": null,
+        "name": null
+      },
+      {
+        "role": "user",
+        "content": "Use the tool to check the domain paypa1-login.example, then stop.",
+        "tool_calls": [],
+        "tool_call_id": null,
+        "name": null
+      }
+    ],
+    "tools": [
+      {
+        "name": "check_domain",
+        "description": "Look up how long ago a domain was registered.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "domain": {
+              "type": "string",
+              "description": "Domain name, no scheme."
+            }
+          },
+          "required": [
+            "domain"
+          ]
+        }
+      }
+    ],
+    "schema": null
+  },
+  "path": "/api/chat",
+  "request": {
+    "model": "qwen3:8b",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a terse assistant for a mail security team."
+      },
+      {
+        "role": "user",
+        "content": "Use the tool to check the domain paypa1-login.example, then stop."
+      }
+    ],
+    "stream": false,
+    "think": false,
+    "options": {
+      "num_ctx": 16384,
+      "temperature": 0.0
+    },
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "check_domain",
+          "description": "Look up how long ago a domain was registered.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "domain": {
+                "type": "string",
+                "description": "Domain name, no scheme."
+              }
+            },
+            "required": [
+              "domain"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "status": 200,
+  "response": {
+    "model": "qwen3:8b",
+    "created_at": "2026-11-01T18:33:46.9226703Z",
+    "message": {
+      "role": "assistant",
+      "content": "",
+      "tool_calls": [
+        {
+          "id": "call_eicdm75t",
+          "function": {
+            "index": 0,
+            "name": "check_domain",
+            "arguments": {
+              "domain": "paypa1-login.example"
+            }
+          }
+        }
+      ]
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 298696600,
+    "load_duration": 3658900,
+    "prompt_eval_count": 176,
+    "prompt_eval_cached_count": 13,
+    "prompt_eval_duration": 47254000,
+    "eval_count": 24,
+    "eval_duration": 239593000
+  }
+}

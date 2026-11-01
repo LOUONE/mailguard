@@ -1,0 +1,60 @@
+{
+  "input": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a terse assistant for a mail security team.",
+        "tool_calls": [],
+        "tool_call_id": null,
+        "name": null
+      },
+      {
+        "role": "user",
+        "content": "Reply with one word: ready.",
+        "tool_calls": [],
+        "tool_call_id": null,
+        "name": null
+      }
+    ],
+    "tools": [],
+    "schema": null
+  },
+  "path": "/api/chat",
+  "request": {
+    "model": "qwen3:8b",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a terse assistant for a mail security team."
+      },
+      {
+        "role": "user",
+        "content": "Reply with one word: ready."
+      }
+    ],
+    "stream": false,
+    "think": false,
+    "options": {
+      "num_ctx": 16384,
+      "temperature": 0.0
+    }
+  },
+  "status": 200,
+  "response": {
+    "model": "qwen3:8b",
+    "created_at": "2026-11-01T18:33:46.6181991Z",
+    "message": {
+      "role": "assistant",
+      "content": "ready"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 3742380800,
+    "load_duration": 3593715000,
+    "prompt_eval_count": 39,
+    "prompt_eval_cached_count": 0,
+    "prompt_eval_duration": 105494000,
+    "eval_count": 2,
+    "eval_duration": 39677000
+  }
+}
