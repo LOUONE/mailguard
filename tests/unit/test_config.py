@@ -49,3 +49,36 @@ def test_invalid_environment_rejected(monkeypatch: pytest.MonkeyPatch, tmp_path:
 
     with pytest.raises(ValidationError):
         Settings()
+
+
+def test_llm_key_comes_from_the_environment_and_stays_hidden(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("MAILGUARD_LLM_BACKEND", "openai")
+    monkeypatch.setenv("MAILGUARD_LLM_API_KEY", "sk-very-secret")
+
+    settings = Settings()
+
+    assert settings.llm_backend == "openai"
+    assert settings.llm_api_key is not None
+    assert settings.llm_api_key.get_secret_value() == "sk-very-secret"
+    assert "sk-very-secret" not in repr(settings)
+
+
+@pytest.mark.parametrize(
+    ("var", "value"),
+    [
+        ("MAILGUARD_LLM_BACKEND", "anthropic"),
+        ("MAILGUARD_LLM_CONTEXT_TOKENS", "512"),
+        ("MAILGUARD_LLM_MAX_RETRIES", "10"),
+    ],
+)
+def test_invalid_llm_settings_rejected(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, var: str, value: str
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv(var, value)
+
+    with pytest.raises(ValidationError):
+        Settings()
