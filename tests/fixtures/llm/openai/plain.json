@@ -1,0 +1,64 @@
+{
+  "input": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a terse assistant for a mail security team.",
+        "tool_calls": [],
+        "tool_call_id": null,
+        "name": null
+      },
+      {
+        "role": "user",
+        "content": "Reply with one word: ready.",
+        "tool_calls": [],
+        "tool_call_id": null,
+        "name": null
+      }
+    ],
+    "tools": [],
+    "schema": null
+  },
+  "path": "/v1/chat/completions",
+  "request": {
+    "model": "qwen3:8b",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a terse assistant for a mail security team."
+      },
+      {
+        "role": "user",
+        "content": "Reply with one word: ready."
+      }
+    ],
+    "temperature": 0.0
+  },
+  "status": 200,
+  "response": {
+    "id": "chatcmpl-155",
+    "object": "chat.completion",
+    "created": 1793558032,
+    "model": "qwen3:8b",
+    "system_fingerprint": "fp_ollama",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "ready",
+          "reasoning": "Okay, the user wants me to reply with one word: \"ready.\" Let me make sure I understand the context. They mentioned I'm a terse assistant for a mail security team. So, they might be testing if I can follow instructions succinctly.\n\nI need to check if there's any hidden meaning or if they're setting up a scenario. Maybe they want to confirm my readiness for a task. Since the instruction is straightforward, the correct response is simply \"ready.\" No need for extra words. Just confirm the command without any additional explanation. Alright, that's it.\n"
+        },
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 33,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens": 122,
+      "total_tokens": 155
+    }
+  }
+}

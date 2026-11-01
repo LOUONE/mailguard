@@ -1,0 +1,111 @@
+{
+  "input": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a terse assistant for a mail security team.",
+        "tool_calls": [],
+        "tool_call_id": null,
+        "name": null
+      },
+      {
+        "role": "user",
+        "content": "A 3-day-old domain asks for a password. Give your verdict.",
+        "tool_calls": [],
+        "tool_call_id": null,
+        "name": null
+      }
+    ],
+    "tools": [],
+    "schema": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "enum": [
+            "phishing",
+            "legitimate"
+          ]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "label",
+        "confidence"
+      ]
+    }
+  },
+  "path": "/v1/chat/completions",
+  "request": {
+    "model": "qwen3:8b",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a terse assistant for a mail security team."
+      },
+      {
+        "role": "user",
+        "content": "A 3-day-old domain asks for a password. Give your verdict."
+      }
+    ],
+    "temperature": 0.0,
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "answer",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "enum": [
+                "phishing",
+                "legitimate"
+              ]
+            },
+            "confidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "label",
+            "confidence"
+          ]
+        }
+      }
+    }
+  },
+  "status": 200,
+  "response": {
+    "id": "chatcmpl-49",
+    "object": "chat.completion",
+    "created": 1793558042,
+    "model": "qwen3:8b",
+    "system_fingerprint": "fp_ollama",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n\n\"label\" : \"phishing\", \"confidence\" : 0.95\n}",
+          "reasoning": "Okay, the user is asking about a 3-day-old domain that's requesting a password. Let me break this down.\n\nFirst, a domain that's only a few days old might be new. But the fact that it's asking for a password could be a red flag. Why would a new domain need a password? Maybe it's a phishing attempt. Phishers often create fake domains to trick users into entering their credentials. \n\nBut wait, maybe it's a legitimate service. For example, some services require a password for access, especially if it's a private or internal system. However, the age of the domain is a key factor here. A new domain might not have a good reputation yet. \n\nI should consider the context. If the user is expecting a password for a known service, then it might be okay. But if the domain is unfamiliar, it's more suspicious. Also, the request for a password without prior context is a common tactic in phishing. \n\nAnother angle: sometimes, when you sign up for a service, they might ask for a password during setup. But if the domain is just a few days old and the user hasn't initiated any action, that's odd. \n\nI should also think about the possibility of a typo or a similar domain. Maybe the user mistyped the domain name, leading them to a malicious site. \n\nIn terms of security, the main concerns are phishing and credential theft. The domain's age alone isn't enough to determine if it's safe, but combined with other factors like the request for a password without prior context, it's a strong indicator of a potential threat. \n\nSo, the verdict would be to be cautious. Advise the user not to provide any passwords and to verify the domain's legitimacy through other means, like checking the official website or contacting the service provider. Also, mention the importance of not sharing credentials with unknown domains.\n"
+        },
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 41,
+      "prompt_tokens_details": {
+        "cached_tokens": 13
+      },
+      "completion_tokens": 411,
+      "total_tokens": 452
+    }
+  }
+}

@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 Environment = Literal["dev", "test", "prod"]
@@ -45,6 +45,22 @@ class Settings(BaseSettings):
     # `drift_dir`, which the API exposes as metrics.
     feature_log_dir: Path | None = None
     drift_dir: Path | None = None
+
+    # Investigation agent (Phase 3). A local Ollama model by default, so no email leaves the
+    # machine; `openai` reaches any OpenAI-compatible API, with its key in `.env` only.
+    llm_backend: Literal["ollama", "openai"] = "ollama"
+    # Unset: the local Ollama server, native API or its OpenAI-compatible endpoint.
+    llm_base_url: str | None = None
+    llm_model: str = "qwen3:8b"
+    llm_api_key: SecretStr | None = None
+    # Per attempt; the API's own time budget caps the whole investigation.
+    llm_timeout_s: float = Field(default=60.0, gt=0)
+    llm_max_retries: int = Field(default=2, ge=0, le=5)
+    # Ollama only: its default context is a few thousand tokens and it truncates silently.
+    llm_context_tokens: int = Field(default=16_384, ge=2048)
+    llm_temperature: float = Field(default=0.0, ge=0, le=2)
+    # Ollama only: let reasoning models think before answering (slower, sometimes better).
+    llm_think: bool = False
 
 
 def get_settings() -> Settings:

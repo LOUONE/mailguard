@@ -1,0 +1,140 @@
+{
+  "input": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a terse assistant for a mail security team.",
+        "tool_calls": [],
+        "tool_call_id": null,
+        "name": null
+      },
+      {
+        "role": "user",
+        "content": "Use the tool to check the domain paypa1-login.example, then stop.",
+        "tool_calls": [],
+        "tool_call_id": null,
+        "name": null
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "call_eicdm75t",
+            "name": "check_domain",
+            "arguments": {
+              "domain": "paypa1-login.example"
+            }
+          }
+        ],
+        "tool_call_id": null,
+        "name": null
+      },
+      {
+        "role": "tool",
+        "content": "{\"age_days\": 3}",
+        "tool_calls": [],
+        "tool_call_id": "call_eicdm75t",
+        "name": "check_domain"
+      }
+    ],
+    "tools": [
+      {
+        "name": "check_domain",
+        "description": "Look up how long ago a domain was registered.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "domain": {
+              "type": "string",
+              "description": "Domain name, no scheme."
+            }
+          },
+          "required": [
+            "domain"
+          ]
+        }
+      }
+    ],
+    "schema": null
+  },
+  "path": "/api/chat",
+  "request": {
+    "model": "qwen3:8b",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a terse assistant for a mail security team."
+      },
+      {
+        "role": "user",
+        "content": "Use the tool to check the domain paypa1-login.example, then stop."
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "call_eicdm75t",
+            "function": {
+              "name": "check_domain",
+              "arguments": {
+                "domain": "paypa1-login.example"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "content": "{\"age_days\": 3}",
+        "tool_name": "check_domain"
+      }
+    ],
+    "stream": false,
+    "think": false,
+    "options": {
+      "num_ctx": 16384,
+      "temperature": 0.0
+    },
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "check_domain",
+          "description": "Look up how long ago a domain was registered.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "domain": {
+                "type": "string",
+                "description": "Domain name, no scheme."
+              }
+            },
+            "required": [
+              "domain"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "status": 200,
+  "response": {
+    "model": "qwen3:8b",
+    "created_at": "2026-11-01T18:33:47.1032669Z",
+    "message": {
+      "role": "assistant",
+      "content": "The domain paypa1-login.example was registered 3 days ago."
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 175996100,
+    "load_duration": 3643700,
+    "prompt_eval_count": 218,
+    "prompt_eval_cached_count": 172,
+    "prompt_eval_duration": 20997000,
+    "eval_count": 15,
+    "eval_duration": 146444000
+  }
+}

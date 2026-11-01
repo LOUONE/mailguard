@@ -1710,6 +1710,7 @@ version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi" },
+    { name = "httpx" },
     { name = "lightgbm" },
     { name = "mlflow" },
     { name = "numpy" },
@@ -1726,7 +1727,6 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "httpx" },
     { name = "hypothesis" },
     { name = "mypy" },
     { name = "pandas-stubs" },
@@ -1750,6 +1750,7 @@ perf = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.120" },
+    { name = "httpx", specifier = ">=0.28" },
     { name = "lightgbm", specifier = ">=4.7.0" },
     { name = "mlflow", specifier = ">=3.15" },
     { name = "numpy", specifier = ">=2.5.4" },
@@ -1766,7 +1767,6 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "httpx", specifier = ">=0.28" },
     { name = "hypothesis", specifier = ">=6.140" },
     { name = "mypy", specifier = ">=2.4.0" },
     { name = "pandas-stubs", specifier = ">=3.0.5.260914" },
