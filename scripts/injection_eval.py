@@ -174,7 +174,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     report = asyncio.run(evaluate())
     report["summary"] = summary(report)
     OUT.mkdir(exist_ok=True)
-    (OUT / "injection.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    text = json.dumps(report, indent=2) + "\n"
+    (OUT / "injection.json").write_text(text, encoding="utf-8", newline="\n")
     (OUT / "injection.md").write_text(markdown(report), encoding="utf-8", newline="\n")
     print(json.dumps(report["summary"], indent=2))
     return 0
