@@ -262,7 +262,9 @@ def domain_age_tool(rdap: RdapClient) -> Tool[DomainArguments, DomainRecord]:
         description=(
             "When a domain from the email was registered, by whom, and its registry status, "
             "from the registry's RDAP server. Phishing domains are often days or weeks old. "
-            "Only domains that appear in the email (sender, reply-to, links) can be looked up."
+            "Only domains that appear in the email (sender, reply-to, links) can be looked up. "
+            "`no_rdap_service` and `unavailable` mean unknown, not suspicious: many country "
+            "domains (.de, .ch) have no RDAP server."
         ),
         arguments=DomainArguments,
         run=domain_age,
