@@ -64,6 +64,12 @@ class Settings(BaseSettings):
     # The receiving server's id in `Authentication-Results`: only its header is trusted, since
     # any sender can write one. Unset: the agent reads the topmost header and calls it untrusted.
     trusted_authserv_id: str | None = None
+    # Network tools (ADR 0010): RDAP lookups are bounded by this timeout; reputation feeds are
+    # read from `reputation_dir` (filled by `make reputation`) and reported stale after
+    # `reputation_max_age_days`.
+    rdap_timeout_s: float = Field(default=5.0, gt=0)
+    reputation_dir: Path = Field(default_factory=lambda: Path("data/reputation"))
+    reputation_max_age_days: int = Field(default=7, ge=1)
 
 
 def get_settings() -> Settings:
