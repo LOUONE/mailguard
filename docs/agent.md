@@ -9,10 +9,48 @@ page describes the pieces as they land in Phase 3.
 | LLM client: Ollama (default, local) or any OpenAI-compatible API | `agent/llm.py`, `agent/backends.py` | #42, [ADR 0009](adr/0009-llm-client-over-plain-http.md) |
 | Offline tools | `agent/tools/offline.py` | #43 |
 | Sandboxed network tools | `agent/tools/network.py` | #44, [ADR 0010](adr/0010-network-evidence.md) |
-| Tool-calling loop and verdict | | #45 |
+| Tool-calling loop and verdict | `agent/investigator.py`, `scripts/investigate.py` | #45 |
 | Prompt-injection defence | | #46 |
 | `/v1/investigate` and grey-zone routing | | #47 |
 | Hard evaluation set | `agent/hard_set.py`, [hard_set.md](hard_set.md) | #48 |
+
+## The investigation loop
+
+```
+uv run python scripts/investigate.py docs/demo/phishing.eml
+```
+
+`Investigator.investigate(case)` runs four stages and always returns an `Investigation`:
+
+1. **Investigate.** The model gets a system prompt (what phishing is, that the email is
+   untrusted data between `<<<EMAIL` and `EMAIL>>>`), the email and the tools. It calls tools
+   for up to 6 turns, 4 calls a turn, and stops when it answers without asking for one.
+2. **Conclude.** One more turn, without tools, asks for a `Verdict` (label, confidence,
+   evidence, plain explanation) held to its JSON schema. Tools and a forced format are kept in
+   separate turns: with both in one request, constrained decoding tends to stop small models
+   from calling tools.
+3. **Check.** The verdict is validated against the schema. Evidence citing a tool the model
+   never called is dropped and counted (`discarded_evidence`). An invalid verdict, or one whose
+   evidence is all invented, gets one retry with the reason.
+4. **Fall back.** An LLM failure or a second invalid verdict returns the classifier's verdict in
+   the same format, with `source: classifier` and the reason.
+
+The classifier's score is not in the prompt: the model can ask for it with
+`get_classifier_explanation`, but is not anchored on it. Each investigation logs one line with
+its source, label, steps, tool names, tokens and duration, and nothing the sender or the model
+wrote.
+
+A run with `qwen3:8b` on an RTX 5070, on the two demo emails:
+
+| Email | Verdict | Turns | Tool calls | Time |
+|---|---|---|---|---|
+| `phishing.eml` (PayPal lure, link to an IP) | phishing, 0.95 | 2 | auth headers, 2 URLs, domain age | 14 s |
+| `colleague.eml` (work follow-up) | legitimate, 0.95 | 1 | none | 3 s |
+
+On the first run the model read `domain_age`'s `no_rdap_service` for `.example` as "fake
+domain". The tool description now says that status means unknown, not suspicious, and the next
+run said "reserved for testing". Tool descriptions are part of the prompt, and #49 evaluates
+them like the rest.
 
 ## Tools
 
