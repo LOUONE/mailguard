@@ -61,6 +61,9 @@ class Settings(BaseSettings):
     llm_temperature: float = Field(default=0.0, ge=0, le=2)
     # Ollama only: let reasoning models think before answering (slower, sometimes better).
     llm_think: bool = False
+    # The receiving server's id in `Authentication-Results`: only its header is trusted, since
+    # any sender can write one. Unset: the agent reads the topmost header and calls it untrusted.
+    trusted_authserv_id: str | None = None
 
 
 def get_settings() -> Settings:
