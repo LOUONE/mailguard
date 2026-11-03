@@ -17,6 +17,7 @@ system does; ADRs say *why it does not do something else*.
 | [0007](0007-drift-without-evidently.md) | Detect drift with PSI and KS in our own code, not Evidently | Accepted | 2026-10-29 |
 | [0008](0008-significance-gated-promotion.md) | Promote a retrained model only on a significant gain, from a plain-Python flow | Accepted | 2026-10-29 |
 | [0009](0009-llm-client-over-plain-http.md) | Reach LLMs through our own protocol over plain `httpx`, with a native Ollama backend | Accepted | 2026-11-01 |
+| [0010](0010-network-evidence.md) | Network evidence: RDAP for domain age, local feed snapshots for reputation, fenced egress | Accepted | 2026-11-03 |
 
 ## Writing one
 

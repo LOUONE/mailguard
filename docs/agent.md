@@ -8,7 +8,7 @@ page describes the pieces as they land in Phase 3.
 |---|---|---|
 | LLM client: Ollama (default, local) or any OpenAI-compatible API | `agent/llm.py`, `agent/backends.py` | #42, [ADR 0009](adr/0009-llm-client-over-plain-http.md) |
 | Offline tools | `agent/tools/offline.py` | #43 |
-| Sandboxed network tools | `agent/tools/network.py` | #44 |
+| Sandboxed network tools | `agent/tools/network.py` | #44, [ADR 0010](adr/0010-network-evidence.md) |
 | Tool-calling loop and verdict | | #45 |
 | Prompt-injection defence | | #46 |
 | `/v1/investigate` and grey-zone routing | | #47 |
@@ -56,6 +56,31 @@ Brands of 4 letters or fewer (`irs`, `dhl`, `usps`) match only exactly: one edit
 check the brand's official domain list, and a `typosquat` can be an unrelated word.
 The character map is a small part of Unicode's confusables; Phase 4 (#53) brings the full
 UTS #39 skeletons.
+
+### Network tools
+
+| Tool | Arguments | What it returns |
+|---|---|---|
+| `domain_age` | `domain` | registration date, age in days, expiry, registrar and registry statuses, from the registry's RDAP server; `not_in_email`, `not_found`, `no_rdap_service` or `unavailable` otherwise |
+| `lookup_reputation` | `url` | whether the exact URL is in the PhishTank or OpenPhish snapshot (with the brand it targets), how many listed URLs share its host, whether that host is a shared platform, and how old the snapshot is |
+
+Both are built from their dependencies (`network_tools(rdap, reputation)`), so tests pass mocked
+transports and an index built from a temporary folder. The fence, from ADR 0010:
+
+- RDAP requests go through `AllowlistTransport`: HTTPS to the registry servers of the bundled
+  IANA bootstrap only, refused before any connection otherwise, redirects not followed.
+- `domain_age` looks up only domains that appear in the email, so a message cannot point it
+  anywhere else.
+- `lookup_reputation` never goes online. `make reputation` downloads the feeds into
+  `data/reputation/` with their SHA-256 and download time; a file changed since then is
+  refused at load, and snapshots older than 7 days are reported stale.
+- The tests run with outbound sockets refused.
+
+A real run, on a Netflix lure taken from the PhishTank feed: listed, and its `.com` registered 5
+days earlier at a low-cost registrar. Two tool calls, and the lure itself was never contacted.
+
+Refreshing the RDAP bootstrap is a reviewed change, like the Public Suffix List:
+`curl -o src/mailguard/agent/tools/data/rdap_dns.json https://data.iana.org/rdap/dns.json`.
 
 ### What the tools never do
 
