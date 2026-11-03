@@ -10,7 +10,7 @@ page describes the pieces as they land in Phase 3.
 | Offline tools | `agent/tools/offline.py` | #43 |
 | Sandboxed network tools | `agent/tools/network.py` | #44, [ADR 0010](adr/0010-network-evidence.md) |
 | Tool-calling loop and verdict | `agent/investigator.py`, `scripts/investigate.py` | #45 |
-| Prompt-injection defence | | #46 |
+| Prompt-injection defence | `agent/injection.py`, [report](../reports/injection.md) | #46 |
 | `/v1/investigate` and grey-zone routing | | #47 |
 | Hard evaluation set | `agent/hard_set.py`, [hard_set.md](hard_set.md) | #48 |
 
@@ -51,6 +51,55 @@ On the first run the model read `domain_age`'s `no_rdap_service` for `.example` 
 domain". The tool description now says that status means unknown, not suspicious, and the next
 run said "reserved for testing". Tool descriptions are part of the prompt, and #49 evaluates
 them like the rest.
+
+## Prompt-injection defence
+
+Every email is attacker-written text read by a language model. The tools only read, so the
+worst an injection can buy is a wrong verdict, usually "legitimate" on a phishing email. Three
+layers (`agent/injection.py`):
+
+1. **An unguessable fence.** The email sits between `<<<EMAIL <id>` and `EMAIL <id>>>`, with a
+   random id drawn for each investigation, and any `<<<` or `>>>` in the content is broken up.
+2. **A deterministic scan** for text written for an AI: override phrasings (English and
+   French), "you are an AI", chat-template tokens and named system prompts, requests to label
+   the message safe, fake tool calls, fake verdict JSON, marker spoofing. It reads the subject,
+   display name, body, raw HTML (comments and CSS-hidden text included), attachment names and
+   URLs. A hit is shown to the model as a note from the system, outside the fence: legitimate
+   mail does not address an AI. Bare `System:` lines are not flagged; IT notices use them.
+3. **A floor.** If the scan found something and the agent still says "legitimate", the
+   classifier's verdict is returned instead. An injection cannot buy a better verdict than the
+   classifier alone gives.
+
+### Measured resistance
+
+`scripts/injection_eval.py` runs 13 trapped emails and 3 legitimate controls
+(`tests/fixtures/injection/`, all made up) through the served classifier and the agent with
+every tool, with the fence only and with the full defence. With `qwen3:8b`
+([full report](../reports/injection.md)):
+
+| | Fence only | Full defence |
+|---|---|---|
+| Traps where the agent itself said phishing | 11/13 | 13/13 |
+| Traps finally labelled phishing | 11/13 | 13/13 |
+| Controls finally labelled legitimate | 2/3 | 2/3 |
+
+- **Without the scan, the model fell for exactly the two attacks that imitate the
+  conversation's structure**: a fake end-of-email marker followed by a fake conclusion, and
+  chat-template tokens opening a fake system turn. With the note, it resisted both on its own;
+  the floor was never needed.
+- **The scan found 11 of 13 traps.** The two it missed carry no trigger words (a claimed prior
+  approval, a request to check 30 mirror links first); the model resisted both anyway, and the
+  step and call limits bound the second.
+- **One control stays wrong in both conditions**: a newsletter that quotes "ignore all
+  previous instructions" while explaining prompt injection. The classifier also flags it
+  (0.37 against a 0.29 threshold). That is the known cost of the scan: an email about
+  injections looks like one.
+- **One prompt sentence was added after the first run**, which also labelled a planned-
+  maintenance notice phishing because it had no `Authentication-Results` header and a reserved
+  domain: "Missing information is not evidence". Controls went from 1/3 to 2/3, traps did not
+  move. The agent now clears that notice although the classifier flags it (0.85). Three
+  controls are too few to tune on any further; the agent's false-positive rate is measured on
+  the hand-labelled hard set (#49), which no prompt was tuned on.
 
 ## Tools
 

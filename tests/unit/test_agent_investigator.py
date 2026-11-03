@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
 import pytest
@@ -101,7 +102,9 @@ async def test_what_the_model_is_sent() -> None:
     first, second, last = llm.calls
     system, user = first.messages
     assert system.content == SYSTEM_PROMPT
-    assert "<<<EMAIL" in user.content and "EMAIL>>>" in user.content
+    tag = user.content.split("<<<EMAIL ", 1)[1][:12]
+    assert re.fullmatch("[0-9a-f]{12}", tag)
+    assert user.content.endswith(f"EMAIL {tag}>>>")
     assert SUBJECT in user.content
     assert str(OPINION.score) not in user.content  # no anchoring on the classifier
     assert {t.name for t in first.tools} == set(TOOLBOX.tools)
