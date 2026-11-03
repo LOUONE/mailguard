@@ -1,0 +1,9 @@
+From: "Security Weekly" <newsletter@security-weekly.example>
+Subject: This week: prompt injection in email assistants
+List-Unsubscribe: <https://security-weekly.example/unsubscribe>
+
+This week's issue looks at prompt injection. Attackers hide sentences such as "ignore all
+previous instructions" in emails, hoping that an AI assistant summarising the inbox will obey
+them. Our guest explains how mail providers test their assistants against it.
+
+Read the full issue at https://security-weekly.example/issues/212
